@@ -1,0 +1,433 @@
+---
+swagger: "2.0"
+info:
+    description: |
+        member api
+        [http://mbrtest.zoomye.com.tw](http://mbrtest.zoomye.com.tw)
+    version: 1.0.0
+    title: member api
+host: mbrtest.zoomye.com.tw
+basePath: /api/v1
+tags:
+    - name: member
+schemes:
+    - https
+    - http
+paths:
+    /customers/auth:
+        post:
+            tags:
+                - auth
+            summary: 商戶登入
+            operationId: login
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: body
+                  name: body
+                  description: account information
+                  required: true
+                  schema:
+                      $ref: "#/definitions/LoginRequest"
+            responses:
+                "200":
+                    description: Login Success
+                    schema:
+                        $ref: "#/definitions/Token"
+                "401":
+                    description: Unauthorized
+    /members:
+        post:
+            tags:
+                - members
+            summary: 註冊會員
+            operationId: addMember
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: body
+                  name: body
+                  required: true
+                  schema:
+                      $ref: "#/definitions/RegisterMember"
+            responses:
+                "200":
+                    description: Successfully create member
+                "400":
+                    description: Invalid input
+    /members/query:
+        post:
+            tags:
+                - members
+            summary: 帶入會員
+            operationId: getUserByAuthCookie
+            produces:
+                - application/json
+            parameters:
+                - in: body
+                  name: body
+                  required: true
+                  schema:
+                      $ref: "#/definitions/QueryMember"
+            responses:
+                "200":
+                    description: Successful operation
+                    schema:
+                        $ref: "#/definitions/Member"
+                "400":
+                    description: Invalid membername supplied
+                "404":
+                    description: User not found
+    /members/{phone}/chops:
+        post:
+            tags:
+                - members
+            summary: 取得會員總點數(不分門市)
+            operationId: getMemberTotalChop
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: phone
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: Successfully void consume chops
+                    schema:
+                        type: object
+                        properties:
+                          chops:
+                            type: integer
+                "400":
+                    description: Invalid input
+    /members/{phone}/chopsDetail:
+        post:
+            tags:
+                - members
+            summary: 取得點數詳細資訊(全門市)
+            operationId: getMemberChopsDetail
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: phone
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: Successfully void consume chops
+                    schema:
+                        $ref: "#/definitions/ChopRecord"
+                "400":
+                    description: Invalid input
+    /earnChopRules:
+        get:
+            tags:
+                - earnChopRules
+            summary: 取得累點規則列表
+            operationId: getEarnChopRules
+            produces:
+                - application/json
+            parameters: []
+            responses:
+                "200":
+                    description: Successful operation
+                    schema:
+                        $ref: "#/definitions/EarnChopRule"
+    /consumeChopRules:
+        get:
+            tags:
+                - consumeChopRules
+            summary: 取得兌點規則列表
+            operationId: getConsumeChopRules
+            produces:
+                - application/json
+            parameters: []
+            responses:
+                "200":
+                    description: Successful operation
+                    schema:
+                        $ref: "#/definitions/ConsumeChopRule"
+    /chops/consume:
+        post:
+            tags:
+                - chops
+            summary: 兌點
+            operationId: consumeChops
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: body
+                  name: body
+                  required: true
+                  schema:
+                      $ref: "#/definitions/ConsumeChopRequest"
+            responses:
+                "200":
+                    description: Successfully consume chops
+                "400":
+                    description: Invalid input
+    /chops/consume/{id}/void:
+        post:
+            tags:
+                - chops
+            summary: 取消兌點
+            operationId: voidConsumeChops
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  type: string
+                - in: body
+                  name: body
+                  required: true
+                  schema:
+                      $ref: "#/definitions/Member"
+            responses:
+                "200":
+                    description: Successfully void consume chops
+                    schema:
+                        $ref: "#/definitions/ConsumeChopRule"
+                "400":
+                    description: Invalid input
+    /transactions:
+        post:
+            tags:
+                - transactions
+            summary: 新增交易(累點)
+            operationId: newTransaction
+            consumes:
+                - application/json
+            produces:
+                - application/json
+            parameters:
+                - in: body
+                  name: body
+                  required: true
+                  schema:
+                      $ref: "#/definitions/Transaction"
+            responses:
+                "200":
+                    description: Successfully create transaction
+                    schema:
+                        $ref: "#/definitions/Transaction"
+                "400":
+                    description: Invalid input
+definitions:
+    Token:
+        type: object
+        properties:
+            token:
+                type: string
+            expiredAt:
+                type: string
+    QueryMember:
+        type: object
+        properties:
+            phone:
+                type: string
+            branch_id:
+                type: string
+    RegisterMember:
+        type: object
+        required:
+            - phone
+            - password
+            - name
+            - url
+            - serviceName
+            - domain
+        properties:
+            first_name:
+                type: string
+            last_name:
+                type: string
+            phone:
+                type: string
+            password:
+                type: string
+            gender:
+                type: string
+                enum: [male, female, others, unknown]
+            email:
+                type: string
+            address:
+                type: string
+    Member:
+        type: object
+        required:
+            - phone
+            - password
+            - name
+            - url
+            - serviceName
+            - domain
+        properties:
+            id:
+                type: integer
+                format: int64
+            first_name:
+                type: string
+            last_name:
+                type: string
+            phone:
+                type: string
+            password:
+                type: string
+            gender:
+                type: string
+                enum: [male, female, others, unknown]
+            email:
+                type: string
+            address:
+                type: string
+            rank:
+              $ref: "#/definitions/Rank"
+    ConsumeChopRequest:
+        type: object
+        properties:
+            member_id:
+                type: string
+            branch_id:
+                type: string
+            chops:
+                type: integer
+    ConsumeChopRule:
+        type: object
+        properties:
+            name:
+                type: string
+            description:
+                type: string
+            payment_type:
+                type: string
+            type:
+                type: string
+            chops_per_unit:
+                type: string
+            unit_per_amount:
+                type: string
+            consume_max_percentage:
+                type: string
+            earn_chops_after_consume:
+                type: boolean
+            activated_at:
+                type: string
+                format: date
+            expired_at:
+                type: string
+                format: date
+            rank:
+              $ref: "#/definitions/Rank"
+    EarnChopRule:
+        type: object
+        properties:
+            name:
+                type: string
+            description:
+                type: string
+            payment_type:
+                type: string
+            type:
+                type: string
+            rule_unit:
+                type: string
+            rule_chops:
+                type: string
+            exclude_product:
+                type: string
+            activated_at:
+                type: string
+                format: date
+            expired_at:
+                type: string
+                format: date
+            rank:
+              $ref: "#/definitions/Rank"
+    Transaction:
+        type: object
+        properties:
+            order_id:
+                type: string
+            member_id:
+                type: string
+            branch_id:
+                type: string
+            payment_type:
+                type: string
+            clerk:
+                type: string
+            items_count:
+                type: integer
+            amount:
+                type: integer
+            status:
+                type: integer
+            items:
+                type: array
+                items:
+                    $ref: "#/definitions/TransactionItem"
+                  
+    TransactionItem:
+        type: object
+        properties:
+            no:
+                type: string
+            name:
+                type: string
+            price:
+                type: integer
+            sbutotal:
+                type: integer
+            qty:
+                type: integer
+            condiments:
+                type: string
+    LoginRequest:
+        type: object
+        properties:
+            account:
+                type: string
+            password:
+                type: string
+    Branch:
+        type: object
+        properties:
+            code:
+                type: string
+            name:
+                type: string
+            store_name:
+                type: string
+    Rank:
+        type: object
+        properties:
+            rank:
+                type: integer
+            name:
+                type: string
+    ChopRecord:
+        type: object
+        properties:
+            chops:
+                type: integer
+            expired_at:
+                type: string
+                format: date
+            branch:
+              $ref: "#/definitions/Branch"
