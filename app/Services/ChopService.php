@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Constants\ChopRecordConstant;
+use App\Exceptions\CannotVoidException;
 use App\Exceptions\ChopsNotEnoughException;
 use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\ResourceNotFoundException;
@@ -13,6 +15,7 @@ use App\Repositories\RankRepository;
 use App\Repositories\MemberRepository;
 use App\Repositories\BranchRepository;
 use App\Events\MemberRegistered;
+use Carbon\Carbon;
 use Cache;
 use DB;
 
@@ -22,124 +25,204 @@ class ChopService
     private $transactionRepository;
     /** @var  ChopRepository */
     private $chopRepository;
-    private $customer;
-    private $member;
-    private $branch;
 
-    public function __construct($customer = '')
+    public function __construct()
     {
         $this->chopRepository = app(ChopRepository::class);
         $this->chopExpiredSettingRepository = app(ChopExpiredSettingRepository::class);
         $this->chopRecordRepository = app(ChopRecordRepository::class);
         $this->memberRepository = app(MemberRepository::class);
         $this->branchRepository = app(BranchRepository::class);
-        $this->customer = $customer;
     }
 
-    public function setCustomer($customer)
+    public function findChopRecord($id)
     {
-        $this->customer = $customer;
+        $chopRecord = $this->chopRecordRepository->findWithoutFail($id);
+        return $chopRecord;
     }
 
-    public function setMember($member)
+    public function listChops($request)
     {
-        $this->member = $member;
+        $this->chopRepository->pushCriteria(new RequestCriteria($request));
+        $this->chopRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $chops = $this->chopRepository->all();
+
+        return $chops;
     }
 
-    public function setBranch($branch)
+    public function manualAddChops($attributes)
     {
-        $this->branch = $branch;
-    }
-
-    public function manualAddChops($chops)
-    {
+        $memberId = $attributes['member_id'];
+        $branchId = $attributes['branch_id'];
+        $addChops = $attributes['chops'];
         $expiredSetting = $this->getChopsExpiredSetting();
-        $member = $this->member;
-        $branch = $this->branch;
-
-        $record = null;
-        DB::transaction(function () use ($member, $branch, $expiredSetting, $chops) {
-            // add chop
-            $this->chopRepository->addChops($member, $branch, $chops);
-            
-            // add chop record
-            $record = $this->chopRecordRepository->newManualChopRecord([
-                'member' => $member,
-                'branch' => $branch,
-                'chops' => $chops
-            ]);
-        }, 5);
-
-        return $record;
-    }
-
-    public function consumeChops($chops)
-    {
-        $expiredSetting = $this->getChopsExpiredSetting();
-        $member = $this->member;
-        $branch = $this->branch;
         
-        $totalChops = $this->getTotalChops($member, $branch);
-        if ($totalChops < $chops) {
-            throw new ChopsNotEnoughException();
-        }
-
-        $record = null;
-        DB::beginTransaction();
-        try {
-            // consume chop
-            $consumeChops = $this->chopRepository->consumeChops($member, $branch, $chops);
-
-            // add chop record
-            $record = $this->chopRecordRepository->newConsumeChopRecord([
-                'member' => $member,
-                'branch' => $branch,
-                'consumeChops' => $chops,
+        // add chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        if (!$chop) {
+            $newChop = $this->chopRepository->create([
+                'member_id' => $memberId,
+                'chops' => $addChops,
+                'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+        } else {
+            $newChop = $this->chopRepository->update([
+                'chops' => $chop->chops + $addChops,
+                'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
+            ], $chop->id);
         }
+        
+        // add add chop record
+        $record = $this->chopRecordRepository->newManualChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'chops' => $addChops
+        ]);
 
         return $record;
     }
 
-    public function voidConsumeChops($id)
+    public function earnChops($attributes)
     {
-        $record = $this->chopRecordRepository->findWithoutFail($id);
-        if (!$record) {
-            throw new \Exception('Can\'t not find the consume record');
+        $memberId = $attributes['member_id'];
+        $branchId = $attributes['branch_id'];
+        $transactionId = $attributes['transaction_id'];
+        $earnChopsRule = $attributes['earn_chop_rule'];
+        $addChops = $attributes['chops'];
+        $expiredSetting = $this->getChopsExpiredSetting();
+        
+        // add chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        if (!$chop) {
+            $newChop = $this->chopRepository->create([
+                'member_id' => $memberId,
+                'chops' => $addChops,
+                'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
+            ]);
+        } else {
+            $newChop = $this->chopRepository->update([
+                'chops' => $chop->chops + $addChops,
+                'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
+            ], $chop->id);
+        }
+        
+        // add add chop record
+        $record = $this->chopRecordRepository->newEarnChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'transaction_id' => $transactionId,
+            'chops' => $addChops,
+            'rule_id' => $earnChopsRule->id
+        ]);
+
+        return $record;
+    }
+
+    public function consumeChops($attributes)
+    {
+        $memberId = $attributes['member_id'];
+        $branchId = $attributes['branch_id'];
+        $consumeChops = $attributes['chops'];
+        $ruleId = $attributes['rule_id'];
+        
+        $totalChops = $this->getTotalChops($memberId, $branchId);
+        if ($totalChops < $consumeChops) {
+            throw new ChopsNotEnoughException('Chops not enough');
+        }
+        
+        // consume chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        if ($chop) {
+            $newChop = $this->chopRepository->update([
+                'chops' => $chop->chops - $consumeChops
+            ], $chop->id);
+        }
+
+        // add consume chop record
+        $record = $this->chopRecordRepository->newConsumeChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'rule_id' => $ruleId,
+            'consume_chops' => $consumeChops,
+        ]);
+
+        return $record;
+    }
+
+    public function voidEarnChops($id, $attributes = [])
+    {
+        $record = $this->chopRecordRepository->find($id);
+        if ($record->type != ChopRecordConstant::CHOP_RECORD_EARN_CHOPS) {
+            throw new CannotVoidException('Can\'t not void not earn record');
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException($record);
+            throw new AlreadyVoidedException('consume already voided', $record);
         }
-        $member = $record->member;
-        $branch = $record->branch;
-        $voidRecord = null;
-        DB::transaction(function () use ($member, $branch, $record, $id) {
+        $memberId = $record->member_id;
+        $branchId = $record->branch_id;
 
-            $chops = -1 * $record->consume_chops;
+        // add chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        $voidEarnChops = $record->chops;
 
-            // add chops
-            $this->chopRepository->addChops($member, $branch, $chops);
+        // add chops
+        $newChop = $this->chopRepository->update([
+            'chops' => $chop->chops - $voidEarnChops
+        ], $chop->id);
 
-            // add void record
-            $voidRecord = $this->chopRecordRepository->voidRecord($id);
-        }, 5);
+        // add void record
+        $voidRecord = $this->chopRecordRepository->voidEarnChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'chops' => -1 * $voidEarnChops,
+            'void_id' => $record->id
+        ]);
 
         return $voidRecord;
     }
 
-    public function getTotalChops($member, $branch)
+    public function voidConsumeChops($id, $attributes = [])
     {
+        $record = $this->chopRecordRepository->find($id);
+        if ($record->type != ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS) {
+            throw new CannotVoidException('Can\'t not void not consume record');
+        }
+        if (!empty($record->voidRecord)) {
+            throw new AlreadyVoidedException('consume already voided', $record);
+        }
+        $memberId = $record->member_id;
+        $branchId = $record->branch_id;
+
+        // add chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        $voidConsumeChops = $record->consume_chops;
+
+        // add chops
+        $newChop = $this->chopRepository->update([
+            'chops' => $chop->chops + $voidConsumeChops
+        ], $chop->id);
+
+        // add void record
+        $voidRecord = $this->chopRecordRepository->voidConsumeChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'consume_chops' => -1 * $voidConsumeChops,
+            'void_id' => $record->id
+        ]);
+
+        return $voidRecord;
+    }
+
+    public function getTotalChops($memberId, $branchId)
+    {
+        $branch = $this->branchRepository->find($branchId);
         $isBranchIndependent = $branch->isIndependent();
         if ($isBranchIndependent) {
-            $chop = $this->chopRepository->getBranchChops($member, $branch);
+            $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
             $totalChops = $chop->chops;
         } else {
             $unindependentBranches = $this->branchRepository->getUnindependentBranches();
-            $chops = $this->chopRepository->getMemberBranchesChops($member, $unindependentBranches->pluck('id'));
+            $chops = $this->chopRepository->getMemberBranchesChops($memberId, $unindependentBranches->pluck('id'));
             $totalChops = $chops->sum('chops');
         }
         return $totalChops;

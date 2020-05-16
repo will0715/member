@@ -2,29 +2,26 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateBranchAPIRequest;
 use App\Http\Requests\API\UpdateBranchAPIRequest;
-use App\Models\Branch;
-use App\Repositories\BranchRepository;
+use App\Http\Resources\Branch;
+use App\Services\BranchService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
 use Response;
+use Log;
 
 /**
  * Class BranchAPIController
- * @package App\Http\Controllers\API
+ * @package App\Http\Controllers
  */
 
 class BranchAPIController extends AppBaseController
 {
-    /** @var  BranchRepository */
-    private $branchRepository;
 
-    public function __construct(BranchRepository $branchRepo)
+    public function __construct()
     {
-        $this->branchRepository = $branchRepo;
+        $this->branchService = app(BranchService::class);
     }
 
     /**
@@ -36,11 +33,13 @@ class BranchAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->branchRepository->pushCriteria(new RequestCriteria($request));
-        $this->branchRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $branches = $this->branchRepository->all();
-
-        return $this->sendResponse($branches->toArray(), 'Branches retrieved successfully');
+        try {
+            $branches = $this->branchService->listBranches($request);
+            return $this->sendResponse(Branch::collection($branches), 'Branches retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -55,9 +54,13 @@ class BranchAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $branch = $this->branchRepository->create($input);
-
-        return $this->sendResponse($branch->toArray(), 'Branch saved successfully');
+        try {
+            $branch = $this->branchService->newBranch($input);
+            return $this->sendResponse(new Branch($branch), 'Branch saved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -70,14 +73,13 @@ class BranchAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var Branch $branch */
-        $branch = $this->branchRepository->find($id);
-
-        if (empty($branch)) {
-            return $this->sendError('Branch not found');
+        try {
+            $branch = $this->branchService->findBranch($id);
+            return $this->sendResponse(new Branch($branch), 'Branch retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($branch->toArray(), 'Branch retrieved successfully');
     }
 
     /**
@@ -93,16 +95,13 @@ class BranchAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        /** @var Branch $branch */
-        $branch = $this->branchRepository->find($id);
-
-        if (empty($branch)) {
-            return $this->sendError('Branch not found');
+        try {
+            $branch = $this->branchService->updateBranch($input, $id);
+            return $this->sendResponse(new Branch($branch), 'Branch updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $branch = $this->branchRepository->update($input, $id);
-
-        return $this->sendResponse($branch->toArray(), 'Branch updated successfully');
     }
 
     /**
@@ -117,15 +116,12 @@ class BranchAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var Branch $branch */
-        $branch = $this->branchRepository->find($id);
-
-        if (empty($branch)) {
-            return $this->sendError('Branch not found');
+        try {
+            $branch = $this->branchService->deleteBranch($id);
+            return $this->sendSuccess('Branch deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $branch->delete();
-
-        return $this->sendSuccess('Branch deleted successfully');
     }
 }

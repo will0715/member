@@ -51,48 +51,18 @@ class ChopRepository extends BaseRepository
         return Chop::class;
     }
 
-    public function getBranchChops($member, $branch)
+    public function getBranchChops($memberId, $branchId)
     {
         return $this->findWhere([
-            'member_id' => $member->id,
-            'branch_id' => $branch->id,
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
         ])->first();
     }
 
-    public function getMemberBranchesChops($member, $branchIds)
+    public function getMemberBranchesChops($memberId, $branchIds)
     {
-        return $this->scopeQuery(function($query) use ($member, $branchIds) {
-            return $query->whereIn('branch_id', $branchIds)->where('member_id', $member->id);
+        return $this->scopeQuery(function($query) use ($memberId, $branchIds) {
+            return $query->whereIn('branch_id', $branchIds)->where('member_id', $memberId);
         });
-    }
-
-    public function addChops($member, $branch, $addChops)
-    {
-        $chop = $this->getBranchChops($member, $branch);
-
-        $expiredSetting = ChopExpiredSetting::first();
-
-        if (!$chop) {
-            $chop = new Chop();
-        }
-        $chop->chops = $addChops;
-        $chop->expired_at = Carbon::now()->add($expiredSetting->expired_date, 'days');
-        $chop->member_id = $member->id;
-        $chop->branch_id = $branch->id;
-        $chop->save();
-
-        return $chop;
-    }
-
-    public function consumeChops($member, $branch, $consumeChops)
-    {
-        $chop = $this->getBranchChops($member, $branch);
-
-        if ($chop) {
-            $chop->chops = $chop->chops - $consumeChops;
-            $chop->save();
-        }
-
-        return $chop;
     }
 }

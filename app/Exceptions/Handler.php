@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use InfyOm\Generator\Utils\ResponseUtil;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use Illuminate\Support\Str;
 
 class Handler extends ExceptionHandler
 {
@@ -51,36 +53,87 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        if ($exception instanceof \Illuminate\Validation\ValidationException) {
-            return response()->json(ResponseUtil::makeError($exception->validator->messages()->first()), 422);
-        }
         if ($request->wantsJson()) {
-            // Define the response
-            $response = [
-                'errors' => 'Sorry, something went wrong.',
-                'message' => $exception->getMessage()
-            ];
-    
-            // If the app is in debug mode
-            if (config('app.debug')) {
-                // Add the exception class name, message and stack trace to response
-                $response['exception'] = get_class($exception); // Reflection might be better here
-                $response['trace'] = $exception->getTrace();
-            }
-    
-            // Default response of 400
-            $status = 400;
-    
-            // If this exception is an instance of HttpException
-            if ($this->isHttpException($exception)) {
-                // Grab the HTTP status code from the Exception
-                $status = $exception->getStatusCode();
-            }
-    
-            // Return a JSON response with the response array and status code
-            return response()->json(ResponseUtil::makeError($exception->getMessage()), $status);
+            return $this->handleApiException($request, $exception);
         }
 
         return parent::render($request, $exception);
+    }
+
+    private function handleApiException($request, Exception $exception)
+    {
+        $exception = $this->prepareException($exception);
+        
+        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            return response()->json(ResponseUtil::makeError($exception->validator->messages()->first()), 422);
+        }
+        if ($exception instanceof \App\Exceptions\PrepaidCardsNotEnoughException) {
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), 422);
+        }
+        if ($exception instanceof \App\Exceptions\AlreadyVoidedException) {
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), 409);
+        }
+        if ($exception instanceof \App\Exceptions\CannotVoidException) {
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), 409);
+        }
+        if ($exception instanceof \App\Exceptions\ResourceNotFoundException) {
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), 404);
+        }
+        if ($exception instanceof \App\Exceptions\TransactionDuplicateException) {
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), 400);
+        }
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            $modelName = $exception->getPrevious()->getModel();
+            $resourceName = Str::replaceFirst('App\\Models\\', '', $modelName);
+            return response()->json(ResponseUtil::makeError($resourceName . ' Not Found'), 404);
+        }
+        if ($exception instanceof \League\OAuth2\Server\Exception\OAuthServerException || 
+            $exception instanceof \Illuminate\Auth\AuthenticationException) {
+            return response()->json(ResponseUtil::makeError('Unauthorized'), 401);
+        }
+
+        return $this->customApiResponse($exception);
+    }
+
+    private function customApiResponse($exception)
+    {
+        if (method_exists($exception, 'getStatusCode')) {
+            $statusCode = $exception->getStatusCode();
+        } else {
+            $statusCode = 500;
+        }
+
+        $response = [];
+
+        switch ($statusCode) {
+            case 401:
+                $response['message'] = 'Unauthorized';
+                break;
+            case 403:
+                $response['message'] = 'Forbidden';
+                break;
+            case 404:
+                $response['message'] = 'Resource Not Found';
+                break;
+            case 405:
+                $response['message'] = 'Method Not Allowed';
+                break;
+            case 422:
+                $response['message'] = $exception->original['message'];
+                $response['errors'] = $exception->original['errors'];
+                break;
+            default:
+                $response['message'] = ($statusCode == 500) ? 'Whoops, looks like something went wrong' : $exception->getMessage();
+                break;
+        }
+
+        if (config('app.debug')) {
+            $response['trace'] = $exception->getTrace();
+            $response['code'] = $exception->getCode();
+        }
+
+        $response['status'] = $statusCode;
+
+        return response()->json($response, $statusCode);
     }
 }

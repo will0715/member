@@ -2,29 +2,25 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateConsumeChopRuleAPIRequest;
 use App\Http\Requests\API\UpdateConsumeChopRuleAPIRequest;
-use App\Models\ConsumeChopRule;
-use App\Repositories\ConsumeChopRuleRepository;
+use App\Http\Resources\ConsumeChopRule;
+use App\Services\ConsumeChopRuleService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
 use Response;
 
 /**
- * Class ConsumeChopRuleController
- * @package App\Http\Controllers\API
+ * Class ConsumeChopRuleAPIController
+ * @package App\Http\Controllers
  */
 
 class ConsumeChopRuleAPIController extends AppBaseController
 {
-    /** @var  ConsumeChopRuleRepository */
-    private $consumeChopRuleRepository;
 
-    public function __construct(ConsumeChopRuleRepository $consumeChopRuleRepo)
+    public function __construct()
     {
-        $this->consumeChopRuleRepository = $consumeChopRuleRepo;
+        $this->consumeChopRuleService = app(ConsumeChopRuleService::class);
     }
 
     /**
@@ -36,11 +32,14 @@ class ConsumeChopRuleAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->consumeChopRuleRepository->pushCriteria(new RequestCriteria($request));
-        $this->consumeChopRuleRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $consumeChopRules = $this->consumeChopRuleRepository->with('rank')->all();
-
-        return $this->sendResponse($consumeChopRules->toArray(), 'Consume Chop Rules retrieved successfully');
+        try {
+            $consumeChopRules = $this->consumeChopRuleService->listConsumeChopRules($request);
+            $consumeChopRules->load(['rank']);
+            return $this->sendResponse(ConsumeChopRule::collection($consumeChopRules), 'ConsumeChopRules retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -55,9 +54,14 @@ class ConsumeChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $consumeChopRule = $this->consumeChopRuleRepository->create($input);
-
-        return $this->sendResponse($consumeChopRule->toArray(), 'Consume Chop Rule saved successfully');
+        try {
+            $consumeChopRule = $this->consumeChopRuleService->newConsumeChopRule($input);
+            $consumeChopRule->load(['rank']);
+            return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule saved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -70,14 +74,14 @@ class ConsumeChopRuleAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var ConsumeChopRule $consumeChopRule */
-        $consumeChopRule = $this->consumeChopRuleRepository->find($id);
-
-        if (empty($consumeChopRule)) {
-            return $this->sendError('Consume Chop Rule not found');
+        try {
+            $consumeChopRule = $this->consumeChopRuleService->findConsumeChopRule($id);
+            $consumeChopRule->load(['rank']);
+            return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($consumeChopRule->toArray(), 'Consume Chop Rule retrieved successfully');
     }
 
     /**
@@ -93,16 +97,14 @@ class ConsumeChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        /** @var ConsumeChopRule $consumeChopRule */
-        $consumeChopRule = $this->consumeChopRuleRepository->find($id);
-
-        if (empty($consumeChopRule)) {
-            return $this->sendError('Consume Chop Rule not found');
+        try {
+            $consumeChopRule = $this->consumeChopRuleService->updateConsumeChopRule($input, $id);
+            $consumeChopRule->load(['rank']);
+            return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $consumeChopRule = $this->consumeChopRuleRepository->update($input, $id);
-
-        return $this->sendResponse($consumeChopRule->toArray(), 'ConsumeChopRule updated successfully');
     }
 
     /**
@@ -117,15 +119,12 @@ class ConsumeChopRuleAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var ConsumeChopRule $consumeChopRule */
-        $consumeChopRule = $this->consumeChopRuleRepository->find($id);
-
-        if (empty($consumeChopRule)) {
-            return $this->sendError('Consume Chop Rule not found');
+        try {
+            $consumeChopRule = $this->consumeChopRuleService->deleteConsumeChopRule($id);
+            return $this->sendSuccess('ConsumeChopRule deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $consumeChopRule->delete();
-
-        return $this->sendSuccess('Consume Chop Rule deleted successfully');
     }
 }

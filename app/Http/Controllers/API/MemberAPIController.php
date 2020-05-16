@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
+use App\Constants\MemberConstant;
+use App\ServiceManagers\MemberChopServiceManager;
+use App\ServiceManagers\MemberPrepaidCardServiceManager;
 use App\Http\Requests\API\CreateMemberAPIRequest;
 use App\Http\Requests\API\UpdateMemberAPIRequest;
-use App\Models\Member;
-use App\Repositories\MemberRepository;
-use App\Repositories\BranchRepository;
-use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
-use App\Events\MemberRegistered;
+use App\Http\Helpers\MemberResourceHelper;
+use App\Http\Resources\Member;
+use App\Http\Resources\MemberByQuery;
 use App\Services\MemberService;
 use App\Services\ChopService;
+use App\Services\RankService;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Response;
 use Hash;
 use Log;
@@ -30,10 +32,11 @@ class MemberAPIController extends AppBaseController
 
     public function __construct()
     {
-        $this->memberRepository = app(MemberRepository::class);
-        $this->branchRepository = app(BranchRepository::class);
-        $this->memberService = new MemberService();
-        $this->chopService = new ChopService();
+        $this->memberService = app(MemberService::class);
+        $this->rankService = app(RankService::class);
+        $this->chopService = app(ChopService::class);
+        $this->memberChopServiceManager = app(MemberChopServiceManager::class);
+        $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
     }
 
     /**
@@ -45,11 +48,15 @@ class MemberAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->memberRepository->pushCriteria(new RequestCriteria($request));
-        $this->memberRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $members = $this->memberRepository->with(['rank', 'chops'])->all();
+        try {
+            $members = $this->memberService->listMembers($request);
+            $members->load(MemberConstant::BASE_MEMBER_RELATIONS);
 
-        return $this->sendResponse($members->toArray(), 'Members retrieved successfully');
+            return $this->sendResponse(Member::collection($members), 'Members retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -62,18 +69,20 @@ class MemberAPIController extends AppBaseController
      */
     public function store(CreateMemberAPIRequest $request)
     {
-        $customer = $this->getCustomerName($request);
         $input = $request->all();
 
         try {
-            $this->memberService->setCustomer($customer);
+            if (!isset($data['rank_id'])) {
+                $basicRank = $this->rankService->getBasicRank();
+                $input['rank_id'] = $basicRank->id;
+            }
+
             $member = $this->memberService->newMember($input);
+            return $this->sendResponse(new Member($member), 'Member saved successfully');
         } catch (\Exception $e) {
             Log::error($e);
-            return $this->sendError('New Member failed', 500);
+            throw $e;
         }
-
-        return $this->sendResponse($member->toArray(), 'Member saved successfully');
     }
 
     /**
@@ -86,34 +95,15 @@ class MemberAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var Member $member */
-        $member = $this->memberRepository->with(['rank', 'chops'])->find($id);
+        try {
+            $member = $this->memberService->findMember($id);
+            $member->load(MemberConstant::BASE_MEMBER_RELATIONS);
 
-        if (empty($member)) {
-            return $this->sendError('Member not found');
+            return $this->sendResponse(new Member($member), 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($member->toArray(), 'Member retrieved successfully');
-    }
-
-    /**
-     * Display the specified Member.
-     * GET|HEAD /members/{id}
-     *
-     * @param int $id
-     *
-     * @return Response
-     */
-    public function detail($id)
-    {
-        /** @var Member $member */
-        $member = $this->memberRepository->with(['rank', 'chops', 'chops.branch', 'orderRecords', 'orderRecords.branch', 'orderRecords.transactionItems', 'orderRecords.chopRecords', 'chopRecords', 'chopRecords.branch', 'chopRecords.voidRecord'])->find($id);
-
-        if (empty($member)) {
-            return $this->sendError('Member not found');
-        }
-
-        return $this->sendResponse($member, 'Member retrieved successfully');
     }
 
     /**
@@ -127,25 +117,15 @@ class MemberAPIController extends AppBaseController
      */
     public function update($id, UpdateMemberAPIRequest $request)
     {
-        $customer = $this->getCustomerName($request);
         $input = $request->all();
 
-        /** @var Member $member */
-        $member = $this->memberRepository->find($id);
-
-        if (empty($member)) {
-            return $this->sendError('Member not found');
-        }
-
         try {
-            $this->memberService->setCustomer($customer);
             $member = $this->memberService->updateMember($input, $id);
+            return $this->sendResponse(new Member($member), 'Member updated successfully');
         } catch (\Exception $e) {
             Log::error($e);
-            return $this->sendError('Update Member failed', 500);
+            throw $e;
         }
-
-        return $this->sendResponse($member->toArray(), 'Member updated successfully');
     }
 
     /**
@@ -160,16 +140,13 @@ class MemberAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var Member $member */
-        $member = $this->memberRepository->find($id);
-
-        if (empty($member)) {
-            return $this->sendError('Member not found');
+        try {
+            $member = $this->memberService->deleteMember($id);
+            return $this->sendSuccess('Member deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $member->delete();
-
-        return $this->sendSuccess('Member deleted successfully');
     }
 
     public function queryByPhone(Request $request)
@@ -177,26 +154,18 @@ class MemberAPIController extends AppBaseController
         $phone = $request->get('phone');
         $branchId = $request->get('branch_id');
 
-        $member = $this->memberRepository->findByPhone($phone);
-        if (!$member) {
-            return $this->sendError('member not exist', 404);
-        }
-    
-        $branch = $this->branchRepository->findByBranchId($branchId);
-        if (!$branch) {
-            return $this->sendError('branch not exist', 404);
-        }
-
         try {
-            $chops = $this->chopService->getTotalChops($member, $branch);
-            $member = $member->toArray();
-            $member['chops'] = $chops;
+            $member = $this->memberChopServiceManager->getMemberWithChops([
+                'phone' => $phone,
+                'branch_id' => $branchId
+            ]);
+            $member->load(MemberConstant::BASE_MEMBER_RELATIONS);
+
+            return $this->sendResponse(new MemberByQuery($member), 'Member query successfully');
         } catch (\Exception $e) {
             Log::error($e);
-            return $this->sendError('Query Member failed', 500);
+            throw $e;
         }
-        
-        return $this->sendResponse($member, 'Member updated successfully');
     }
 
     /**
@@ -209,14 +178,15 @@ class MemberAPIController extends AppBaseController
      */
     public function getChops($phone)
     {
-        /** @var Member $member */
-        $member = $this->memberRepository->findByPhone($phone);
-
-        if (empty($member)) {
-            return $this->sendError('Member not found');
+        try {
+            $chops = $this->memberChopServiceManager->getMemberTotalChops([
+                'phone' => $phone
+            ]);
+            return $this->sendResponse(['chops' => $chops], 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse(['chops' => $member->chops->sum('chops')], 'Member retrieved successfully');
     }
 
     /**
@@ -229,14 +199,15 @@ class MemberAPIController extends AppBaseController
      */
     public function getChopsDetail($phone)
     {
-        /** @var Member $member */
-        $member = $this->memberRepository->with('chops.branch')->findByPhone($phone);
-
-        if (empty($member)) {
-            return $this->sendError('Member not found');
+        try {
+            $chops = $this->memberChopServiceManager->getMemberChopsDetail([
+                'phone' => $phone
+            ]);
+            return $this->sendResponse($chops, 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($member->chops, 'Member retrieved successfully');
     }
 
     /**
@@ -249,13 +220,52 @@ class MemberAPIController extends AppBaseController
      */
     public function getOrderRecords($phone)
     {
-        /** @var Member $member */
-        $member = $this->memberRepository->with(['orderRecords', 'orderRecords.branch', 'orderRecords.transactionItems', 'orderRecords.chopRecords'])->findByPhone($phone);
-
-        if (empty($member)) {
-            return $this->sendError('Member not found');
+        try {
+            $orderRecords = $this->memberChopServiceManager->getMemberChopsDetail([
+                'phone' => $phone
+            ]);
+            return $this->sendResponse($orderRecords, 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
+    }
 
-        return $this->sendResponse($member->orderRecords, 'Member retrieved successfully');
+    public function getBalance($phone)
+    {
+        try {
+            $balance = $this->memberPrepaidCardServiceManager->getMemberBalance([
+                'phone' => $phone
+            ]);
+            return $this->sendResponse($balance, 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+    public function information($phone)
+    {
+        try {
+            $member = $this->memberService->findMemberByPhone($phone);
+            $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
+
+            return $this->sendResponse(new Member($member), 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    public function detail($id)
+    {
+        try {
+            $member = $this->memberService->findMember($id);
+            $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
+
+            return $this->sendResponse(new Member($member), 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 }

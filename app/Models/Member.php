@@ -55,6 +55,7 @@ class Member extends Authenticatable
         'gender',
         'email',
         'address',
+        'birthday',
         'remark',
         'rank_id',
         'status'
@@ -74,7 +75,8 @@ class Member extends Authenticatable
         'gender' => 'string',
         'email' => 'string',
         'address' => 'string',
-        'remark' => 'string'
+        'remark' => 'string',
+        'birthday' => 'date',
     ];
 
     /**
@@ -89,6 +91,7 @@ class Member extends Authenticatable
         'password' => 'required',
         'gender' => 'required|in:male,female,others,unknown',
         'email' => 'email',
+        'birthday' => 'date',
     ];
 
     public function getFullNameAttribute()
@@ -114,6 +117,16 @@ class Member extends Authenticatable
     public function orderRecords()
     {
         return $this->hasMany(\App\Models\Transaction::class);
+    }
+
+    public function prepaidcard()
+    {
+        return $this->hasOne(\App\Models\PrepaidCard::class);
+    }
+
+    public function prepaidcardRecords()
+    {
+        return $this->hasMany(\App\Models\PrepaidCardRecord::class);
     }
     
 }

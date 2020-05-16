@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Repositories\CustomerRepository;
 use App\Utils\CustomResponseUtil;
+use App\Helpers\CustomerHelper;
 use Illuminate\Support\Facades\Config;
 use Closure;
 use Poyi\PGSchema\Facades\PGSchema;
@@ -38,6 +39,7 @@ class SwitchCustomer
         PGSchema::schema($dbSchemaName, 'pgsql');
         $request->merge(['_customerName' => $customer->name]);
         $request->merge(['_customer' => $customer]);
+        CustomerHelper::setCustomer($customer);
 
         return $next($request);
     }

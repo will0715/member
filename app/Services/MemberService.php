@@ -2,14 +2,21 @@
 
 namespace App\Services;
 
-use App\Models\Member;
+use Prettus\Repository\Criteria\RequestCriteria;
+use App\Constants\MemberConstant;
+use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\MemberRepository;
 use App\Repositories\RankRepository;
+use App\Helpers\CustomerHelper;
 use App\Events\MemberRegistered;
+use App\Exceptions\ResourceNotFoundException;
+use Poyi\PGSchema\Facades\PGSchema;
+use Auth;
 use Cache;
 
 class MemberService
 {
+    
     /** @var  MemberRepository */
     private $memberRepository;
     private $customer;
@@ -18,23 +25,35 @@ class MemberService
     {
         $this->memberRepository = app(MemberRepository::class);
         $this->rankRepository = app(RankRepository::class);
-        $this->customer = $customer;
     }
 
-    public function setCustomer($customer)
+    public function listMembers($request)
     {
-        $this->customer = $customer;
+        $this->memberRepository->pushCriteria(new RequestCriteria($request));
+        $this->memberRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $members = $this->memberRepository->all();
+
+        return $members;
+    }
+
+    public function findMember($id)
+    {
+        $member = $this->memberRepository->findWithoutFail($id);
+        return $member;
+    }
+
+    public function findMemberByPhone($phone)
+    {
+        $member = $this->memberRepository->findByPhone($phone);
+        return $member;
     }
 
     public function newMember($data)
     {
-        if (!isset($data['rank_id'])) {
-            $basicMemberRank = $this->getBasicMemberRank();
-            $data['rank_id'] = $basicMemberRank->id; 
-        }
+        $customer = CustomerHelper::getCustomer();
         $member = $this->memberRepository->newMember($data);
 
-        event(new MemberRegistered($this->customer, $member));
+        event(new MemberRegistered($customer, $member));
 
         return $member;
     }
@@ -45,15 +64,10 @@ class MemberService
         return $member;
     }
 
-    public function getBasicMemberRank()
+    public function deleteMember($id)
     {
-        $basicMemberRank = $this->rankRepository->getBasicRank();
-        // TODO:: add cache
-        // $basicMemberRank = Cache::get($this->customer . 'basicMemberRank');
-        // if (!$basicMemberRank) {
-        //     $basicMemberRank = $this->rankRepository->getBasicRank();
-        //     Cache::set($this->customer . 'basicMemberRank', $basicMemberRank);
-        // }
-        return $basicMemberRank;
+        $member = $this->findMember($id);
+        $member->delete();
+        return $member;
     }
 }

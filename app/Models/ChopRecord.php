@@ -27,12 +27,6 @@ class ChopRecord extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    const ADD_CHOPS = 'ADD_CHOPS';
-    const EARN_CHOPS = 'EARN_CHOPS';
-    const CONSUME_CHOPS = 'CONSUME_CHOPS';
-    const VOID_EARN_CHOPS = 'VOID_EARN_CHOPS';
-    const VOID_CONSUME_CHOPS = 'VOID_CONSUME_CHOPS';
-
 
     public $fillable = [
         'member_id',

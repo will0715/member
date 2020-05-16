@@ -2,16 +2,17 @@
 
 namespace App\Exceptions;
 
+use App\Constants\ExceptionCode;
 use Exception;
-use Response;
 
 class AlreadyVoidedException extends Exception
 {
     private $voidedRecord = null;
 
-    public function __construct($voidedRecord)
+    public function __construct($message, $voidedRecord, $code = ExceptionCode::ALREADY_VOIDED_EXCEPTION)
     {
         $this->voidedRecord = $voidedRecord;
-        $this->message = __('record already voided');
+        $message = sprintf('[AlreadyVoided]%s', $message);
+        parent::__construct($message, $code);
     }
 }

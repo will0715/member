@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\UserConstant;
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateUserAPIRequest;
 use App\Http\Requests\API\UpdateUserAPIRequest;
-use App\Models\User;
-use App\Models\Permission;
-use App\Repositories\CustomerRepository;
-use App\Repositories\UserRepository;
+use App\Http\Resources\User;
+use App\Services\CustomerService;
+use App\Services\AuthService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
+use Poyi\PGSchema\Facades\PGSchema;
 use Response;
 use Auth;
-use Poyi\PGSchema\Facades\PGSchema;
+use Log;
 
 /**
  * Class UserAPIController
@@ -23,12 +23,12 @@ use Poyi\PGSchema\Facades\PGSchema;
 
 class UserAPIController extends AppBaseController
 {
-    /** @var  UserRepository */
-    private $userRepository;
 
-    public function __construct(UserRepository $userRepo)
+    public function __construct()
     {
-        $this->userRepository = $userRepo;
+        $this->authService = app(AuthService::class);
+        $this->userService = app(UserService::class);
+        $this->customerService = app(CustomerService::class);
     }
 
     /**
@@ -40,44 +40,51 @@ class UserAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->userRepository->pushCriteria(new RequestCriteria($request));
-        $this->userRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $users = $this->userRepository->all();
+        try {
+            $users = $this->userService->listUsers($request);
 
-        return $this->sendResponse($users->toArray(), 'Users retrieved successfully');
+            return $this->sendResponse(User::collection($users), 'Users retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     public function login(Request $request)
     {
-    	$customerName = $request->get('customer');
+    	$customer = $request->get('customer');
     	$email = $request->get('email');
     	$password = $request->get('password');
-        $customer = app(CustomerRepository::class)->getByAccount($customerName);
-        if (!$customer) {
+        
+        try {
+            $customer = $this->customerService->findCustomerByAccount($customer);
+            
+            PGSchema::schema($customer->getSchema(), 'pgsql');
+
+            $token = $this->authService->login([
+                'email' => $email,
+                'password' => $password
+            ]);
+
+            return $this->sendResponse($token, 'Login successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
     		return $this->sendError('Unauthenticated', 401);
         }
-        PGSchema::schema($customer->getSchema(), 'pgsql');
-    	if (Auth::guard('user')->attempt(['email' => $email, 'password' => $password])) {
-            $user = Auth::guard('user')->user();
-            $token = $user->createToken('user ' . $user->id, ['*']);
-            $success['token'] = $token->accessToken;
-    		$success['expiredAt'] = $token->token->expires_at;
-            return $this->sendResponse($success, 'Login successfully');
-    	} else {
-    		return $this->sendError('Unauthenticated', 401);
-    	}
     }
 
     public function me()
     {
-        $user = Auth::guard('api')->user();
-        $user = $this->userRepository->with(['roles', 'permissions'])->find($user->id);
+        try {
+            $user = $this->authService->getLoginedUser();
+            $user->load(UserConstant::USER_RELATIONS);
 
-        if (empty($user)) {
-            return $this->sendError('User not found');
+            return $this->sendResponse(new User($user), 'User retrieved successfully');
+        } catch (\Exception $e) {
+            dd($e);
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($user->toArray(), 'User retrieved successfully');
     }
 
     /**
@@ -92,9 +99,14 @@ class UserAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $user = $this->userRepository->newUser($input);
+        try {
+            $user = $this->userService->newUser($input);
 
-        return $this->sendResponse($user->toArray(), 'User saved successfully');
+            return $this->sendResponse(new User($user), 'User saved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -107,14 +119,15 @@ class UserAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var User $user */
-        $user = $this->userRepository->find($id);
-
-        if (empty($user)) {
-            return $this->sendError('User not found');
+        try {
+            $user = $this->userService->findUser($id);
+            $user->load(UserConstant::USER_RELATIONS);
+            
+            return $this->sendResponse(new User($user), 'User retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($user->toArray(), 'User retrieved successfully');
     }
 
     /**
@@ -130,16 +143,13 @@ class UserAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        /** @var User $user */
-        $user = $this->userRepository->find($id);
-
-        if (empty($user)) {
-            return $this->sendError('User not found');
+        try {
+            $user = $this->userService->updateUser($input, $id);
+            return $this->sendResponse(new User($user), 'User updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $user = $this->userRepository->updateUser($input, $id);
-
-        return $this->sendResponse($user->toArray(), 'User updated successfully');
     }
 
     /**
@@ -154,15 +164,12 @@ class UserAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var User $user */
-        $user = $this->userRepository->find($id);
-
-        if (empty($user)) {
-            return $this->sendError('User not found');
+        try {
+            $user = $this->userService->deleteUser($id);
+            return $this->sendSuccess('User deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $user->delete();
-
-        return $this->sendSuccess('User deleted successfully');
     }
 }

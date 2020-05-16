@@ -2,29 +2,25 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateEarnChopRuleAPIRequest;
 use App\Http\Requests\API\UpdateEarnChopRuleAPIRequest;
-use App\Models\EarnChopRule;
-use App\Repositories\EarnChopRuleRepository;
+use App\Http\Resources\EarnChopRule;
+use App\Services\EarnChopRuleService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
 use Response;
 
 /**
- * Class EarnChopRuleController
- * @package App\Http\Controllers\API
+ * Class EarnChopRuleAPIController
+ * @package App\Http\Controllers
  */
 
 class EarnChopRuleAPIController extends AppBaseController
 {
-    /** @var  EarnChopRuleRepository */
-    private $earnChopRuleRepository;
 
-    public function __construct(EarnChopRuleRepository $earnChopRuleRepo)
+    public function __construct()
     {
-        $this->earnChopRuleRepository = $earnChopRuleRepo;
+        $this->earnChopRuleService = app(EarnChopRuleService::class);
     }
 
     /**
@@ -36,11 +32,14 @@ class EarnChopRuleAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->earnChopRuleRepository->pushCriteria(new RequestCriteria($request));
-        $this->earnChopRuleRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $earnChopRules = $this->earnChopRuleRepository->with('rank')->all();
-
-        return $this->sendResponse($earnChopRules->toArray(), 'Earn Chop Rules retrieved successfully');
+        try {
+            $earnChopRules = $this->earnChopRuleService->listEarnChopRules($request);
+            $earnChopRules->load(['rank']);
+            return $this->sendResponse(EarnChopRule::collection($earnChopRules), 'EarnChopRules retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -55,9 +54,14 @@ class EarnChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $earnChopRule = $this->earnChopRuleRepository->create($input);
-
-        return $this->sendResponse($earnChopRule->toArray(), 'Earn Chop Rule saved successfully');
+        try {
+            $earnChopRule = $this->earnChopRuleService->newEarnChopRule($input);
+            $earnChopRule->load(['rank']);
+            return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule saved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -70,14 +74,14 @@ class EarnChopRuleAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var EarnChopRule $earnChopRule */
-        $earnChopRule = $this->earnChopRuleRepository->find($id);
-
-        if (empty($earnChopRule)) {
-            return $this->sendError('Earn Chop Rule not found');
+        try {
+            $earnChopRule = $this->earnChopRuleService->findEarnChopRule($id);
+            $earnChopRule->load(['rank']);
+            return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($earnChopRule->toArray(), 'Earn Chop Rule retrieved successfully');
     }
 
     /**
@@ -93,16 +97,14 @@ class EarnChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        /** @var EarnChopRule $earnChopRule */
-        $earnChopRule = $this->earnChopRuleRepository->find($id);
-
-        if (empty($earnChopRule)) {
-            return $this->sendError('Earn Chop Rule not found');
+        try {
+            $earnChopRule = $this->earnChopRuleService->updateEarnChopRule($input, $id);
+            $earnChopRule->load(['rank']);
+            return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $earnChopRule = $this->earnChopRuleRepository->update($input, $id);
-
-        return $this->sendResponse($earnChopRule->toArray(), 'EarnChopRule updated successfully');
     }
 
     /**
@@ -117,15 +119,12 @@ class EarnChopRuleAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var EarnChopRule $earnChopRule */
-        $earnChopRule = $this->earnChopRuleRepository->find($id);
-
-        if (empty($earnChopRule)) {
-            return $this->sendError('Earn Chop Rule not found');
+        try {
+            $earnChopRule = $this->earnChopRuleService->deleteEarnChopRule($id);
+            return $this->sendSuccess('EarnChopRule deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $earnChopRule->delete();
-
-        return $this->sendSuccess('Earn Chop Rule deleted successfully');
     }
 }

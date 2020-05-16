@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRankAPIRequest;
 use App\Http\Requests\API\UpdateRankAPIRequest;
-use App\Models\Rank;
-use App\Repositories\RankRepository;
+use App\Http\Resources\Rank;
+use App\Services\RankService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
 use Response;
+use Log;
 
 /**
  * Class RankAPIController
@@ -19,12 +18,10 @@ use Response;
 
 class RankAPIController extends AppBaseController
 {
-    /** @var  RankRepository */
-    private $rankRepository;
 
-    public function __construct(RankRepository $rankRepo)
+    public function __construct()
     {
-        $this->rankRepository = $rankRepo;
+        $this->rankService = app(RankService::class);
     }
 
     /**
@@ -36,11 +33,13 @@ class RankAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->rankRepository->pushCriteria(new RequestCriteria($request));
-        $this->rankRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $ranks = $this->rankRepository->all();
-
-        return $this->sendResponse($ranks->toArray(), 'Ranks retrieved successfully');
+        try {
+            $ranks = $this->rankService->listRanks($request);
+            return $this->sendResponse(Rank::collection($ranks), 'Ranks retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -55,9 +54,13 @@ class RankAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $rank = $this->rankRepository->create($input);
-
-        return $this->sendResponse($rank->toArray(), 'Rank saved successfully');
+        try {
+            $rank = $this->rankService->newRank($input);
+            return $this->sendResponse(new Rank($rank), 'Rank saved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -70,14 +73,13 @@ class RankAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var Rank $rank */
-        $rank = $this->rankRepository->find($id);
-
-        if (empty($rank)) {
-            return $this->sendError('Rank not found');
+        try {
+            $rank = $this->rankService->findRank($id);
+            return $this->sendResponse(new Rank($rank), 'Rank retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($rank->toArray(), 'Rank retrieved successfully');
     }
 
     /**
@@ -93,16 +95,13 @@ class RankAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        /** @var Rank $rank */
-        $rank = $this->rankRepository->find($id);
-
-        if (empty($rank)) {
-            return $this->sendError('Rank not found');
+        try {
+            $rank = $this->rankService->updateRank($input, $id);
+            return $this->sendResponse(new Rank($rank), 'Rank updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $rank = $this->rankRepository->update($input, $id);
-
-        return $this->sendResponse($rank->toArray(), 'Rank updated successfully');
     }
 
     /**
@@ -117,15 +116,12 @@ class RankAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var Rank $rank */
-        $rank = $this->rankRepository->find($id);
-
-        if (empty($rank)) {
-            return $this->sendError('Rank not found');
+        try {
+            $rank = $this->rankService->deleteRank($id);
+            return $this->sendSuccess('Rank deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $rank->delete();
-
-        return $this->sendSuccess('Rank deleted successfully');
     }
 }

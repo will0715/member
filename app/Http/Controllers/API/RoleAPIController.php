@@ -2,31 +2,25 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRoleAPIRequest;
 use App\Http\Requests\API\UpdateRoleAPIRequest;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Permission;
-use App\Repositories\RoleRepository;
+use App\Http\Resources\Role;
+use App\Services\RoleService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
 use Response;
 
 /**
  * Class RoleAPIController
- * @package App\Http\Controllers\API
+ * @package App\Http\Controllers
  */
 
 class RoleAPIController extends AppBaseController
 {
-    /** @var  RoleRepository */
-    private $roleRepository;
 
-    public function __construct(RoleRepository $roleRepo)
+    public function __construct()
     {
-        $this->roleRepository = $roleRepo;
+        $this->roleService = app(RoleService::class);
     }
 
     /**
@@ -38,16 +32,13 @@ class RoleAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $user = User::first();
-        $role = Role::first();
-        // $role = Role::create(['guard_name' => 'api', 'name' => 'admin']);
-        // $permission = Permission::create(['guard_name' => 'api', 'name' => 'publish articles']);
-        $user->givePermissionTo('publish articles');
-        $this->roleRepository->pushCriteria(new RequestCriteria($request));
-        $this->roleRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $roles = $this->roleRepository->all();
-
-        return $this->sendResponse($roles->toArray(), 'Roles retrieved successfully');
+        try {
+            $roles = $this->roleService->listRoles($request);
+            return $this->sendResponse(Role::collection($roles), 'Roles retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -62,9 +53,13 @@ class RoleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $role = $this->roleRepository->create($input);
-
-        return $this->sendResponse($role->toArray(), 'Role saved successfully');
+        try {
+            $role = $this->roleService->newRole($input);
+            return $this->sendResponse(new Role($role), 'Role saved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -77,14 +72,13 @@ class RoleAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var Role $role */
-        $role = $this->roleRepository->find($id);
-
-        if (empty($role)) {
-            return $this->sendError('Role not found');
+        try {
+            $role = $this->roleService->findRole($id);
+            return $this->sendResponse(new Role($role), 'Role retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($role->toArray(), 'Role retrieved successfully');
     }
 
     /**
@@ -100,16 +94,13 @@ class RoleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        /** @var Role $role */
-        $role = $this->roleRepository->find($id);
-
-        if (empty($role)) {
-            return $this->sendError('Role not found');
+        try {
+            $role = $this->roleService->updateRole($input, $id);
+            return $this->sendResponse(new Role($role), 'Role updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $role = $this->roleRepository->update($input, $id);
-
-        return $this->sendResponse($role->toArray(), 'Role updated successfully');
     }
 
     /**
@@ -124,15 +115,12 @@ class RoleAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        /** @var Role $role */
-        $role = $this->roleRepository->find($id);
-
-        if (empty($role)) {
-            return $this->sendError('Role not found');
+        try {
+            $role = $this->roleService->deleteRole($id);
+            return $this->sendSuccess('Role deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        $role->delete();
-
-        return $this->sendSuccess('Role deleted successfully');
     }
 }

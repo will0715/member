@@ -2,16 +2,13 @@
 
 namespace App\Exceptions;
 
+use App\Constants\ExceptionCode;
 use Exception;
-use Response;
 
 class TransactionDuplicateException extends Exception
 {
-    private $orderId = '';
-
-    public function __construct($orderId)
+    public function __construct($message, $code = ExceptionCode::TRANSACTION_DUPLICATE_EXCEPTION)
     {
-        $this->orderId = $orderId;
-        $this->message = __($orderId . ' is already exist');
+        parent::__construct($message, $code);
     }
 }

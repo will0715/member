@@ -10,7 +10,8 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::view('/{path?}', 'main')
-     ->where('path', '.*')
-     ->name('react');
+if (!strpos(Request::url(),"api")) {
+     Route::view('/{path?}', 'main')
+          ->where('path', '.*')
+          ->name('react');
+}

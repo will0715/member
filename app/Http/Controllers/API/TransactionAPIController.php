@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\AppBaseController;
 use App\Exceptions\TransactionDuplicateException;
 use App\Http\Requests\API\CreateTransactionAPIRequest;
 use App\Http\Requests\API\UpdateTransactionAPIRequest;
-use App\Models\Transaction;
-use App\Repositories\TransactionRepository;
-use App\Repositories\MemberRepository;
-use App\Repositories\BranchRepository;
+use App\Http\Resources\Transaction;
 use App\Services\TransactionService;
+use App\ServiceManagers\TransactionManager;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
-use Prettus\Repository\Criteria\RequestCriteria;
-use App\Criterias\LimitOffsetCriteria;
 use Response;
 use Log;
+use DB;
 
 /**
  * Class TransactionController
@@ -24,17 +21,13 @@ use Log;
 
 class TransactionAPIController extends AppBaseController
 {
-    /** @var  TransactionRepository */
-    private $transactionRepository;
 
     private $transactionService;
 
-    public function __construct(TransactionRepository $transactionRepo)
+    public function __construct()
     {
-        $this->transactionRepository = $transactionRepo;
-        $this->memberRepository = app(MemberRepository::class);
-        $this->branchRepository = app(BranchRepository::class);
         $this->transactionService = new TransactionService();
+        $this->transactionManager = app(TransactionManager::class);
     }
 
     /**
@@ -64,36 +57,17 @@ class TransactionAPIController extends AppBaseController
     public function store(CreateTransactionAPIRequest $request)
     {
         $input = $request->all();
-        $memberId = $request->get('member_id');
-        $branchId = $request->get('branch_id');
-        $chops = $request->get('chops');
-        $customer = $this->getCustomer($request);
 
-        $member = $this->memberRepository->findByPhone($memberId);
-        if (!$member) {
-            return $this->sendError('member not exist', 404);
-        }
-    
-        $branch = $this->branchRepository->findByBranchId($branchId);
-        if (!$branch) {
-            return $this->sendError('branch not exist', 404);
-        }
-
+        DB::beginTransaction();
         try {
-            $this->transactionService->setCustomer($customer);
-            $this->transactionService->setMember($member);
-            $this->transactionService->setBranch($branch);
+            $transaction = $this->transactionManager->newTransaction($input);
+            DB::commit();
 
-            $transaction = $this->transactionService->newTransaction($input);
-        } catch (TransactionDuplicateException $e) {
-            Log::warning($e);
-            return $this->sendError($e->getMessage(), 422);
+            return $this->sendResponse(new Transaction($transaction), 'New Transaction successfully');
         } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('New Transaction Failed', 500);
+            DB::rollBack();
+            throw $e;
         }
-
-        return $this->sendResponse($transaction->toArray(), 'Transaction saved successfully');
     }
 
     /**
@@ -117,31 +91,6 @@ class TransactionAPIController extends AppBaseController
     }
 
     /**
-     * Update the specified Transaction in storage.
-     * PUT/PATCH /transactions/{id}
-     *
-     * @param int $id
-     * @param UpdateTransactionAPIRequest $request
-     *
-     * @return Response
-     */
-    public function update($id, UpdateTransactionAPIRequest $request)
-    {
-        $input = $request->all();
-
-        /** @var Transaction $transaction */
-        $transaction = $this->transactionRepository->find($id);
-
-        if (empty($transaction)) {
-            return $this->sendError('Transaction not found');
-        }
-
-        $transaction = $this->transactionRepository->update($input, $id);
-
-        return $this->sendResponse($transaction->toArray(), 'Transaction updated successfully');
-    }
-
-    /**
      * Remove the specified Transaction from storage.
      * DELETE /transactions/{id}
      *
@@ -153,20 +102,17 @@ class TransactionAPIController extends AppBaseController
      */
     public function destroy($id, Request $request)
     {
-        $customer = $this->getCustomer($request);
+        $input = $request->all();
+
+        DB::beginTransaction();
         try {
-            $this->transactionService->setCustomer($customer);
+            $chops = $this->transactionManager->voidTransaction($id, $input);
+            DB::commit();
 
-            $this->transactionService->voidTransaction($id);
-        } catch (AlreadyVoidedException $e) {
-            Log::error($e);
-            return $this->sendError($e->getMessage(), 409);
+            return $this->sendResponse(new Transaction($chops), 'Void Transaction successfully');
         } catch (\Exception $e) {
-            Log::error($e);
-            dd($e);
-            return $this->sendError('Consume Chops failed', 500);
+            DB::rollBack();
+            throw $e;
         }
-
-        return $this->sendSuccess('Transaction deleted successfully');
     }
 }

@@ -2,13 +2,14 @@
 
 namespace App\Exceptions;
 
+use App\Constants\ExceptionCode;
 use Exception;
-use Response;
 
 class ChopsNotEnoughException extends Exception
 {
-    public function __construct()
+    public function __construct($message, $code = ExceptionCode::CHOPS_NOT_ENOUGH_EXCEPTION)
     {
-        $this->message = __('chops not enough');
+        $message = sprintf('[ChopsNotEnough]%s', $message);
+        parent::__construct($message, $code);
     }
 }

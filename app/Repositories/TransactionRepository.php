@@ -49,32 +49,14 @@ class TransactionRepository extends BaseRepository
         return Transaction::class;
     }
 
-    public function getByOrderId($orderId)
+    public function findByOrderId($orderId)
     {
         return $this->findByField('order_id', $orderId)->first();
     }
 
-    public function createTransaction(array $attributes, Collection $transactionItems)
+    public function createTransaction(array $attributes)
     {
-        $transaction = null;
-        $attributes['items_count'] = count($transactionItems);
-
         $transaction =  $this->create($attributes);
-        // TODO: transaction data check
-
-        $transactionItems = $transactionItems->map(function ($item, $key) {
-            $orderItem = [
-                'item_no' => $item['no'],
-                'item_name' => $item['name'],
-                'price' => $item['price'],
-                'subtotal' => $item['subtotal'],
-                'quantity' => $item['qty'],
-                'item_condiments' => $item['condiments'] ?: ''
-            ];
-            return $orderItem;
-        });
-
-        $transaction->transactionItems()->createMany($transactionItems->toArray());
 
         return $transaction;
     }

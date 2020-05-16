@@ -32,6 +32,7 @@ class TransactionUsedChopRuleHelper
         $earnChopRules = $this->earnChopRuleRepository->findByRank($member->rank->id);
         $transactionPaymentType = Arr::get($transactionData, 'payment_type');
 
+        // TODO: 積點規則
         foreach ($earnChopRules as $earnChopRule) {
             $chops = 0;
             if ($earnChopRule->payment_type === $transactionPaymentType) {

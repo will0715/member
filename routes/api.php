@@ -38,14 +38,26 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('members/{phone}/chops', 'MemberAPIController@getChops');
             Route::get('members/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
             Route::get('members/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
+            Route::get('members/{phone}/prepaidcard', 'MemberAPIController@getBalance');
+            Route::get('members/{phone}/information', 'MemberAPIController@information');
             Route::get('members/{id}/detail', 'MemberAPIController@detail');
             Route::resource('members', 'MemberAPIController');
     
             Route::get('/earnChopRules', 'EarnChopRuleAPIController@index');
             Route::get('/consumeChopRules', 'ConsumeChopRuleAPIController@index');
+
             Route::post('/chops/add', 'ChopAPIController@manualAddChops');
             Route::post('/chops/consume', 'ChopAPIController@consumeChops');
             Route::post('/chops/consume/{id}/void', 'ChopAPIController@voidConsumeChops');
+            Route::delete('/chops/consume/{id}', 'ChopAPIController@voidConsumeChops');
+
+            Route::group(['prefix' => 'prepaidcards'], function () {
+                Route::post('/topup', 'PrepaidCardAPIController@topup');
+                Route::post('/payment', 'PrepaidCardAPIController@payment');
+                Route::post('/payment/{id}/void', 'PrepaidCardAPIController@voidPayment');
+                Route::delete('/payment/{id}', 'PrepaidCardAPIController@voidPayment');
+            });
+
             Route::resource('roles', 'RoleAPIController');
     
             Route::resource('branches', 'BranchAPIController');
@@ -55,10 +67,9 @@ Route::group(['prefix' => 'v1'], function () {
             Route::resource('consumeChopRules', 'ConsumeChopRuleAPIController');
             
             Route::resource('earnChopRules', 'EarnChopRuleAPIController');
-    
-            Route::resource('chopRecords', 'ChopRecordAPIController');
             
             Route::resource('transactions', 'TransactionAPIController');
+            Route::post('/transactions/{id}/void', 'TransactionAPIController@destroy');
     
             Route::resource('chopExpiredSettings', 'ChopExpiredSettingAPIController');
     

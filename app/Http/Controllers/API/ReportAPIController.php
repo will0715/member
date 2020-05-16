@@ -38,23 +38,16 @@ class ReportAPIController extends AppBaseController
      */
     public function dashboard(Request $request)
     {
-        $customer = $this->getCustomer($request);
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         $chops = $request->get('chops');
-        $user = Auth::guard('api')->user();
         
         try {
-            $this->reportService->setCustomer($customer);
-            $this->reportService->setCustomer($user);
-
             $data = $this->reportService->dashboard($startAt, $endAt);
+            return $this->sendResponse($data, 'Users retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
-            dd($e);
             return $this->sendError('Get Dashboard Data Failed', 500);
         }
-
-        return $this->sendResponse($data, 'Users retrieved successfully');
     }
 }

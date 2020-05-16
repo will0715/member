@@ -2,16 +2,13 @@
 
 namespace App\Exceptions;
 
+use App\Constants\ExceptionCode;
 use Exception;
-use Response;
 
 class ResourceNotFoundException extends Exception
 {
-    private $resource = '';
-
-    public function __construct($resource)
+    public function __construct($message, $code = ExceptionCode::RESOURCE_NOT_FOUND_EXCEPTION)
     {
-        $this->resource = $resource;
-        $this->message = __($resource + ' is not exist');
+        parent::__construct($message, $code);
     }
 }

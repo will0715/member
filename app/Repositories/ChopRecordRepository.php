@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\ChopRecord;
+use App\Constants\ChopRecordConstant;
 use App\Repositories\BaseRepository;
 use Arr;
 
@@ -14,11 +15,6 @@ use Arr;
 
 class ChopRecordRepository extends BaseRepository
 {
-    const ADD_CHOPS = 'ADD_CHOPS';
-    const EARN_CHOPS = 'EARN_CHOPS';
-    const CONSUME_CHOPS = 'CONSUME_CHOPS';
-    const VOID_EARN_CHOPS = 'VOID_EARN_CHOPS';
-    const VOID_CONSUME_CHOPS = 'VOID_CONSUME_CHOPS';
 
     /**
      * @var array
@@ -51,52 +47,61 @@ class ChopRecordRepository extends BaseRepository
 
     public function newManualChopRecord($data)
     {
-        $member = Arr::get($data, 'member');
-        $branch = Arr::get($data, 'branch');
-        $chops = Arr::get($data, 'chops');
-
         return $this->create([
-            'member_id' => $member->id,
-            'branch_id' => $branch->id,
-            'type' => self::ADD_CHOPS,
-            'chops' => $chops,
+            'member_id' => $data['member_id'],
+            'branch_id' => $data['branch_id'],
+            'type' => ChopRecordConstant::CHOP_RECORD_ADD_CHOPS,
+            'chops' => $data['chops'],
             'consume_chops' => 0,
         ]);
     }
 
     public function newEarnChopRecord($data)
     {
-        $member = Arr::get($data, 'member');
-        $branch = Arr::get($data, 'branch');
-        $chops = Arr::get($data, 'chops');
-        $transaction = Arr::get($data, 'transaction');
-        $earnChopRule = Arr::get($data, 'earnChopRule');
-
         return $this->create([
-            'member_id' => $member->id,
-            'branch_id' => $branch->id,
-            'type' => self::EARN_CHOPS,
-            'chops' => $chops,
+            'member_id' => $data['member_id'],
+            'branch_id' => $data['branch_id'],
+            'type' => ChopRecordConstant::CHOP_RECORD_EARN_CHOPS,
+            'chops' => $data['chops'],
             'consume_chops' => 0,
-            'transaction_id' => $transaction->id,
-            'rule_id' => $earnChopRule->id
+            'transaction_id' => $data['transaction_id'],
+            'rule_id' => $data['rule_id']
+        ]);
+    }
+
+    public function voidEarnChopRecord($data)
+    {
+        return  $this->create([
+            'member_id' => $data['member_id'],
+            'branch_id' => $data['branch_id'],
+            'type' => ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS,
+            'chops' => $data['chops'],
+            'consume_chops' => 0,
+            'void_id' => $data['void_id']
         ]);
     }
 
     public function newConsumeChopRecord($data)
     {
-        $member = Arr::get($data, 'member');
-        $branch = Arr::get($data, 'branch');
-        $consumeChops = Arr::get($data, 'consumeChops');
-        $consumeChopRule = Arr::get($data, 'consumeChopRule');
-
         return $this->create([
-            'member_id' => $member->id,
-            'branch_id' => $branch->id,
-            'type' => self::CONSUME_CHOPS,
+            'member_id' => $data['member_id'],
+            'branch_id' => $data['branch_id'],
+            'type' => ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS,
             'chops' => 0,
-            'consume_chops' => $consumeChops,
-            'rule_id' => optional($consumeChopRule)->id
+            'consume_chops' => $data['consume_chops'],
+            'rule_id' => $data['rule_id'],
+        ]);
+    }
+
+    public function voidConsumeChopRecord($data)
+    {
+        return $this->create([
+            'member_id' => $data['member_id'],
+            'branch_id' => $data['branch_id'],
+            'type' => ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS,
+            'chops' => 0,
+            'consume_chops' => $data['consume_chops'],
+            'void_id' => $data['void_id']
         ]);
     }
 
@@ -108,22 +113,22 @@ class ChopRecordRepository extends BaseRepository
         }
         $voidRecord = null;
         switch ($record->type) {
-            case self::CONSUME_CHOPS:
+            case ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS:
                 $voidRecord = $this->create([
                     'member_id' => $record->member_id,
                     'branch_id' => $record->branch_id,
-                    'type' => self::VOID_CONSUME_CHOPS,
+                    'type' => ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS,
                     'chops' => 0,
                     'consume_chops' => -1 * $record->consume_chops,
                     'void_id' => $record->id
                 ]);
                 break;
                 
-            case self::EARN_CHOPS:
+            case ChopRecordConstant::CHOP_RECORD_EARN_CHOPS:
                 $voidRecord = $this->create([
                     'member_id' => $record->member_id,
                     'branch_id' => $record->branch_id,
-                    'type' => self::VOID_EARN_CHOPS,
+                    'type' => ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS,
                     'chops' => -1 * $record->chops,
                     'consume_chops' => 0,
                     'void_id' => $record->id

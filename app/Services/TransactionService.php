@@ -2,20 +2,20 @@
 
 namespace App\Services;
 
+use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\TransactionDuplicateException;
 use App\Criterias\TransactionValidCriteria;
-use App\Models\Member;
 use App\Repositories\TransactionRepository;
+use App\Repositories\TransactionItemRepository;
 use App\Repositories\ChopRecordRepository;
 use App\Repositories\ChopRepository;
 use App\Repositories\RankRepository;
 use App\Repositories\MemberRepository;
 use App\Repositories\BranchRepository;
 use App\Repositories\EarnChopRuleRepository;
+use App\Models\Member;
 use App\Helpers\TransactionUsedChopRuleHelper;
-use App\Events\MemberRegistered;
 use Carbon\Carbon;
-use Exception;
 use Cache;
 use DB;
 use Arr;
@@ -26,87 +26,71 @@ class TransactionService
     private $transactionRepository;
     /** @var  ChopRepository */
     private $chopRepository;
-    private $customer;
-    private $member;
-    private $branch;
 
     public function __construct($customer = '')
     {
         $this->transactionRepository = app(TransactionRepository::class);
+        $this->transactionItemRepository = app(TransactionItemRepository::class);
         $this->chopRepository = app(ChopRepository::class);
         $this->chopRecordRepository = app(ChopRecordRepository::class);
         $this->earnChopRuleRepository = app(EarnChopRuleRepository::class);
         $this->memberRepository = app(MemberRepository::class);
         $this->branchRepository = app(BranchRepository::class);
         $this->chopRecordRepository = app(ChopRecordRepository::class);
-        $this->customer = $customer;
     }
 
-    public function setCustomer($customer)
+    public function findTransaction($id)
     {
-        $this->customer = $customer;
+        $transaction = $this->transactionRepository->findWithoutFail($id);
+        return $transaction;
     }
 
-    public function setMember($member)
+    public function findByOrderId($orderId)
     {
-        $this->member = $member;
+        $transaction = $this->transactionRepository->findByOrderId($orderId);
+        return $transaction;
     }
 
-    public function setBranch($branch)
+    public function newTransaction($attributes)
     {
-        $this->branch = $branch;
-    }
-
-    public function newTransaction($transactionData)
-    {
+        $memberId = $attributes['member_id'];
+        $branchId = $attributes['branch_id'];
+        $transactionData = $attributes['transaction'];
         $transactionItems = collect(Arr::get($transactionData, 'items', []));
         $orderId = $transactionData['order_id'];
-        $order = $this->transactionRepository->getByOrderId($orderId);
+        $order = $this->findByOrderId($orderId);
         if ($order) {
-            throw new TransactionDuplicateException($orderId);
+            throw new TransactionDuplicateException($orderId . ' is already exist');
         }
-        
-        $member = $this->member;
-        $branch = $this->branch;
-        // calculate chop
-        // TODO : 架構調整 Transaction Service與 Chop Service 合併 Or 移至Event
-        $usedChposRuleHelper = new TransactionUsedChopRuleHelper($member, $transactionData);
-        $earnChops = $usedChposRuleHelper->calTransactionEarnChops();
-        $earnChopRule = $usedChposRuleHelper->getUsedChopRule();
 
-        $transaction = null;
-        DB::beginTransaction();
-        try {
+        $transaction = $this->transactionRepository->createTransaction([
+            'order_id' => $orderId,
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'payment_type' => Arr::get($transactionData, 'payment_type', ''),
+            'clerk' => Arr::get($transactionData, 'clerk', ''),
+            'items_count' => count($transactionItems),
+            'amount' => Arr::get($transactionData, 'amount', 0),
+            'remark' => Arr::get($transactionData, 'remark', ''),
+            'status' => 1,
+            'transaction_time' => Arr::get($transactionData, 'transaction_time', Carbon::now()),
+        ], $transactionItems);
 
-            $transaction = $this->transactionRepository->createTransaction([
-                'order_id' => $orderId,
-                'member_id' => $member->id,
-                'branch_id' => $branch->id,
-                'payment_type' => Arr::get($transactionData, 'payment_type', ''),
-                'clerk' => Arr::get($transactionData, 'clerk', ''),
-                'items_count' => $transactionItems,
-                'amount' => Arr::get($transactionData, 'amount', 0),
-                'remark' => Arr::get($transactionData, 'remark', ''),
-                'status' => 1,
-                'transaction_time' => Arr::get($transactionData, 'transaction_time', Carbon::now()),
-            ], $transactionItems);
+        // make transaction item
+        // TODO: transaction data check
+        $transactionItems = $transactionItems->map(function ($item, $key) {
+            $orderItem = [
+                'item_no' => $item['no'],
+                'item_name' => $item['name'],
+                'price' => $item['price'],
+                'subtotal' => $item['subtotal'],
+                'quantity' => $item['qty'],
+                'item_condiments' => $item['condiments'] ?: ''
+            ];
+            return $orderItem;
+        });
 
-            $this->chopRepository->addChops($member, $branch, $earnChops);
-            
-            // add chop record
-            $record = $this->chopRecordRepository->newEarnChopRecord([
-                'member' => $member,
-                'branch' => $branch,
-                'chops' => $earnChops,
-                'earnChopRule' => $earnChopRule,
-                'transaction' => $transaction
-            ]);
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-        $transaction = $this->transactionRepository->with(['chopRecords', 'transactionItems', 'chopRecords.earnChopRule'])->find($transaction->id);
+        $transaction->transactionItems()->createMany($transactionItems->toArray());
 
         return $transaction;
     }
@@ -114,42 +98,17 @@ class TransactionService
     public function voidTransaction($id)
     {
         $transaction = $this->transactionRepository->find($id);
-        if (!$transaction) {
-            throw new Exception('Can\'t not find the transcation');
-        }
         if (!$transaction->isValid()) {
-            throw new Exception('Transaction already been voided');
+            throw new AlreadyVoidedException('Transaction already been voided');
         }
+        $voidTransaction = $this->transactionRepository->voidTransaction($transaction->id);
 
-        $member = $transaction->member;
-        $branch = $transaction->branch;
-        $records = $transaction->chopRecords;
-        // TODO: multi chop record
-        $record = $records->first();
-        DB::beginTransaction();
-        try {
-            $transaction = $this->transactionRepository->voidTransaction($transaction->id);
-            if ($record) {
-                $chops = -1 * $record->chops;
-    
-                // add chops
-                $this->chopRepository->addChops($member, $branch, $chops);
-     
-                // add void record
-                $voidRecord = $this->chopRecordRepository->voidRecord($record->id);
-            }
-            DB::commit();
-        } catch (\Exception $e) {
-            dd($e);
-            DB::rollBack();
-        }
-
-        return $transaction;
+        return $voidTransaction;
     }
 
-    public function calTransactionEarnChops($transactionData)
+    // TODO: 加強累點功能
+    public function calTransactionEarnChops(Member $member, $transactionData)
     {
-        $member = $this->member;
         $earnChopRules = $this->earnChopRuleRepository->findByRank($member->rank->id);
         $transactionPaymentType = Arr::get($transactionData, 'payment_type');
 
@@ -180,6 +139,9 @@ class TransactionService
                 }
             }
         }
-        return $earnChops ?: 0;
+        return [
+            'chops' => $earnChops ?: 0,
+            'used_chop_rule' => $usedChopRule
+        ];
     }
 }
