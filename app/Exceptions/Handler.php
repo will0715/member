@@ -83,9 +83,11 @@ class Handler extends ExceptionHandler
             return response()->json(ResponseUtil::makeError($exception->getMessage()), 400);
         }
         if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-            $modelName = $exception->getPrevious()->getModel();
-            $resourceName = Str::replaceFirst('App\\Models\\', '', $modelName);
-            return response()->json(ResponseUtil::makeError($resourceName . ' Not Found'), 404);
+            if ($exception->getPrevious()) {
+                $modelName = $exception->getPrevious()->getModel();
+                $resourceName = Str::replaceFirst('App\\Models\\', '', $modelName);
+                return response()->json(ResponseUtil::makeError($resourceName . ' Not Found'), 404);
+            }
         }
         if ($exception instanceof \League\OAuth2\Server\Exception\OAuthServerException || 
             $exception instanceof \Illuminate\Auth\AuthenticationException) {

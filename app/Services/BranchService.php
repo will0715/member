@@ -5,6 +5,7 @@ namespace App\Services;
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\BranchRepository;
+use App\Exceptions\ResourceNotFoundException;
 use Cache;
 
 class BranchService
@@ -29,12 +30,18 @@ class BranchService
     public function findBranch($id)
     {
         $branch = $this->branchRepository->findWithoutFail($id);
+        if (!$branch) {
+            throw new ResourceNotFoundException('Branch Not Found');
+        }
         return $branch;
     }
 
     public function findBranchByCode($code)
     {
         $branch = $this->branchRepository->findByBranchId($code);
+        if (!$branch) {
+            throw new ResourceNotFoundException('Branch Not Found');
+        }
         return $branch;
     }
 

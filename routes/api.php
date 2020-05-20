@@ -30,17 +30,26 @@ Route::group(['prefix' => 'v1'], function () {
     Route::group(['middleware' => 'auth:api'], function(){
         
         Route::middleware(['customer.switch'])->group(function () {
-            Route::get('/report/dashboard', 'ReportAPIController@dashboard');
+            Route::group(['prefix' => 'report'], function () {
+                Route::get('/dashboard', 'ReportAPIController@dashboard');
+                Route::get('/prepaidcards/topup', 'ReportAPIController@getPrepaidcardTopupRecords');
+                Route::get('/prepaidcards/payment', 'ReportAPIController@getPrepaidcardPaymentRecords');
+                Route::get('/chops/add', 'ReportAPIController@getAddChopsRecords');
+                Route::get('/chops/consume', 'ReportAPIController@getConsumeChopsRecords');
+                Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
+            });
 
             Route::get('/user/me', 'UserAPIController@me');
             
-            Route::post('members/query', 'MemberAPIController@queryByPhone');
-            Route::get('members/{phone}/chops', 'MemberAPIController@getChops');
-            Route::get('members/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
-            Route::get('members/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
-            Route::get('members/{phone}/prepaidcard', 'MemberAPIController@getBalance');
-            Route::get('members/{phone}/information', 'MemberAPIController@information');
-            Route::get('members/{id}/detail', 'MemberAPIController@detail');
+            Route::group(['prefix' => 'members'], function () {
+                Route::post('/query', 'MemberAPIController@queryByPhone');
+                Route::get('/{phone}/chops', 'MemberAPIController@getChops');
+                Route::get('/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
+                Route::get('/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
+                Route::get('/{phone}/prepaidcard', 'MemberAPIController@getBalance');
+                Route::get('/{phone}/information', 'MemberAPIController@information');
+                Route::get('/{id}/detail', 'MemberAPIController@detail');
+            });
             Route::resource('members', 'MemberAPIController');
     
             Route::get('/earnChopRules', 'EarnChopRuleAPIController@index');

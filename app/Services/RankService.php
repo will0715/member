@@ -29,6 +29,9 @@ class RankService
     public function findRank($id)
     {
         $rank = $this->rankRepository->findWithoutFail($id);
+        if (!$rank) {
+            throw new ResourceNotFoundException('Rank not exist');
+        }
         return $rank;
     }
 

@@ -38,6 +38,9 @@ class ChopService
     public function findChopRecord($id)
     {
         $chopRecord = $this->chopRecordRepository->findWithoutFail($id);
+        if (!$chopRecord) {
+            throw new ResourceNotFoundException('Chop Record Not Found');
+        }
         return $chopRecord;
     }
 

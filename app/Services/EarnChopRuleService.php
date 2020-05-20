@@ -29,6 +29,9 @@ class EarnChopRuleService
     public function findEarnChopRule($id)
     {
         $earnChopRule = $this->earnChopRuleRepository->findWithoutFail($id);
+        if (!$earnChopRule) {
+            throw new ResourceNotFoundException('Earn Consume rule Not Found');
+        }
         return $earnChopRule;
     }
 

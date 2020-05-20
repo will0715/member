@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Constants\PrepaidCardConstant;
 use App\Constants\ChopRecordConstant;
+use App\Criterias\LimitOffsetCriteria;
+use App\Criterias\RequestDateRangeCriteria;
 use App\Repositories\ChopExpiredSettingRepository;
 use App\Repositories\ChopRecordRepository;
 use App\Repositories\ChopRepository;
@@ -13,6 +15,8 @@ use App\Repositories\RankRepository;
 use App\Repositories\MemberRepository;
 use App\Repositories\BranchRepository;
 use App\Repositories\TransactionRepository;
+use Illuminate\Http\Request;
+use Prettus\Repository\Criteria\RequestCriteria;
 
 class ReportService
 {
@@ -33,8 +37,11 @@ class ReportService
         $this->rankRepository = app(RankRepository::class);
     }
 
-    public function dashboard($startAt, $endAt)
+    public function dashboard(Request $request)
     {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+
         $memberCount = $this->memberRepository->findWhere(['status' => 1])->count();
         $branchCount = $this->branchRepository->count();
         $totalChops = $this->chopRepository->sum('chops');
@@ -42,11 +49,13 @@ class ReportService
         $prepaidCardTopup = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->sum('topup');
         $prepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])->sum('payment');
         $voidPrepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT])->sum('payment');
+
         $manualAddChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_ADD_CHOPS])->sum('chops');
         $earnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_EARN_CHOPS])->sum('chops');
         $voidEarnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS])->sum('chops');
         $consumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS])->sum('consume_chops');
         $voidConsumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS])->sum('consume_chops');
+
         $totalAmount = $this->transactionRepository->findWhere(['status' => 1])->sum('amount');
         $ranks = $this->rankRepository->withCount('members')->all();
 
@@ -64,5 +73,71 @@ class ReportService
             'total_topup' => (int)$prepaidCardTopup,
             'total_paymnet' => (int)($prepaidCardPayment + $voidPrepaidCardPayment),
         ];
+    }
+
+    public function getPrepaidcardTopupRecords(Request $request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $prepaidCardRecord = $this->prepaidCardRecordRepository->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->with(['branch', 'member'])->all();
+
+        return $prepaidCardRecord;
+    }
+
+    public function getPrepaidcardPaymentRecords(Request $request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $prepaidCardRecord = $this->prepaidCardRecordRepository
+                            ->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])
+                            ->with(['branch', 'member'])
+                            ->all();
+
+        return $prepaidCardRecord;
+    }
+
+    public function getAddChopsRecords(Request $request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $chopRecord = $this->chopRecordRepository
+                        ->whereIn('type', [
+                            ChopRecordConstant::CHOP_RECORD_ADD_CHOPS, 
+                            ChopRecordConstant::CHOP_RECORD_EARN_CHOPS,
+                            ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS
+                        ])
+                        ->with(['branch', 'member'])
+                        ->all();
+
+        return $chopRecord;
+    }
+
+    public function getConsumeChopsRecords(Request $request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $chopRecord = $this->chopRecordRepository
+                        ->whereIn('type', [
+                            ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS, 
+                            ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS
+                        ])
+                        ->with(['branch', 'member'])
+                        ->all();
+
+        return $chopRecord;
+    }
+
+    public function getTransactionRecords(Request $request)
+    {
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->transactionRepository->pushCriteria(new RequestCriteria($request));
+        $this->transactionRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $transactions = $this->transactionRepository->with(['branch', 'member'])->all();
+
+        return $transactions;
     }
 }

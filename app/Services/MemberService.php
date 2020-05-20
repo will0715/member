@@ -39,12 +39,18 @@ class MemberService
     public function findMember($id)
     {
         $member = $this->memberRepository->findWithoutFail($id);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member not exist');
+        }
         return $member;
     }
 
     public function findMemberByPhone($phone)
     {
         $member = $this->memberRepository->findByPhone($phone);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member not exist');
+        }
         return $member;
     }
 

@@ -128,5 +128,10 @@ class Member extends Authenticatable
     {
         return $this->hasMany(\App\Models\PrepaidCardRecord::class);
     }
+
+    public function registerBranch()
+    {
+        return $this->belongsToMany(\App\Models\Branch::class, 'member_register_branch')->withPivot('register_at')->first();
+    }
     
 }

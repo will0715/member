@@ -105,4 +105,9 @@ class Branch extends Model
     {
         return $this->is_independent;
     }
+
+    public function registerMembers()
+    {
+        return $this->belongsToMany(\App\Models\Member::class, 'member_register_branch')->withPivot('register_at');
+    }
 }

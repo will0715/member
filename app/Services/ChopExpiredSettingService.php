@@ -29,6 +29,9 @@ class ChopExpiredSettingService
     public function findChopExpiredSetting($id)
     {
         $chopExpiredSetting = $this->chopExpiredSettingRepository->findWithoutFail($id);
+        if (!$chopExpiredSetting) {
+            throw new ResourceNotFoundException('Chop Expired Setting Not Found');
+        }
         return $chopExpiredSetting;
     }
 

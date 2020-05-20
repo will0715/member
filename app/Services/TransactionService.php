@@ -42,12 +42,18 @@ class TransactionService
     public function findTransaction($id)
     {
         $transaction = $this->transactionRepository->findWithoutFail($id);
+        if (!$transaction) {
+            throw new ResourceNotFoundException('Transaction not exist');
+        }
         return $transaction;
     }
 
     public function findByOrderId($orderId)
     {
         $transaction = $this->transactionRepository->findByOrderId($orderId);
+        if (!$transaction) {
+            throw new ResourceNotFoundException('Transaction not exist');
+        }
         return $transaction;
     }
 

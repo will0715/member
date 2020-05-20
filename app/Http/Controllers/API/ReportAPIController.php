@@ -40,11 +40,65 @@ class ReportAPIController extends AppBaseController
     {
         $startAt = $request->get('start');
         $endAt = $request->get('end');
-        $chops = $request->get('chops');
         
         try {
-            $data = $this->reportService->dashboard($startAt, $endAt);
-            return $this->sendResponse($data, 'Users retrieved successfully');
+            $data = $this->reportService->dashboard($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getPrepaidcardTopupRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getPrepaidcardTopupRecords($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getPrepaidcardPaymentRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getPrepaidcardPaymentRecords($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getAddChopsRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getAddChopsRecords($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getConsumeChopsRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getConsumeChopsRecords($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getTransactionRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getTransactionRecords($request);
+            return $this->sendResponse($data, 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);

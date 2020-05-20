@@ -8,6 +8,7 @@ use App\Exceptions\ResourceNotFoundException;
 use App\Models\Member;
 use App\Repositories\PrepaidCardRecordRepository;
 use App\Repositories\PrepaidCardRepository;
+use Illuminate\Http\Request;
 use Arr;
 use DB;
 
