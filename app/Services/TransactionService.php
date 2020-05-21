@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\TransactionDuplicateException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Criterias\TransactionValidCriteria;
 use App\Repositories\TransactionRepository;
 use App\Repositories\TransactionItemRepository;
@@ -51,9 +52,6 @@ class TransactionService
     public function findByOrderId($orderId)
     {
         $transaction = $this->transactionRepository->findByOrderId($orderId);
-        if (!$transaction) {
-            throw new ResourceNotFoundException('Transaction not exist');
-        }
         return $transaction;
     }
 
@@ -105,7 +103,7 @@ class TransactionService
     {
         $transaction = $this->transactionRepository->find($id);
         if (!$transaction->isValid()) {
-            throw new AlreadyVoidedException('Transaction already been voided');
+            throw new AlreadyVoidedException('Transaction already been voided', $transaction);
         }
         $voidTransaction = $this->transactionRepository->voidTransaction($transaction->id);
 

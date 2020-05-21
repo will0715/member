@@ -32,6 +32,7 @@ class Member extends JsonResource
             'chops' => Chop::collection($resource->whenLoaded('chops')),
             'order_records' => Transaction::collection($resource->whenLoaded('orderRecords')),
             'chop_records' => ChopRecord::collection($resource->whenLoaded('chopRecords')),
+            'prepaidcard' => new Prepaidcard($resource->whenLoaded('prepaidcard')),
             'prepaidcard_records' => PrepaidcardRecord::collection($resource->whenLoaded('prepaidcardRecords')),
             'created_at' => $resource->created_at,
         ];

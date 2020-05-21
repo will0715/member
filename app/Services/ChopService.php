@@ -65,6 +65,7 @@ class ChopService
         if (!$chop) {
             $newChop = $this->chopRepository->create([
                 'member_id' => $memberId,
+                'branch_id' => $branchId,
                 'chops' => $addChops,
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
@@ -90,7 +91,7 @@ class ChopService
         $memberId = $attributes['member_id'];
         $branchId = $attributes['branch_id'];
         $transactionId = $attributes['transaction_id'];
-        $earnChopsRule = $attributes['earn_chop_rule'];
+        $earnChopsRuleId = $attributes['earn_chop_rule_id'];
         $addChops = $attributes['chops'];
         $expiredSetting = $this->getChopsExpiredSetting();
         
@@ -99,6 +100,7 @@ class ChopService
         if (!$chop) {
             $newChop = $this->chopRepository->create([
                 'member_id' => $memberId,
+                'branch_id' => $branchId,
                 'chops' => $addChops,
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
@@ -115,7 +117,7 @@ class ChopService
             'branch_id' => $branchId,
             'transaction_id' => $transactionId,
             'chops' => $addChops,
-            'rule_id' => $earnChopsRule->id
+            'rule_id' => $earnChopsRuleId
         ]);
 
         return $record;

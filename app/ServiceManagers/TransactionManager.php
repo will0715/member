@@ -54,7 +54,7 @@ class TransactionManager
             'branch_id' => $branch->id,
             'transaction_id' => $newTransactionRecord->id,
             'chops' => $earnChops,
-            'earn_chop_rule' => $earnChopRule
+            'earn_chop_rule_id' => optional($earnChopRule)->id
         ]);
         
         $newTransactionRecord->load(['chopRecords', 'transactionItems', 'chopRecords.earnChopRule']);

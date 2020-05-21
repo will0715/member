@@ -27,6 +27,7 @@ class ChopRecord extends JsonResource
             'transaction' => new Transaction($resource->whenLoaded('transaction')),
             'void_record' => new ChopRecord($resource->whenLoaded('voidRecord')),
             'voided_record' => new ChopRecord($resource->whenLoaded('voidedRecord')),
+            'created_at' => $resource->created_at,
         ];
     }
 }
