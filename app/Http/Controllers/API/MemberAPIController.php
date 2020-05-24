@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\AppBaseController;
 use App\Constants\MemberConstant;
+use App\Http\Controllers\AppBaseController;
 use App\ServiceManagers\MemberChopServiceManager;
 use App\ServiceManagers\MemberPrepaidCardServiceManager;
+use App\ServiceManagers\MemberRegisterManager;
 use App\Http\Requests\API\CreateMemberAPIRequest;
 use App\Http\Requests\API\UpdateMemberAPIRequest;
 use App\Http\Helpers\MemberResourceHelper;
@@ -37,6 +38,7 @@ class MemberAPIController extends AppBaseController
         $this->chopService = app(ChopService::class);
         $this->memberChopServiceManager = app(MemberChopServiceManager::class);
         $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
+        $this->memberRegisterManager = app(MemberRegisterManager::class);
     }
 
     /**
@@ -72,12 +74,7 @@ class MemberAPIController extends AppBaseController
         $input = $request->all();
 
         try {
-            if (!isset($data['rank_id'])) {
-                $basicRank = $this->rankService->getBasicRank();
-                $input['rank_id'] = $basicRank->id;
-            }
-
-            $member = $this->memberService->newMember($input);
+            $member = $this->memberRegisterManager->registerMember($input);
             return $this->sendResponse(new Member($member), 'Member saved successfully');
         } catch (\Exception $e) {
             Log::error($e);

@@ -108,6 +108,6 @@ class Branch extends Model
 
     public function registerMembers()
     {
-        return $this->belongsToMany(\App\Models\Member::class, 'member_register_branch')->withPivot('register_at');
+        return $this->hasMany(\App\Models\Member::class, 'register_branch_id');
     }
 }

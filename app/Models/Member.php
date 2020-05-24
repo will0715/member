@@ -58,7 +58,8 @@ class Member extends Authenticatable
         'birthday',
         'remark',
         'rank_id',
-        'status'
+        'status',
+        'register_branch_id'
     ];
 
     /**
@@ -77,6 +78,7 @@ class Member extends Authenticatable
         'address' => 'string',
         'remark' => 'string',
         'birthday' => 'date',
+        'register_branch_id' => 'string',
     ];
 
     /**
@@ -131,7 +133,7 @@ class Member extends Authenticatable
 
     public function registerBranch()
     {
-        return $this->belongsToMany(\App\Models\Branch::class, 'member_register_branch')->withPivot('register_at')->first();
+        return $this->belongsTo(\App\Models\Branch::class, 'register_branch_id');
     }
     
 }

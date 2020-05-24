@@ -35,6 +35,7 @@ class Member extends JsonResource
             'prepaidcard' => new Prepaidcard($resource->whenLoaded('prepaidcard')),
             'prepaidcard_records' => PrepaidcardRecord::collection($resource->whenLoaded('prepaidcardRecords')),
             'created_at' => $resource->created_at,
+            'register_branch' => new Branch($resource->whenLoaded('registerBranch'))
         ];
     }
 }

@@ -37,6 +37,8 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/chops/add', 'ReportAPIController@getAddChopsRecords');
                 Route::get('/chops/consume', 'ReportAPIController@getConsumeChopsRecords');
                 Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
+                Route::get('/memberRegisterBranch/detail', 'ReportAPIController@getMemberRegisterBranchDetail');
+                Route::get('/memberRegisterBranch/statistics', 'ReportAPIController@getMemberRegisterBranchStatistics');
             });
 
             Route::get('/user/me', 'UserAPIController@me');

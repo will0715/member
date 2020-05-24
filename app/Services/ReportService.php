@@ -17,6 +17,7 @@ use App\Repositories\BranchRepository;
 use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
 use Prettus\Repository\Criteria\RequestCriteria;
+use Arr;
 
 class ReportService
 {
@@ -139,5 +140,32 @@ class ReportService
         $transactions = $this->transactionRepository->with(['branch', 'member'])->all();
 
         return $transactions;
+    }
+
+    public function getMemberRegisterBranchDetail(Request $request)
+    {
+        $startAt = Arr::get($request, 'start', null);
+        $endAt = Arr::get($request, 'end', null);
+
+        $this->memberRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->memberRepository->pushCriteria(new RequestCriteria($request));
+        $this->memberRepository->pushCriteria(new LimitOffsetCriteria($request));
+
+        $members = $this->memberRepository->with('registerBranch')->all();
+
+        return $members;
+    }
+
+    public function getMemberRegisterBranchStatistics(Request $request)
+    {
+        $startAt = Arr::get($request, 'start', null);
+        $endAt = Arr::get($request, 'end', null);
+
+        $this->branchRepository->pushCriteria(new RequestCriteria($request));
+        $this->branchRepository->pushCriteria(new LimitOffsetCriteria($request));
+
+        $branch = $this->branchRepository->withRegisterMemberCount($startAt, $endAt)->get();
+
+        return $branch;
     }
 }

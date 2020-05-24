@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\User;
 use App\Models\Role;
@@ -32,6 +33,9 @@ class CustomerTableSeeder extends Seeder
         ]);
         PGSchema::schema($schema, 'pgsql');
 
+        //Add HQ branch
+        $branch = Branch::create(array('code' => 'HQ', 'name' => 'HQ', 'store_name' => 'HQ'));
+
         //Add user
         $user = User::create(array('name' => $name, 'email' => $account, 'password' => Hash::make($password)));
         $user = User::where('name', $name)->first();
@@ -42,13 +46,13 @@ class CustomerTableSeeder extends Seeder
         $user->assignRole('admin');
 
         //Add basic rank
-        $user = Rank::create([
+        $rank = Rank::create([
             'rank' => 1,
             'name' => '一般會員'
         ]);
 
         //Add basic chop expired setting
-        $user = ChopExpiredSetting::create([
+        $chopExpiredSetting = ChopExpiredSetting::create([
             'expired_date' => 365,
         ]);
 

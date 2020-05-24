@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Branch;
 use App\Repositories\BaseRepository;
+use DB;
 
 /**
  * Class BranchRepository
@@ -61,5 +62,16 @@ class BranchRepository extends BaseRepository
     public function getUnindependentBranches()
     {
         return $this->findByField('is_independent', false);
+    }
+
+    public function withRegisterMemberCount($startAt = null, $endAt = null)
+    {
+        if (!$startAt || !$endAt){
+            return $this->withCount(['registerMembers']);
+        }
+        return $this->withCount(['registerMembers' => function ($query) use ($startAt, $endAt) {
+            $query->where('created_at', '>=', $startAt)
+                    ->where('created_at', '<', $endAt);
+        }]);
     }
 }

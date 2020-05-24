@@ -4,7 +4,8 @@ namespace App\Constants;
 class MemberConstant {
     const BASE_MEMBER_RELATIONS = [
         'rank', 
-        'chops'
+        'chops', 
+        'prepaidcard'
     ];
     
     const ALL_MEMBER_RELATIONS = [
@@ -21,6 +22,7 @@ class MemberConstant {
         'prepaidcard', 
         'prepaidcardRecords',
         'prepaidcardRecords.branch', 
-        'prepaidcardRecords.voidRecord'
+        'prepaidcardRecords.voidRecord',
+        'registerBranch'
     ];
 }

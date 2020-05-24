@@ -104,4 +104,26 @@ class ReportAPIController extends AppBaseController
             return $this->sendError('Get Dashboard Data Failed', 500);
         }
     }
+
+    public function getMemberRegisterBranchDetail(Request $request)
+    {
+        try {
+            $data = $this->reportService->getMemberRegisterBranchDetail($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getMemberRegisterBranchStatistics(Request $request)
+    {
+        try {
+            $data = $this->reportService->getMemberRegisterBranchStatistics($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
 }

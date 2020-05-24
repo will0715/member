@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\PaymentTypeConstant;
 use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\TransactionDuplicateException;
 use App\Exceptions\ResourceNotFoundException;
@@ -120,7 +121,8 @@ class TransactionService
         $usedChopRule = 0;
         foreach ($earnChopRules as $earnChopRule) {
             $chops = 0;
-            if ($earnChopRule->payment_type === $transactionPaymentType) {
+            if ($earnChopRule->payment_type === $transactionPaymentType || 
+                $earnChopRule->payment_type === PaymentTypeConstant::PAYMENT_TYPE_ALL) {
                 $ruleUnit = $earnChopRule->rule_unit;
                 $ruleChops = $earnChopRule->rule_chops;
                 // TODO: exclude_product

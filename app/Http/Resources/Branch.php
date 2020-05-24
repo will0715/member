@@ -36,6 +36,7 @@ class Branch extends JsonResource
             'opening_times' => $resource->opening_times,
             'is_independent' => $resource->is_independent,
             'created_at' => $resource->created_at,
+            'register_members' => Member::collection($resource->whenLoaded('registerMembers'))
         ];
     }
 }

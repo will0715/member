@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\BranchConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateBranchAPIRequest;
 use App\Http\Requests\API\UpdateBranchAPIRequest;
@@ -75,6 +76,8 @@ class BranchAPIController extends AppBaseController
     {
         try {
             $branch = $this->branchService->findBranch($id);
+            $branch->load(BranchConstant::BRANCH_BASIC_RELATIONS);
+            
             return $this->sendResponse(new Branch($branch), 'Branch retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
