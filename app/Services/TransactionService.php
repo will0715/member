@@ -6,6 +6,8 @@ use App\Constants\PaymentTypeConstant;
 use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\TransactionDuplicateException;
 use App\Exceptions\ResourceNotFoundException;
+use App\Criterias\LimitOffsetCriteria;
+use App\Criterias\RequestDateRangeCriteria;
 use App\Criterias\TransactionValidCriteria;
 use App\Repositories\TransactionRepository;
 use App\Repositories\TransactionItemRepository;
@@ -17,6 +19,8 @@ use App\Repositories\BranchRepository;
 use App\Repositories\EarnChopRuleRepository;
 use App\Models\Member;
 use App\Helpers\TransactionUsedChopRuleHelper;
+use Prettus\Repository\Criteria\RequestCriteria;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Cache;
 use DB;
@@ -41,6 +45,16 @@ class TransactionService
         $this->chopRecordRepository = app(ChopRecordRepository::class);
     }
 
+    public function listTransactions(Request $request)
+    {
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->transactionRepository->pushCriteria(new RequestCriteria($request));
+        $this->transactionRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $transactions = $this->transactionRepository->all();
+
+        return $transactions;
+    }
+
     public function findTransaction($id)
     {
         $transaction = $this->transactionRepository->findWithoutFail($id);
@@ -53,6 +67,12 @@ class TransactionService
     public function findByOrderId($orderId)
     {
         $transaction = $this->transactionRepository->findByOrderId($orderId);
+        return $transaction;
+    }
+
+    public function getByMemberId($memberId)
+    {
+        $transaction = $this->transactionRepository->getByMemberId($memberId);
         return $transaction;
     }
 

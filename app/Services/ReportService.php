@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Constants\PrepaidCardConstant;
+use App\Constants\RecordConstant;
 use App\Constants\ChopRecordConstant;
 use App\Criterias\LimitOffsetCriteria;
+use App\Constants\TransactionConstant;
 use App\Criterias\RequestDateRangeCriteria;
 use App\Repositories\ChopExpiredSettingRepository;
 use App\Repositories\ChopRecordRepository;
@@ -81,7 +83,7 @@ class ReportService
         $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
         $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
         $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $prepaidCardRecord = $this->prepaidCardRecordRepository->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->with(['branch', 'member'])->all();
+        $prepaidCardRecord = $this->prepaidCardRecordRepository->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->with(RecordConstant::BASIC_RELATIONS)->all();
 
         return $prepaidCardRecord;
     }
@@ -93,7 +95,7 @@ class ReportService
         $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
         $prepaidCardRecord = $this->prepaidCardRecordRepository
                             ->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])
-                            ->with(['branch', 'member'])
+                            ->with(RecordConstant::BASIC_RELATIONS)
                             ->all();
 
         return $prepaidCardRecord;
@@ -110,7 +112,7 @@ class ReportService
                             ChopRecordConstant::CHOP_RECORD_EARN_CHOPS,
                             ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS
                         ])
-                        ->with(['branch', 'member'])
+                        ->with(RecordConstant::BASIC_RELATIONS)
                         ->all();
 
         return $chopRecord;
@@ -126,7 +128,7 @@ class ReportService
                             ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS, 
                             ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS
                         ])
-                        ->with(['branch', 'member'])
+                        ->with(RecordConstant::BASIC_RELATIONS)
                         ->all();
 
         return $chopRecord;
@@ -137,7 +139,7 @@ class ReportService
         $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
         $this->transactionRepository->pushCriteria(new RequestCriteria($request));
         $this->transactionRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $transactions = $this->transactionRepository->with(['branch', 'member'])->all();
+        $transactions = $this->transactionRepository->with(TransactionConstant::BASIC_RELATIONS)->all();
 
         return $transactions;
     }

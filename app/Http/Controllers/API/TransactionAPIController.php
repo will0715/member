@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\TransactionConstant;
+use App\Constants\RecordConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Exceptions\TransactionDuplicateException;
 use App\Http\Requests\API\CreateTransactionAPIRequest;
@@ -26,7 +28,7 @@ class TransactionAPIController extends AppBaseController
 
     public function __construct()
     {
-        $this->transactionService = new TransactionService();
+        $this->transactionService = app(TransactionService::class);
         $this->transactionManager = app(TransactionManager::class);
     }
 
@@ -39,11 +41,15 @@ class TransactionAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $this->transactionRepository->pushCriteria(new RequestCriteria($request));
-        $this->transactionRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $transactions = $this->transactionRepository->all();
+        try {
+            $transactions = $this->transactionService->listTransactions($request);
+            $transactions->load(TransactionConstant::BASIC_RELATIONS);
 
-        return $this->sendResponse($transactions->toArray(), 'Transactions retrieved successfully');
+            return $this->sendResponse(Transaction::collection($transactions), 'Transactions retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -80,14 +86,15 @@ class TransactionAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var Transaction $transaction */
-        $transaction = $this->transactionRepository->find($id);
+        try {
+            $transaction = $this->transactionService->findTransaction($id);
+            $transaction->load(TransactionConstant::BASIC_RELATIONS);
 
-        if (empty($transaction)) {
-            return $this->sendError('Transaction not found');
+            return $this->sendResponse(new Transaction($transaction), 'Transaction retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
         }
-
-        return $this->sendResponse($transaction->toArray(), 'Transaction retrieved successfully');
     }
 
     /**

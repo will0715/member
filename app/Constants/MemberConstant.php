@@ -2,6 +2,11 @@
 namespace App\Constants;
 
 class MemberConstant {
+    const SIMPLE_MEMBER_RELATIONS = [
+        'rank',
+        'registerBranch'
+    ];
+
     const BASE_MEMBER_RELATIONS = [
         'rank', 
         'chops', 

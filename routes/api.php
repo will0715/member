@@ -53,6 +53,7 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/{id}/detail', 'MemberAPIController@detail');
             });
             Route::resource('members', 'MemberAPIController');
+            Route::patch('/members/{phone}/byPhone', 'MemberAPIController@updateByPhone');
     
             Route::get('/earnChopRules', 'EarnChopRuleAPIController@index');
             Route::get('/consumeChopRules', 'ConsumeChopRuleAPIController@index');

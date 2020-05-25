@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\ChopsRuleConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateEarnChopRuleAPIRequest;
 use App\Http\Requests\API\UpdateEarnChopRuleAPIRequest;
@@ -34,7 +35,7 @@ class EarnChopRuleAPIController extends AppBaseController
     {
         try {
             $earnChopRules = $this->earnChopRuleService->listEarnChopRules($request);
-            $earnChopRules->load(['rank']);
+            $earnChopRules->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(EarnChopRule::collection($earnChopRules), 'EarnChopRules retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -56,7 +57,7 @@ class EarnChopRuleAPIController extends AppBaseController
 
         try {
             $earnChopRule = $this->earnChopRuleService->newEarnChopRule($input);
-            $earnChopRule->load(['rank']);
+            $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule saved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -76,7 +77,7 @@ class EarnChopRuleAPIController extends AppBaseController
     {
         try {
             $earnChopRule = $this->earnChopRuleService->findEarnChopRule($id);
-            $earnChopRule->load(['rank']);
+            $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -99,7 +100,7 @@ class EarnChopRuleAPIController extends AppBaseController
 
         try {
             $earnChopRule = $this->earnChopRuleService->updateEarnChopRule($input, $id);
-            $earnChopRule->load(['rank']);
+            $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule updated successfully');
         } catch (\Exception $e) {
             Log::error($e);

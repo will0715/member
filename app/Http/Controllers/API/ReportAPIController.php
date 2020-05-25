@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\TransactionConstant;
 use App\Repositories\CustomerRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
@@ -9,6 +10,7 @@ use App\Http\Controllers\AppBaseController;
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Criterias\LimitOffsetCriteria;
 use App\Services\ReportService;
+use App\Services\TransactionService;
 use Response;
 use Auth;
 use Log;
@@ -26,7 +28,8 @@ class ReportAPIController extends AppBaseController
     public function __construct(UserRepository $userRepo)
     {
         $this->userRepository = $userRepo;
-        $this->reportService = new ReportService();
+        $this->reportService = app(ReportService::class);
+        $this->transactionService = app(TransactionService::class);
     }
 
     /**
@@ -97,7 +100,9 @@ class ReportAPIController extends AppBaseController
     public function getTransactionRecords(Request $request)
     {
         try {
-            $data = $this->reportService->getTransactionRecords($request);
+            $data = $this->transactionService->listTransactions($request);
+            $data->load(TransactionConstant::BASIC_RELATIONS);
+
             return $this->sendResponse($data, 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);

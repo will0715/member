@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\TransactionConstant;
 use App\Constants\MemberConstant;
 use App\Http\Controllers\AppBaseController;
 use App\ServiceManagers\MemberChopServiceManager;
@@ -9,12 +10,15 @@ use App\ServiceManagers\MemberPrepaidCardServiceManager;
 use App\ServiceManagers\MemberRegisterManager;
 use App\Http\Requests\API\CreateMemberAPIRequest;
 use App\Http\Requests\API\UpdateMemberAPIRequest;
+use App\Http\Requests\API\UpdateMemberByPhoneAPIRequest;
 use App\Http\Helpers\MemberResourceHelper;
 use App\Http\Resources\Member;
 use App\Http\Resources\MemberByQuery;
 use App\Services\MemberService;
 use App\Services\ChopService;
 use App\Services\RankService;
+use App\Services\TransactionService;
+use App\ServiceManagers\TransactionManager;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Response;
@@ -39,6 +43,7 @@ class MemberAPIController extends AppBaseController
         $this->memberChopServiceManager = app(MemberChopServiceManager::class);
         $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
         $this->memberRegisterManager = app(MemberRegisterManager::class);
+        $this->transactionManager = app(TransactionManager::class);
     }
 
     /**
@@ -118,6 +123,29 @@ class MemberAPIController extends AppBaseController
 
         try {
             $member = $this->memberService->updateMember($input, $id);
+            return $this->sendResponse(new Member($member), 'Member updated successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * Update the specified Member in storage.
+     * PUT/PATCH /members/{phone}
+     *
+     * @param int $phone
+     * @param UpdateMemberByPhoneAPIRequest $request
+     *
+     * @return Response
+     */
+    public function updateByPhone($phone, UpdateMemberByPhoneAPIRequest $request)
+    {
+        $input = $request->all();
+
+        try {
+            $member = $this->memberService->updateMemberByPhone($input, $phone);
+
             return $this->sendResponse(new Member($member), 'Member updated successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -218,9 +246,9 @@ class MemberAPIController extends AppBaseController
     public function getOrderRecords($phone)
     {
         try {
-            $orderRecords = $this->memberChopServiceManager->getMemberChopsDetail([
-                'phone' => $phone
-            ]);
+            $orderRecords = $this->transactionManager->listByMemberPhone($phone);
+            $orderRecords->load(TransactionConstant::BASIC_RELATIONS);
+
             return $this->sendResponse($orderRecords, 'Member retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);

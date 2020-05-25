@@ -24,6 +24,16 @@ class TransactionManager
         $this->transactionService = app(TransactionService::class);
     }
 
+    public function listByMemberPhone($phone)
+    {
+        // search member
+        $member = $this->memberService->findMemberByPhone($phone);
+        
+        $transaction = $this->transactionService->getByMemberId($member->id);
+
+        return $transaction;
+    }
+
     public function newTransaction($attributes)
     {
         $phone = $attributes['phone'];
