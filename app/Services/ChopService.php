@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use Prettus\Repository\Criteria\RequestCriteria;
 use App\Constants\ChopRecordConstant;
+use App\Criterias\LimitOffsetCriteria;
+use App\Criterias\RequestDateRangeCriteria;
 use App\Exceptions\CannotVoidException;
 use App\Exceptions\ChopsNotEnoughException;
 use App\Exceptions\AlreadyVoidedException;
@@ -51,6 +54,21 @@ class ChopService
         $chops = $this->chopRepository->all();
 
         return $chops;
+    }
+
+    public function listRecords($request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $records = $this->chopRecordRepository->all();
+
+        return $records;
+    }
+
+    public function findChopsRecordsByMember($memberId)
+    {
+        return $this->chopRecordRepository->findWhere(['member_id' => $memberId]);
     }
 
     public function manualAddChops($attributes)

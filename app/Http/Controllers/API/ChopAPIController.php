@@ -40,8 +40,8 @@ class ChopAPIController extends AppBaseController
     public function index(Request $request)
     {
         try {
-            $chops = $this->chopService->listChops($request);
-            return $this->sendResponse(Chop::collection($chops), 'Chops retrieved successfully');
+            $records = $this->chopService->listRecords($request);
+            return $this->sendResponse(ChopRecord::collection($records), 'Chops retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             throw $e;

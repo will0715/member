@@ -6,7 +6,7 @@ use App\Models\BaseModel as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Class TransactionItem
+ * Class TransactionItemCondiment
  * @package App\Models
  * @version April 8, 2020, 1:45 pm UTC
  *
@@ -20,12 +20,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property number subtotal
  * @property string remark
  */
-class TransactionItem extends Model
+class TransactionItemCondiment extends Model
 {
 
     public $incrementing = false;
     protected $keyType = 'string';
-    public $table = 'transaction_items';
+    public $table = 'transaction_item_condiments';
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -33,10 +33,9 @@ class TransactionItem extends Model
     protected $dates = ['deleted_at'];
 
     public $fillable = [
-        'transaction_id',
-        'item_no',
-        'item_name',
-        'item_condiments',
+        'transaction_item_id',
+        'no',
+        'name',
         'quantity',
         'price',
         'subtotal',
@@ -50,10 +49,9 @@ class TransactionItem extends Model
      */
     protected $casts = [
         'id' => 'string',
-        'transaction_id' => 'string',
-        'item_no' => 'string',
-        'item_name' => 'string',
-        'item_condiments' => 'string',
+        'transaction_item_id' => 'string',
+        'no' => 'string',
+        'name' => 'string',
         'quantity' => 'integer',
         'price' => 'float',
         'subtotal' => 'float',
@@ -66,10 +64,9 @@ class TransactionItem extends Model
      * @var array
      */
     public static $rules = [
-        'transaction_id' => 'required',
-        'item_no' => 'required',
-        'item_name' => 'required',
-        'item_condiments' => 'required',
+        'transaction_item_id' => 'required',
+        'no' => 'required',
+        'name' => 'required',
         'quantity' => 'required',
         'price' => 'required',
         'subtotal' => 'required'
@@ -78,13 +75,8 @@ class TransactionItem extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      **/
-    public function transaction()
+    public function transactionItem()
     {
-        return $this->belongsTo(\App\Models\Transaction::class, 'transaction_id');
-    }
-
-    public function condiments()
-    {
-        return $this->hasMany(\App\Models\TransactionItemCondiment::class);
+        return $this->belongsTo(\App\Models\TransactionItem::class, 'transaction_item_id');
     }
 }

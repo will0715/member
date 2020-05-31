@@ -14,8 +14,11 @@ use App\Http\Requests\API\UpdateMemberByPhoneAPIRequest;
 use App\Http\Helpers\MemberResourceHelper;
 use App\Http\Resources\Member;
 use App\Http\Resources\MemberByQuery;
+use App\Http\Resources\ChopRecord;
+use App\Http\Resources\PrepaidcardRecord;
 use App\Services\MemberService;
 use App\Services\ChopService;
+use App\Services\PrepaidCardService;
 use App\Services\RankService;
 use App\Services\TransactionService;
 use App\ServiceManagers\TransactionManager;
@@ -40,6 +43,7 @@ class MemberAPIController extends AppBaseController
         $this->memberService = app(MemberService::class);
         $this->rankService = app(RankService::class);
         $this->chopService = app(ChopService::class);
+        $this->prepaidCardService = app(PrepaidCardService::class);
         $this->memberChopServiceManager = app(MemberChopServiceManager::class);
         $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
         $this->memberRegisterManager = app(MemberRegisterManager::class);
@@ -243,6 +247,27 @@ class MemberAPIController extends AppBaseController
      *
      * @return Response
      */
+    public function getChopsRecords($phone)
+    {
+        try {
+            $records = $this->memberChopServiceManager->getMemberChopsRecords([
+                'phone' => $phone
+            ]);
+            return $this->sendResponse(ChopRecord::collection($records), 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * Display the specified Member.
+     * GET|HEAD /members/{id}
+     *
+     * @param int $id
+     *
+     * @return Response
+     */
     public function getOrderRecords($phone)
     {
         try {
@@ -268,6 +293,21 @@ class MemberAPIController extends AppBaseController
             throw $e;
         }
     }
+
+    public function getPrepaidcardRecords($phone)
+    {
+        try {
+            $records = $this->memberPrepaidCardServiceManager->getMemberPrepaidCardRecords([
+                'phone' => $phone
+            ]);
+            return $this->sendResponse(PrepaidcardRecord::collection($records), 'Member retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+
     public function information($phone)
     {
         try {

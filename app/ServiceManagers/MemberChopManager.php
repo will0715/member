@@ -42,6 +42,21 @@ class MemberChopServiceManager
         return $member;
     }
 
+    public function getMemberChopsRecords($attributes)
+    {
+        $phone = $attributes['phone'];
+
+        // search member
+        $member = $this->memberService->findMemberByPhone($phone);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member not exist');
+        }
+
+        $records = $this->chopService->findChopsRecordsByMember($member->id);
+
+        return $records;
+    }
+
     public function manualAddChops($attributes)
     {
         $phone = $attributes['phone'];

@@ -30,7 +30,25 @@ class PrepaidCardAPIController extends AppBaseController
     public function __construct()
     {
         $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
-        
+        $this->prepaidCardService = app(PrepaidCardService::class);
+    }
+
+    /**
+     * Display a listing of the Branch.
+     * GET|HEAD /branches
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function index(Request $request)
+    {
+        try {
+            $records = $this->prepaidCardService->listRecords($request);
+            return $this->sendResponse(PrepaidcardRecord::collection($records), 'Branches retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
     
     public function topup(Request $request)

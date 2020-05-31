@@ -30,6 +30,8 @@ class AddMemberRegisterBranch extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('register_branch_id');
+        Schema::table('members', function (Blueprint $table) {
+            $table->dropColumn('register_branch_id');
+        });
     }
 }

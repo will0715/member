@@ -9,6 +9,7 @@ use App\Http\Resources\Role;
 use App\Services\RoleService;
 use Illuminate\Http\Request;
 use Response;
+use Log;
 
 /**
  * Class RoleAPIController

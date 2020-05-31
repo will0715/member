@@ -20,7 +20,7 @@ class MemberConstant {
         'orderRecords', 
         'orderRecords.branch', 
         'orderRecords.transactionItems', 
-        'orderRecords.chopRecords', 
+        'orderRecords.transactionItems.condiments', 
         'chopRecords', 
         'chopRecords.branch', 
         'chopRecords.voidRecord', 

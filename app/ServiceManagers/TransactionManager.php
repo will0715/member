@@ -7,6 +7,7 @@ use App\Services\MemberService;
 use App\Services\BranchService;
 use App\Services\ChopService;
 use App\Services\TransactionService;
+use App\Services\CalculateEarnChopsService;
 use Arr;
 
 class TransactionManager 
@@ -22,6 +23,7 @@ class TransactionManager
         $this->branchService = app(branchService::class);
         $this->chopService = app(ChopService::class);
         $this->transactionService = app(TransactionService::class);
+        $this->calculateEarnChopsService = app(CalculateEarnChopsService::class);
     }
 
     public function listByMemberPhone($phone)
@@ -45,18 +47,19 @@ class TransactionManager
 
         // search branch
         $branch = $this->branchService->findBranchByCode($branchId);
+
+        // calculate chop
+        $earnChopsData = $this->calculateEarnChopsService->calTransactionEarnChops($member, $attributes);
+        $earnChops = $earnChopsData['chops'];
+        $earnChopRule = $earnChopsData['used_chop_rule'];
         
         // add transaction
         $newTransactionRecord = $this->transactionService->newTransaction([
             'member_id' => $member->id,
             'branch_id' => $branch->id,
+            'chops' => $earnChops,
             'transaction' => $attributes
         ]);
-
-        // calculate chop
-        $earnChopsData = $this->transactionService->calTransactionEarnChops($member, $attributes);
-        $earnChops = $earnChopsData['chops'];
-        $earnChopRule = $earnChopsData['used_chop_rule'];
         
         // add chop
         $record = $this->chopService->earnChops([
@@ -66,8 +69,40 @@ class TransactionManager
             'chops' => $earnChops,
             'earn_chop_rule_id' => optional($earnChopRule)->id
         ]);
+
+        return $newTransactionRecord;
+    }
+
+    public function newTransactionWithoutCalculateChops($attributes)
+    {
+        $phone = $attributes['phone'];
+        $branchId = $attributes['branch_id'];
+        $earnChops = Arr::get($attributes, 'chops', null);
+        $earnChopRule = Arr::get($attributes, 'chops_rule', null);
+        $ruleId = Arr::get($attributes, 'rule_id', null);
+
+        // search member
+        $member = $this->memberService->findMemberByPhone($phone);
+
+        // search branch
+        $branch = $this->branchService->findBranchByCode($branchId);
         
-        $newTransactionRecord->load(['chopRecords', 'transactionItems', 'chopRecords.earnChopRule']);
+        // add transaction
+        $newTransactionRecord = $this->transactionService->newTransaction([
+            'member_id' => $member->id,
+            'branch_id' => $branch->id,
+            'chops' => $earnChops,
+            'transaction' => $attributes
+        ]);
+        
+        // add chop
+        $record = $this->chopService->earnChops([
+            'member_id' => $member->id,
+            'branch_id' => $branch->id,
+            'transaction_id' => $newTransactionRecord->id,
+            'chops' => $earnChops,
+            'earn_chop_rule_id' => $earnChopRule
+        ]);
 
         return $newTransactionRecord;
     }

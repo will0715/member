@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TransactionItem extends JsonResource
+class TransactionItemCondiment extends JsonResource
 {
     
     /**
@@ -19,14 +19,12 @@ class TransactionItem extends JsonResource
 
         return [
             'id' => $resource->id,
-            'item_no' => $resource->item_no,
-            'item_name' => $resource->item_name,
+            'no' => $resource->no,
+            'name' => $resource->name,
             'quantity' => $resource->quantity,
             'price' => $resource->price,
             'subtotal' => $resource->subtotal,
             'remark' => $resource->remark,
-            'transaction' => new Transaction($resource->whenLoaded('transaction')),
-            'condiments' => TransactionItemCondiment::collection($resource->whenLoaded('condiments'))
         ];
     }
 }

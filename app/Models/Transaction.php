@@ -49,7 +49,11 @@ class Transaction extends Model
         'amount',
         'remark',
         'status',
-        'transaction_time'
+        'transaction_time', 
+        'destination',
+        'discount',
+        'chops',
+        'consume_chops'
     ];
 
     /**
@@ -68,9 +72,12 @@ class Transaction extends Model
         'earn_chops' => 'integer',
         'items_count' => 'integer',
         'amount' => 'float',
+        'discount' => 'float',
         'remark' => 'string',
         'status' => 'integer',
-        'transaction_time' => 'datetime'
+        'transaction_time' => 'datetime',
+        'chops' => 'integer',
+        'consume_chops' => 'integer'
     ];
 
     /**
@@ -85,7 +92,9 @@ class Transaction extends Model
         'clerk' => 'required',
         'items_count' => 'required',
         'amount' => 'required',
-        'status' => 'required'
+        'status' => 'required',
+        'discount' => 'required',
+        'transaction_time' => 'required'
     ];
 
     /**

@@ -47,8 +47,10 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::post('/query', 'MemberAPIController@queryByPhone');
                 Route::get('/{phone}/chops', 'MemberAPIController@getChops');
                 Route::get('/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
+                Route::get('/{phone}/chopsRecords', 'MemberAPIController@getChopsRecords');
                 Route::get('/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
-                Route::get('/{phone}/prepaidcard', 'MemberAPIController@getBalance');
+                Route::get('/{phone}/balance', 'MemberAPIController@getBalance');
+                Route::get('/{phone}/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
                 Route::get('/{phone}/information', 'MemberAPIController@information');
                 Route::get('/{id}/detail', 'MemberAPIController@detail');
             });
@@ -64,6 +66,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::delete('/chops/consume/{id}', 'ChopAPIController@voidConsumeChops');
 
             Route::group(['prefix' => 'prepaidcards'], function () {
+                Route::get('/', 'PrepaidCardAPIController@index');
                 Route::post('/topup', 'PrepaidCardAPIController@topup');
                 Route::post('/payment', 'PrepaidCardAPIController@payment');
                 Route::post('/payment/{id}/void', 'PrepaidCardAPIController@voidPayment');
@@ -80,6 +83,7 @@ Route::group(['prefix' => 'v1'], function () {
             
             Route::resource('earnChopRules', 'EarnChopRuleAPIController');
             
+            Route::post('/transactionsByPos', 'TransactionAPIController@storeByPos');
             Route::resource('transactions', 'TransactionAPIController');
             Route::post('/transactions/{id}/void', 'TransactionAPIController@destroy');
     

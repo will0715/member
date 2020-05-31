@@ -10,6 +10,7 @@ use App\Http\Resources\EarnChopRule;
 use App\Services\EarnChopRuleService;
 use Illuminate\Http\Request;
 use Response;
+use Log;
 
 /**
  * Class EarnChopRuleAPIController

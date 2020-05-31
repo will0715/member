@@ -67,6 +67,32 @@ class TransactionAPIController extends AppBaseController
         DB::beginTransaction();
         try {
             $transaction = $this->transactionManager->newTransaction($input);
+            $transaction->load(TransactionConstant::WITH_CHPOS_RELATIONS);
+            DB::commit();
+
+            return $this->sendResponse(new Transaction($transaction), 'New Transaction successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Store a newly created Transaction in storage.
+     * POST /transactions
+     *
+     * @param CreateTransactionAPIRequest $request
+     *
+     * @return Response
+     */
+    public function storeByPos(CreateTransactionAPIRequest $request)
+    {
+        $input = $request->all();
+
+        DB::beginTransaction();
+        try {
+            $transaction = $this->transactionManager->newTransactionWithoutCalculateChops($input);
+            $transaction->load(TransactionConstant::WITH_CHPOS_RELATIONS);
             DB::commit();
 
             return $this->sendResponse(new Transaction($transaction), 'New Transaction successfully');

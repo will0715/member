@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use Prettus\Repository\Criteria\RequestCriteria;
+use App\Criterias\LimitOffsetCriteria;
+use App\Criterias\RequestDateRangeCriteria;
 use App\Exceptions\PrepaidCardsNotEnoughException;
 use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\ResourceNotFoundException;
@@ -23,6 +26,21 @@ class PrepaidCardService
     {
         $this->prepaidCardRepository = app(PrepaidCardRepository::class);
         $this->prepaidCardRecordRepository = app(PrepaidCardRecordRepository::class);
+    }
+
+    public function listRecords($request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $records = $this->prepaidCardRecordRepository->all();
+
+        return $records;
+    }
+
+    public function findPrepaidcardRecordsByMember($memberId)
+    {
+        return $this->prepaidCardRecordRepository->findWhere(['member_id' => $memberId]);
     }
 
     public function topup($attributes)

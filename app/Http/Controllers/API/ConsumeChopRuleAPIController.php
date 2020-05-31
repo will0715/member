@@ -10,6 +10,7 @@ use App\Http\Resources\ConsumeChopRule;
 use App\Services\ConsumeChopRuleService;
 use Illuminate\Http\Request;
 use Response;
+use Log;
 
 /**
  * Class ConsumeChopRuleAPIController
