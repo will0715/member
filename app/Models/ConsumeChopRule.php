@@ -38,7 +38,6 @@ class ConsumeChopRule extends Model
         'type',
         'chops_per_unit',
         'unit_per_amount',
-        'earn_chops_after_consume',
         'activated_at',
         'expired_at'
     ];
@@ -57,7 +56,6 @@ class ConsumeChopRule extends Model
         'type' => 'string',
         'chops_per_unit' => 'float',
         'unit_per_amount' => 'float',
-        'earn_chops_after_consume' => 'boolean',
         'activated_at' => 'datetime',
         'expired_at' => 'datetime'
     ];

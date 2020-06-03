@@ -25,38 +25,38 @@ class CustomerTableSeeder extends Seeder
         $account = 'w67890w67890@gmail.com';
         $password = '123123';
 
-        $migrate = Artisan::call('pgschema:migrate', ["--schema" => $schema , "--force" => "true"]);
+        $migrate = Artisan::call('customer:add', ["name" => $name, "--account" => $account , "--password" => $password]);
 
-        Customer::create([
-            'db_schema' => $schema,
-            'name' => $name
-        ]);
-        PGSchema::schema($schema, 'pgsql');
+        // $migrate = Artisan::call('pgschema:migrate', ["--schema" => $schema , "--force" => "true"]);
 
-        //Add HQ branch
-        $branch = Branch::create(array('code' => 'HQ', 'name' => 'HQ', 'store_name' => 'HQ'));
+        // Customer::create([
+        //     'db_schema' => $schema,
+        //     'name' => $name
+        // ]);
+        // PGSchema::schema($schema, 'pgsql');
 
-        //Add user
-        $user = User::create(array('name' => $name, 'email' => $account, 'password' => Hash::make($password)));
-        $user = User::where('name', $name)->first();
+        // //Add HQ branch
+        // $branch = Branch::create(array('code' => 'HQ', 'name' => 'HQ', 'store_name' => 'HQ'));
 
-        //Add admin role
-        $admin = Role::create(array('name' => 'admin', 'guard_name' => 'api' ));
+        // //Add user
+        // $user = User::create(array('name' => $name, 'email' => $account, 'password' => Hash::make($password)));
+        // $user = User::where('name', $name)->first();
 
-        $user->assignRole('admin');
+        // //Add admin role
+        // $admin = Role::create(array('name' => 'admin', 'guard_name' => 'api' ));
 
-        //Add basic rank
-        $rank = Rank::create([
-            'rank' => 1,
-            'name' => '一般會員'
-        ]);
+        // $user->assignRole('admin');
 
-        //Add basic chop expired setting
-        $chopExpiredSetting = ChopExpiredSetting::create([
-            'expired_date' => 365,
-        ]);
+        // //Add basic rank
+        // $rank = Rank::create([
+        //     'rank' => 1,
+        //     'name' => '一般會員'
+        // ]);
 
-        // passport init
-        $migrate = Artisan::call('php artisan passport:install', ["--schema" => $schema , "--force" => "true"]);
+        // //Add basic chop expired setting
+        // $chopExpiredSetting = ChopExpiredSetting::create([
+        //     'expired_date' => 365,
+        // ]);
+
     }
 }
