@@ -38,6 +38,7 @@ class ConsumeChopRule extends Model
         'type',
         'chops_per_unit',
         'unit_per_amount',
+        'exclude_product',
         'activated_at',
         'expired_at'
     ];
@@ -56,6 +57,7 @@ class ConsumeChopRule extends Model
         'type' => 'string',
         'chops_per_unit' => 'float',
         'unit_per_amount' => 'float',
+        'exclude_product' => 'string',
         'activated_at' => 'datetime',
         'expired_at' => 'datetime'
     ];
