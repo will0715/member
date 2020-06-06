@@ -92,7 +92,7 @@ class Member extends Authenticatable
         'last_name' => 'required',
         'password' => 'required',
         'gender' => 'required|in:male,female,others,unknown',
-        'email' => 'email',
+        'email' => 'nullable|email',
         'birthday' => 'date',
     ];
 

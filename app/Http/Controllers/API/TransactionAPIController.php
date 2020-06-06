@@ -85,13 +85,13 @@ class TransactionAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function storeByPos(CreateTransactionAPIRequest $request)
+    public function newTransactionWithoutEarnChops(CreateTransactionAPIRequest $request)
     {
         $input = $request->all();
 
         DB::beginTransaction();
         try {
-            $transaction = $this->transactionManager->newTransactionWithoutCalculateChops($input);
+            $transaction = $this->transactionManager->newTransactionWithoutEarnChops($input);
             $transaction->load(TransactionConstant::WITH_CHPOS_RELATIONS);
             DB::commit();
 

@@ -61,6 +61,8 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('/consumeChopRules', 'ConsumeChopRuleAPIController@index');
 
             Route::post('/chops/add', 'ChopAPIController@manualAddChops');
+            Route::post('/chops/earn', 'ChopAPIController@earnChops');
+            Route::post('/chops/earn/{id}/void', 'ChopAPIController@voidEarnChops');
             Route::post('/chops/consume', 'ChopAPIController@consumeChops');
             Route::post('/chops/consume/{id}/void', 'ChopAPIController@voidConsumeChops');
             Route::delete('/chops/consume/{id}', 'ChopAPIController@voidConsumeChops');
@@ -83,7 +85,7 @@ Route::group(['prefix' => 'v1'], function () {
             
             Route::resource('earnChopRules', 'EarnChopRuleAPIController');
             
-            Route::post('/transactionsByPos', 'TransactionAPIController@storeByPos');
+            Route::post('/transactions/withoutEarnChops', 'TransactionAPIController@newTransactionWithoutEarnChops');
             Route::resource('transactions', 'TransactionAPIController');
             Route::post('/transactions/{id}/void', 'TransactionAPIController@destroy');
     

@@ -33,7 +33,6 @@ class MemberChopServiceManager
         $branch = $this->branchService->findBranchByCode($branchId);
 
         // chops branch can use
-        // TODO:: 重構chopService
         $chops = $this->chopService->getTotalChops($member->id, $branch->id);
         $member->totalChops = $chops;
         // $member = $member->toArray();
@@ -62,6 +61,8 @@ class MemberChopServiceManager
         $phone = $attributes['phone'];
         $branchId = $attributes['branch_id'];
         $chops = $attributes['chops'];
+        $remark = Arr::get($attributes, 'remark');
+        $transactionNo = Arr::get($attributes, 'transaction_no');
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
@@ -73,7 +74,43 @@ class MemberChopServiceManager
             'member_id' => $member->id,
             'branch_id' => $branch->id,
             'chops' => $chops,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
         ]);
+
+        return $record;
+    }
+
+    public function earnChops($attributes)
+    {
+        $phone = $attributes['phone'];
+        $branchId = $attributes['branch_id'];
+        $chops = $attributes['chops'];
+        $earnChopsRuleId = Arr::get($attributes, 'earn_chop_rule_id');
+        $remark = Arr::get($attributes, 'remark');
+        $transactionNo = Arr::get($attributes, 'transaction_no');
+
+        // search member
+        $member = $this->memberService->findMemberByPhone($phone);
+
+        // search branch
+        $branch = $this->branchService->findBranchByCode($branchId);
+        
+        $record = $this->chopService->earnChops([
+            'member_id' => $member->id,
+            'branch_id' => $branch->id,
+            'chops' => $chops,
+            'earn_chop_rule_id' => $earnChopsRuleId,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
+        ]);
+
+        return $record;
+    }
+
+    public function voidEarnChops($id, $attributes)
+    {
+        $record = $this->chopService->voidEarnChops($id, $attributes);
 
         return $record;
     }
@@ -84,6 +121,8 @@ class MemberChopServiceManager
         $branchId = $attributes['branch_id'];
         $chops = $attributes['chops'];
         $ruleId = Arr::get($attributes, 'rule_id', null);
+        $remark = Arr::get($attributes, 'remark');
+        $transactionNo = Arr::get($attributes, 'transaction_no');
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
@@ -96,6 +135,8 @@ class MemberChopServiceManager
             'branch_id' => $branch->id,
             'rule_id' => $ruleId,
             'chops' => $chops,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
         ]);
 
         return $record;

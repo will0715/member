@@ -40,7 +40,7 @@ class TransactionManager
     {
         $phone = $attributes['phone'];
         $branchId = $attributes['branch_id'];
-        $ruleId = Arr::get($attributes, 'rule_id', null);
+        $orderId = $attributes['order_id'];
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
@@ -65,21 +65,20 @@ class TransactionManager
         $record = $this->chopService->earnChops([
             'member_id' => $member->id,
             'branch_id' => $branch->id,
-            'transaction_id' => $newTransactionRecord->id,
             'chops' => $earnChops,
-            'earn_chop_rule_id' => optional($earnChopRule)->id
+            'earn_chop_rule_id' => optional($earnChopRule)->id,
+            'transaction_no' => $orderId,
+            'remark' => $attributes['order_id']
         ]);
 
         return $newTransactionRecord;
     }
 
-    public function newTransactionWithoutCalculateChops($attributes)
+    public function newTransactionWithoutEarnChops($attributes)
     {
         $phone = $attributes['phone'];
         $branchId = $attributes['branch_id'];
         $earnChops = Arr::get($attributes, 'chops', null);
-        $earnChopRule = Arr::get($attributes, 'chops_rule', null);
-        $ruleId = Arr::get($attributes, 'rule_id', null);
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
@@ -93,15 +92,6 @@ class TransactionManager
             'branch_id' => $branch->id,
             'chops' => $earnChops,
             'transaction' => $attributes
-        ]);
-        
-        // add chop
-        $record = $this->chopService->earnChops([
-            'member_id' => $member->id,
-            'branch_id' => $branch->id,
-            'transaction_id' => $newTransactionRecord->id,
-            'chops' => $earnChops,
-            'earn_chop_rule_id' => $earnChopRule
         ]);
 
         return $newTransactionRecord;

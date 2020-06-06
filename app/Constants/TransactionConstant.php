@@ -10,8 +10,6 @@ class TransactionConstant {
     ];
 
     const WITH_CHPOS_RELATIONS = [
-        'chopRecords', 
-        'chopRecords.earnChopRule', 
         'transactionItems', 
         'transactionItems.condiments'
     ];
@@ -19,8 +17,6 @@ class TransactionConstant {
     const DETAIL_RELATIONS = [
         'branch', 
         'member',
-        'chopRecords', 
-        'chopRecords.earnChopRule', 
         'transactionItems', 
         'transactionItems.condiments'
     ];
