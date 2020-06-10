@@ -3,16 +3,8 @@
 namespace App\Exceptions;
 
 use App\Constants\ExceptionCode;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-class CannotVoidException extends Exception
+class CannotVoidException extends ConflictHttpException
 {
-    private $voidedRecord = null;
-
-    public function __construct($message, $voidedRecord, $code = ExceptionCode::CANNOT_VOID_EXCEPTION)
-    {
-        $this->voidedRecord = $voidedRecord;
-        $message = sprintf('[CannotVoid]%s', $message);
-        parent::__construct($message, $code);
-    }
 }

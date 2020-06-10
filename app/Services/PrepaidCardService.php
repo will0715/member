@@ -109,7 +109,7 @@ class PrepaidCardService
 
         $record = $this->prepaidCardRecordRepository->find($id);
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('payment already voided', $record);
+            throw new AlreadyVoidedException('payment already voided');
         }
 
         // need lock row for update

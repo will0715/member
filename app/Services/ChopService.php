@@ -191,7 +191,7 @@ class ChopService
             throw new CannotVoidException('Can\'t not void not earn record');
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('consume already voided', $record);
+            throw new AlreadyVoidedException('consume already voided');
         }
         $memberId = $record->member_id;
         $branchId = $record->branch_id;
@@ -225,7 +225,7 @@ class ChopService
             throw new CannotVoidException('Can\'t not void not consume record');
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('consume already voided', $record);
+            throw new AlreadyVoidedException('consume already voided');
         }
         $memberId = $record->member_id;
         $branchId = $record->branch_id;

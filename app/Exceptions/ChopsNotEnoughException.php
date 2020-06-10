@@ -3,13 +3,8 @@
 namespace App\Exceptions;
 
 use App\Constants\ExceptionCode;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-class ChopsNotEnoughException extends Exception
+class ChopsNotEnoughException extends ConflictHttpException
 {
-    public function __construct($message, $code = ExceptionCode::CHOPS_NOT_ENOUGH_EXCEPTION)
-    {
-        $message = sprintf('[ChopsNotEnough]%s', $message);
-        parent::__construct($message, $code);
-    }
 }

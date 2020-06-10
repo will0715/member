@@ -3,13 +3,8 @@
 namespace App\Exceptions;
 
 use App\Constants\ExceptionCode;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-class PrepaidCardsNotEnoughException extends Exception
+class PrepaidCardsNotEnoughException extends ConflictHttpException
 {
-    public function __construct($message, $code = ExceptionCode::PREPAIDCARD_NOT_ENOUGH_EXCEPTION)
-    {
-        $message = sprintf('[PrepaidCardsNotEnough]%s', $message);
-        parent::__construct($message, $code);
-    }
 }

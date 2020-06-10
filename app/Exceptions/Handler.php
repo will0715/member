@@ -63,31 +63,21 @@ class Handler extends ExceptionHandler
         if ($exception instanceof \Illuminate\Validation\ValidationException) {
             return response()->json(ResponseUtil::makeError($exception->validator->messages()->first()), 422);
         }
-        if ($exception instanceof \App\Exceptions\PrepaidCardsNotEnoughException) {
-            return response()->json(ResponseUtil::makeError($exception->getMessage()), 422);
-        }
-        if ($exception instanceof \App\Exceptions\AlreadyVoidedException) {
-            return response()->json(ResponseUtil::makeError($exception->getMessage()), 409);
-        }
-        if ($exception instanceof \App\Exceptions\CannotVoidException) {
-            return response()->json(ResponseUtil::makeError($exception->getMessage()), 409);
-        }
-        if ($exception instanceof \App\Exceptions\ResourceNotFoundException) {
-            return response()->json(ResponseUtil::makeError($exception->getMessage()), 404);
-        }
-        if ($exception instanceof \App\Exceptions\TransactionDuplicateException) {
-            return response()->json(ResponseUtil::makeError($exception->getMessage()), 400);
-        }
         if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
             if ($exception->getPrevious()) {
                 $modelName = $exception->getPrevious()->getModel();
                 $resourceName = Str::replaceFirst('App\\Models\\', '', $modelName);
                 return response()->json(ResponseUtil::makeError($resourceName . ' Not Found'), 404);
             }
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), 404);
         }
         if ($exception instanceof \League\OAuth2\Server\Exception\OAuthServerException || 
             $exception instanceof \Illuminate\Auth\AuthenticationException) {
             return response()->json(ResponseUtil::makeError('Unauthorized'), 401);
+        }
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+            return response()->json(ResponseUtil::makeError($exception->getMessage()), $exception->getStatusCode());
         }
 
         return $this->customApiResponse($exception);

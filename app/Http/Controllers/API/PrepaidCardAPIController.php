@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\PrepaidCardsNotEnoughException;
-use App\Exceptions\AlreadyVoidedException;
 use App\Http\Requests\API\CreatePrepaidCardAPIRequest;
 use App\Http\Requests\API\UpdatePrepaidCardAPIRequest;
 use App\Http\Resources\Prepaidcard;

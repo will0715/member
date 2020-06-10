@@ -150,7 +150,7 @@ class TransactionService
     {
         $transaction = $this->transactionRepository->find($id);
         if (!$transaction->isValid()) {
-            throw new AlreadyVoidedException('Transaction already been voided', $transaction);
+            throw new AlreadyVoidedException('Transaction already been voided');
         }
         $voidTransaction = $this->transactionRepository->voidTransaction($transaction->id);
 
