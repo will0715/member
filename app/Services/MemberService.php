@@ -92,8 +92,12 @@ class MemberService
 
     public function deleteMember($id)
     {
-        $member = $this->findMember($id);
-        $member->delete();
+        return $this->memberRepository->delete($id);
+    }
+
+    public function forceDeleteMember($id)
+    {
+        $member = $this->memberRepository->forceDelete($id);
         return $member;
     }
 }

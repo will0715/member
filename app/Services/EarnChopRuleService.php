@@ -49,8 +49,6 @@ class EarnChopRuleService
 
     public function deleteEarnChopRule($id)
     {
-        $earnChopRule = $this->findEarnChopRule($id);
-        $earnChopRule->delete();
-        return $earnChopRule;
+        return $this->earnChopRuleRepository->delete($id);
     }
 }

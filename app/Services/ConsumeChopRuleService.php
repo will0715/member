@@ -49,8 +49,6 @@ class ConsumeChopRuleService
 
     public function deleteConsumeChopRule($id)
     {
-        $consumeChopRule = $this->findConsumeChopRule($id);
-        $consumeChopRule->delete();
-        return $consumeChopRule;
+        return $this->consumeChopRuleRepository->delete($id);
     }
 }

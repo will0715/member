@@ -50,8 +50,6 @@ class UserService
 
     public function deleteUser($id)
     {
-        $user = $this->findUser($id);
-        $user->delete();
-        return $user;
+        return $this->userRepository->delete($id);
     }
 }

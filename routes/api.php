@@ -56,6 +56,7 @@ Route::group(['prefix' => 'v1'], function () {
             });
             Route::resource('members', 'MemberAPIController');
             Route::patch('/members/{phone}/byPhone', 'MemberAPIController@updateByPhone');
+            Route::delete('/members/{phone}/force', 'MemberAPIController@forceDelete');
     
             Route::get('/earnChopRules', 'EarnChopRuleAPIController@index');
             Route::get('/consumeChopRules', 'ConsumeChopRuleAPIController@index');

@@ -54,8 +54,7 @@ class RankService
         if ($rank->members->count() > 0) {
             throw new ConflictHttpException('The rank has members. Can not be deleted.');
         }
-        $rank->delete();
-        return $rank;
+        return $this->rankRepository->delete($id);
     }
 
     public function getBasicRank()

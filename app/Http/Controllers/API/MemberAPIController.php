@@ -178,6 +178,27 @@ class MemberAPIController extends AppBaseController
         }
     }
 
+    /**
+     * Remove the specified Member from storage.
+     * DELETE /members/{id}/force
+     *
+     * @param int $id
+     *
+     * @throws \Exception
+     *
+     * @return Response
+     */
+    public function forceDelete($id)
+    {
+        try {
+            $member = $this->memberService->forceDeleteMember($id);
+            return $this->sendSuccess('Member deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
     public function queryByPhone(Request $request)
     {
         $phone = $request->get('phone');

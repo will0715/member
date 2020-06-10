@@ -59,8 +59,6 @@ class BranchService
 
     public function deleteBranch($id)
     {
-        $branch = $this->findBranch($id);
-        $branch->delete();
-        return $branch;
+        return $this->branchRepository->delete($id);
     }
 }

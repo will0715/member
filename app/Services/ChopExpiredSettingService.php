@@ -49,8 +49,6 @@ class ChopExpiredSettingService
 
     public function deleteChopExpiredSetting($id)
     {
-        $chopExpiredSetting = $this->findChopExpiredSetting($id);
-        $chopExpiredSetting->delete();
-        return $chopExpiredSetting;
+        return $this->chopExpiredSettingRepository->delete($id);
     }
 }

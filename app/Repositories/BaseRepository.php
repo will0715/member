@@ -37,4 +37,11 @@ abstract class BaseRepository extends InfyOmBaseRepository
 
         return $data;
     }
+
+    public function forceDelete($id)
+    {
+        $data = $this->model->withTrashed()->findOrFail($id);
+        $data->forceDelete();
+        return $data;
+    }
 }
