@@ -22,6 +22,7 @@ class CustomerAPIController extends AppBaseController
     public function __construct()
     {
         $this->customerService = app(CustomerService::class);
+        $this->customerService->includeExpiredCustomer();
     }
 
     /**

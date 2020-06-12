@@ -20,8 +20,8 @@ class Role extends JsonResource
         return [
             'id' => $resource->id,
             'name' => $resource->name,
-            'guard_name' => $resource->guard_name,
-            'created_at' => $resource->created_at
+            'created_at' => $resource->created_at,
+            'permissions' => Permission::collection($resource->whenLoaded('permissions'))
         ];
     }
 }

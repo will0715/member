@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\RoleConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRoleAPIRequest;
 use App\Http\Requests\API\UpdateRoleAPIRequest;
@@ -35,6 +36,8 @@ class RoleAPIController extends AppBaseController
     {
         try {
             $roles = $this->roleService->listRoles($request);
+            $roles->load(RoleConstant::ROLE_RELATIONS);
+
             return $this->sendResponse(Role::collection($roles), 'Roles retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -75,6 +78,8 @@ class RoleAPIController extends AppBaseController
     {
         try {
             $role = $this->roleService->findRole($id);
+            $role->load(RoleConstant::ROLE_RELATIONS);
+
             return $this->sendResponse(new Role($role), 'Role retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);

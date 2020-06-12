@@ -2,11 +2,16 @@
 
 namespace App\Repositories;
 
+use App\Criterias\ValidCustomerCriteria;
 use App\Repositories\BaseRepository;
 use App\Models\Customer;
 
 class CustomerRepository extends BaseRepository
 {
+    public function boot(){
+        $this->pushCriteria(ValidCustomerCriteria::class);
+    }
+    
     /**
      * @var array
      */

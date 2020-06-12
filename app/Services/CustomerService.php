@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Prettus\Repository\Criteria\RequestCriteria;
+use App\Criterias\ValidCustomerCriteria;
 use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\CustomerRepository;
 use App\Helpers\CustomerHelper;
@@ -17,6 +18,16 @@ class CustomerService
     public function __construct()
     {
         $this->customerRepository = app(CustomerRepository::class);
+    }
+
+    public function includeExpiredCustomer()
+    {
+        $this->customerRepository->popCriteria(ValidCustomerCriteria::class);
+    }
+
+    public function excludeExpiredCustomer()
+    {
+        $this->customerRepository->pushCriteria(ValidCustomerCriteria::class);
     }
 
     public function listCustomers($request)
