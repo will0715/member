@@ -38,8 +38,8 @@ class PrepaidCardRecord extends Model
         'member_id' => 'string',
         'branch_id' => 'string',
         'type' => 'string',
-        'topup' => 'integer',
-        'payment' => 'integer',
+        'topup' => 'double',
+        'payment' => 'double',
         'void_id' => 'string',
         'remark' => 'string'
     ];
