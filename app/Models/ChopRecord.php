@@ -110,7 +110,7 @@ class ChopRecord extends Model
      **/
     public function transaction()
     {
-        return $this->belongsTo(\App\Models\Transaction::class, 'transaction_id');
+        return $this->belongsTo(\App\Models\Transaction::class, 'transaction_no', 'order_id');
     }
 
     /**

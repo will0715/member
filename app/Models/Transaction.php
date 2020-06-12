@@ -126,7 +126,7 @@ class Transaction extends Model
      **/
     public function chopRecords()
     {
-        return $this->hasMany(\App\Models\ChopRecord::class, 'transaction_id');
+        return $this->hasMany(\App\Models\ChopRecord::class, 'transaction_no', 'order_id');
     }
 
     public function isValid()

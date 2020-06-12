@@ -50,7 +50,9 @@ class TransactionManager
 
         // calculate chop
         $earnChopsData = $this->calculateEarnChopsService->calTransactionEarnChops($member, $attributes);
-        $earnChops = $earnChopsData['chops'];
+        
+        // chops can't less than 1
+        $earnChops = (int) $earnChopsData['chops'];
         $earnChopRule = $earnChopsData['used_chop_rule'];
         
         // add transaction
