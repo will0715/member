@@ -8,6 +8,9 @@ use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Prettus\Repository\Criteria\RequestCriteria;
+use App\Http\Resources\ChopRecord;
+use App\Http\Resources\PrepaidcardRecord;
+use App\Http\Resources\Transaction;
 use App\Criterias\LimitOffsetCriteria;
 use App\Services\ReportService;
 use App\Services\TransactionService;
@@ -57,7 +60,7 @@ class ReportAPIController extends AppBaseController
     {
         try {
             $data = $this->reportService->getPrepaidcardTopupRecords($request);
-            return $this->sendResponse($data, 'retrieved successfully');
+            return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);
@@ -68,7 +71,7 @@ class ReportAPIController extends AppBaseController
     {
         try {
             $data = $this->reportService->getPrepaidcardPaymentRecords($request);
-            return $this->sendResponse($data, 'retrieved successfully');
+            return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);
@@ -79,7 +82,7 @@ class ReportAPIController extends AppBaseController
     {
         try {
             $data = $this->reportService->getAddChopsRecords($request);
-            return $this->sendResponse($data, 'retrieved successfully');
+            return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);
@@ -90,7 +93,7 @@ class ReportAPIController extends AppBaseController
     {
         try {
             $data = $this->reportService->getConsumeChopsRecords($request);
-            return $this->sendResponse($data, 'retrieved successfully');
+            return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);
@@ -103,7 +106,7 @@ class ReportAPIController extends AppBaseController
             $data = $this->transactionService->listTransactions($request);
             $data->load(TransactionConstant::BASIC_RELATIONS);
 
-            return $this->sendResponse($data, 'retrieved successfully');
+            return $this->sendResponse(Transaction::collection($data), 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);
