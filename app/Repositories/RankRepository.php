@@ -43,4 +43,9 @@ class RankRepository extends BaseRepository
     {
         return $this->orderBy('rank')->first();
     }
+
+    public function getWithMemberCount()
+    {
+        return $this->withCount('members')->all();
+    }
 }

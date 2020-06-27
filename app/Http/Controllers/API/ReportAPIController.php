@@ -56,6 +56,111 @@ class ReportAPIController extends AppBaseController
         }
     }
 
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function todayDashboard(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getTodayDashboardData($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function rankMemberSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getRankMemberSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function memberGenderTransactionAmountPercentageSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getMemberGenderTransactionAmountPercentageSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function branchChopConsumeChopSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getBranchChopConsumeChopSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function branchRegisterMemberSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getBranchRegisterMemberSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
     public function getPrepaidcardTopupRecords(Request $request)
     {
         try {
