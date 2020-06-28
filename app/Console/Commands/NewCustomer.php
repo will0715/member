@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Rank;
 use App\Models\ChopExpiredSetting;
+use App\Services\CustomerService;
 use Poyi\PGSchema\Facades\PGSchema;
 use Artisan;
 use DB;
@@ -21,7 +22,11 @@ class NewCustomer extends Command
      *
      * @var string
      */
-    protected $signature = 'customer:add {name : customer name} {--account= : admin account} {--password= : admin password}';
+    protected $signature = 'customer:add {name : customer name} 
+                            {--account= : admin account} 
+                            {--password= : admin password} 
+                            {--permissions= : admin permission}
+                            {--expired_at= : customer expired at}';
 
     /**
      * The console command description.
@@ -37,6 +42,7 @@ class NewCustomer extends Command
      */
     public function __construct()
     {
+        $this->customerService = app(CustomerService::class);
         parent::__construct();
     }
 
@@ -50,43 +56,23 @@ class NewCustomer extends Command
         $name = $this->argument('name');
         $account = $this->option('account');
         $password = $this->option('password');
+        $expiredAt = $this->option('expired_at');
+        $permissions = explode(',', $this->option('permissions'));
         $schema = 'db_'.$name;
         
-        $createSchema = DB::connection()->statement('create schema IF NOT EXISTS ' . $schema);
-        PGSchema::schema($schema, 'pgsql');
+        // $createSchema = DB::connection()->statement('create schema IF NOT EXISTS ' . $schema);
+        // PGSchema::schema($schema, 'pgsql');
 
         DB::beginTransaction();
         try {
-        
-            //Add customer data in public
-            Customer::create([
-                'db_schema' => $schema,
+            $this->customerService->newCustomer([
                 'name' => $name,
+                'expired_at' => $expiredAt,
             ]);
-            
-            $migrate = Artisan::call('pgschema:migrate', ["--schema" => $schema , "--force" => "true"]);
-    
-            //Add HQ branch
-            $branch = Branch::create(array('code' => 'HQ', 'name' => 'HQ', 'store_name' => 'HQ'));
-    
-            //Add user
-            $user = User::create(array('name' => $name, 'email' => $account, 'password' => Hash::make($password)));
-            $user = User::where('name', $name)->first();
-    
-            //Add admin role
-            $admin = Role::create(array('name' => 'admin', 'guard_name' => 'api' ));
-    
-            $user->assignRole('admin');
-    
-            //Add basic rank
-            $rank = Rank::create([
-                'rank' => 1,
-                'name' => '一般會員'
-            ]);
-    
-            //Add basic chop expired setting
-            $chopExpiredSetting = ChopExpiredSetting::create([
-                'expired_date' => 365,
+
+            $this->customerService->initCustomer([
+                'name' => $name,
+                'expired_at' => $expiredAt,
             ]);
             DB::commit();
 
@@ -94,7 +80,7 @@ class NewCustomer extends Command
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error('Create Customer Failed');
-            throw $e;
+            dd($e);
         }
     }
 }

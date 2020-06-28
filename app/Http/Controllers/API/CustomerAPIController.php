@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\AppBaseController;
-use App\Http\Requests\API\CreateBranchAPIRequest;
+use App\Http\Requests\API\CreateCustomerAPIRequest;
 use App\Http\Requests\API\UpdateBranchAPIRequest;
 use App\Http\Resources\Customer;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Response;
 use Log;
+use DB;
 
 /**
  * Class CustomerAPIController
@@ -47,25 +48,37 @@ class CustomerAPIController extends AppBaseController
      * Store a newly created Role in storage.
      * POST /roles
      *
-     * @param CreateRoleAPIRequest $request
+     * @param CreateCustomerAPIRequest $request
      *
      * @return Response
      */
-    public function store(CreateRoleAPIRequest $request)
+    public function store(CreateCustomerAPIRequest $request)
     {
-    	
-    	$name = $request->get('name');
-    	$account = $request->get('account');
-        $password = $request->get('password');
-        $schema = $request->get('schema');
+        $input = $request->all();
 
-        $this->customerRepository->create([
-            'name' => $name,
-            'db_schema' => $schema,
-            'account' => $account,
-            'password' => Hash::make($password),
-        ]);
+        DB::beginTransaction();
+        try {
+            $customer = $this->customerService->newCustomer($input);
+            DB::commit();
+            
+            return $this->sendResponse(new Customer($customer), 'Customers create successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
 
-        return $this->sendResponse(new Customer($role), 'Role saved successfully');
+    public function setAdminRolePermission($id, Request $request)
+    {
+        $input = $request->all();
+
+        try {
+            $customer = $this->customerService->setAdminRolePermission($input, $id);
+            return $this->sendResponse(Customer::collection($customer), 'Customers create successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 }

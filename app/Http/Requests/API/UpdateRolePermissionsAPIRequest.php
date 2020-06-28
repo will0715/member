@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\API;
 
-use App\Models\Rank;
+use App\Models\Role;
 use InfyOm\Generator\Request\APIRequest;
 use Auth;
 
-class UpdateRankAPIRequest extends APIRequest
+class UpdateRolePermissionsAPIRequest extends APIRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,7 +15,7 @@ class UpdateRankAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return Auth::user()->can('edit-rank');
+        return Auth::user()->can('edit-role');
     }
 
     /**
@@ -25,11 +25,8 @@ class UpdateRankAPIRequest extends APIRequest
      */
     public function rules()
     {
-        $rules = [
-            'rank' => 'required',
-            'name' => 'required|unique:App\Models\Rank,name,' . $this->route('rank')
+        return [
+            'permissions.*' => 'string'
         ];
-        
-        return $rules;
     }
 }

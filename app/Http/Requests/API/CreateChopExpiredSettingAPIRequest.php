@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\ChopExpiredSetting;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class CreateChopExpiredSettingAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class CreateChopExpiredSettingAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-chops');
     }
 
     /**

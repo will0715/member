@@ -6,6 +6,7 @@ use App\Constants\RoleConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRoleAPIRequest;
 use App\Http\Requests\API\UpdateRoleAPIRequest;
+use App\Http\Requests\API\UpdateRolePermissionsAPIRequest;
 use App\Http\Resources\Role;
 use App\Services\RoleService;
 use Illuminate\Http\Request;
@@ -124,6 +125,19 @@ class RoleAPIController extends AppBaseController
         try {
             $role = $this->roleService->deleteRole($id);
             return $this->sendSuccess('Role deleted successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    public function setPermission($id, UpdateRolePermissionsAPIRequest $request)
+    {
+        $input = $request->all();
+
+        try {
+            $role = $this->roleService->setPermission($input, $id);
+            return $this->sendSuccess('Role set permission successfully');
         } catch (\Exception $e) {
             Log::error($e);
             throw $e;

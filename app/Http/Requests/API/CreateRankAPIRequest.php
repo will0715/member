@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\Rank;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class CreateRankAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class CreateRankAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-rank');
     }
 
     /**
