@@ -34,14 +34,9 @@ class ConsumeChopRuleAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $consumeChopRules = $this->consumeChopRuleService->listConsumeChopRules($request);
-            $consumeChopRules->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(ConsumeChopRule::collection($consumeChopRules), 'ConsumeChopRules retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $consumeChopRules = $this->consumeChopRuleService->listConsumeChopRules($request);
+        $consumeChopRules->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(ConsumeChopRule::collection($consumeChopRules), 'ConsumeChopRules retrieved successfully');
     }
 
     /**
@@ -56,14 +51,9 @@ class ConsumeChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $consumeChopRule = $this->consumeChopRuleService->newConsumeChopRule($input);
-            $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $consumeChopRule = $this->consumeChopRuleService->newConsumeChopRule($input);
+        $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule saved successfully');
     }
 
     /**
@@ -76,14 +66,9 @@ class ConsumeChopRuleAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $consumeChopRule = $this->consumeChopRuleService->findConsumeChopRule($id);
-            $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $consumeChopRule = $this->consumeChopRuleService->findConsumeChopRule($id);
+        $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule retrieved successfully');
     }
 
     /**
@@ -99,14 +84,9 @@ class ConsumeChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $consumeChopRule = $this->consumeChopRuleService->updateConsumeChopRule($input, $id);
-            $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $consumeChopRule = $this->consumeChopRuleService->updateConsumeChopRule($input, $id);
+        $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule updated successfully');
     }
 
     /**
@@ -121,12 +101,7 @@ class ConsumeChopRuleAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $consumeChopRule = $this->consumeChopRuleService->deleteConsumeChopRule($id);
-            return $this->sendSuccess('ConsumeChopRule deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $consumeChopRule = $this->consumeChopRuleService->deleteConsumeChopRule($id);
+        return $this->sendSuccess('ConsumeChopRule deleted successfully');
     }
 }

@@ -33,14 +33,9 @@ class RankAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $ranks = $this->rankService->listRanks($request);
-            $ranks->loadCount('members');
-            return $this->sendResponse(Rank::collection($ranks), 'Ranks retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $ranks = $this->rankService->listRanks($request);
+        $ranks->loadCount('members');
+        return $this->sendResponse(Rank::collection($ranks), 'Ranks retrieved successfully');
     }
 
     /**
@@ -55,13 +50,8 @@ class RankAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $rank = $this->rankService->newRank($input);
-            return $this->sendResponse(new Rank($rank), 'Rank saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $rank = $this->rankService->newRank($input);
+        return $this->sendResponse(new Rank($rank), 'Rank saved successfully');
     }
 
     /**
@@ -74,13 +64,8 @@ class RankAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $rank = $this->rankService->findRank($id);
-            return $this->sendResponse(new Rank($rank), 'Rank retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $rank = $this->rankService->findRank($id);
+        return $this->sendResponse(new Rank($rank), 'Rank retrieved successfully');
     }
 
     /**
@@ -96,13 +81,8 @@ class RankAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $rank = $this->rankService->updateRank($input, $id);
-            return $this->sendResponse(new Rank($rank), 'Rank updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $rank = $this->rankService->updateRank($input, $id);
+        return $this->sendResponse(new Rank($rank), 'Rank updated successfully');
     }
 
     /**
@@ -117,12 +97,7 @@ class RankAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $rank = $this->rankService->deleteRank($id);
-            return $this->sendSuccess('Rank deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $rank = $this->rankService->deleteRank($id);
+        return $this->sendSuccess('Rank deleted successfully');
     }
 }

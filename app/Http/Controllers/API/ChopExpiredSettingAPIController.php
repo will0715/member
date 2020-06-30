@@ -33,13 +33,8 @@ class ChopExpiredSettingAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $chopExpiredSettings = $this->chopExpiredSettingService->listChopExpiredSettings($request);
-            return $this->sendResponse(ChopExpiredSetting::collection($chopExpiredSettings), 'ChopExpiredSettings retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chopExpiredSettings = $this->chopExpiredSettingService->listChopExpiredSettings($request);
+        return $this->sendResponse(ChopExpiredSetting::collection($chopExpiredSettings), 'ChopExpiredSettings retrieved successfully');
     }
 
     /**
@@ -54,13 +49,8 @@ class ChopExpiredSettingAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $chopExpiredSetting = $this->chopExpiredSettingService->newChopExpiredSetting($input);
-            return $this->sendResponse(new ChopExpiredSetting($chopExpiredSetting), 'ChopExpiredSetting saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chopExpiredSetting = $this->chopExpiredSettingService->newChopExpiredSetting($input);
+        return $this->sendResponse(new ChopExpiredSetting($chopExpiredSetting), 'ChopExpiredSetting saved successfully');
     }
 
     /**
@@ -73,13 +63,8 @@ class ChopExpiredSettingAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $chopExpiredSetting = $this->chopExpiredSettingService->findChopExpiredSetting($id);
-            return $this->sendResponse(new ChopExpiredSetting($chopExpiredSetting), 'ChopExpiredSetting retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chopExpiredSetting = $this->chopExpiredSettingService->findChopExpiredSetting($id);
+        return $this->sendResponse(new ChopExpiredSetting($chopExpiredSetting), 'ChopExpiredSetting retrieved successfully');
     }
 
     /**
@@ -95,13 +80,8 @@ class ChopExpiredSettingAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $chopExpiredSetting = $this->chopExpiredSettingService->updateChopExpiredSetting($input, $id);
-            return $this->sendResponse(new ChopExpiredSetting($chopExpiredSetting), 'ChopExpiredSetting updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chopExpiredSetting = $this->chopExpiredSettingService->updateChopExpiredSetting($input, $id);
+        return $this->sendResponse(new ChopExpiredSetting($chopExpiredSetting), 'ChopExpiredSetting updated successfully');
     }
 
     /**
@@ -116,12 +96,7 @@ class ChopExpiredSettingAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $chopExpiredSetting = $this->chopExpiredSettingService->deleteChopExpiredSetting($id);
-            return $this->sendSuccess('ChopExpiredSetting deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chopExpiredSetting = $this->chopExpiredSettingService->deleteChopExpiredSetting($id);
+        return $this->sendSuccess('ChopExpiredSetting deleted successfully');
     }
 }

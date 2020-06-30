@@ -41,13 +41,8 @@ class PrepaidCardAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $records = $this->prepaidCardService->listRecords($request);
-            return $this->sendResponse(PrepaidcardRecord::collection($records), 'Branches retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $records = $this->prepaidCardService->listRecords($request);
+        return $this->sendResponse(PrepaidcardRecord::collection($records), 'Branches retrieved successfully');
     }
     
     public function topup(Request $request)

@@ -34,14 +34,9 @@ class EarnChopRuleAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $earnChopRules = $this->earnChopRuleService->listEarnChopRules($request);
-            $earnChopRules->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(EarnChopRule::collection($earnChopRules), 'EarnChopRules retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $earnChopRules = $this->earnChopRuleService->listEarnChopRules($request);
+        $earnChopRules->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(EarnChopRule::collection($earnChopRules), 'EarnChopRules retrieved successfully');
     }
 
     /**
@@ -56,14 +51,9 @@ class EarnChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $earnChopRule = $this->earnChopRuleService->newEarnChopRule($input);
-            $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $earnChopRule = $this->earnChopRuleService->newEarnChopRule($input);
+        $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule saved successfully');
     }
 
     /**
@@ -76,14 +66,9 @@ class EarnChopRuleAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $earnChopRule = $this->earnChopRuleService->findEarnChopRule($id);
-            $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $earnChopRule = $this->earnChopRuleService->findEarnChopRule($id);
+        $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule retrieved successfully');
     }
 
     /**
@@ -99,14 +84,9 @@ class EarnChopRuleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $earnChopRule = $this->earnChopRuleService->updateEarnChopRule($input, $id);
-            $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
-            return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $earnChopRule = $this->earnChopRuleService->updateEarnChopRule($input, $id);
+        $earnChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
+        return $this->sendResponse(new EarnChopRule($earnChopRule), 'EarnChopRule updated successfully');
     }
 
     /**
@@ -121,12 +101,7 @@ class EarnChopRuleAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $earnChopRule = $this->earnChopRuleService->deleteEarnChopRule($id);
-            return $this->sendSuccess('EarnChopRule deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $earnChopRule = $this->earnChopRuleService->deleteEarnChopRule($id);
+        return $this->sendSuccess('EarnChopRule deleted successfully');
     }
 }

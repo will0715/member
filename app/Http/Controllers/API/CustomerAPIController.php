@@ -35,13 +35,9 @@ class CustomerAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $customers = $this->customerService->listCustomers($request);
-            return $this->sendResponse(Customer::collection($customers), 'Customers retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $customers = $this->customerService->listCustomers($request);
+        return $this->sendResponse(Customer::collection($customers), 'Customers retrieved successfully');
+        
     }
 
     /**
@@ -73,12 +69,7 @@ class CustomerAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $customer = $this->customerService->setAdminRolePermission($input, $id);
-            return $this->sendResponse(Customer::collection($customer), 'Customers create successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $customer = $this->customerService->setAdminRolePermission($input, $id);
+        return $this->sendResponse(Customer::collection($customer), 'Customers create successfully');
     }
 }
