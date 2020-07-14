@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Constants\PrepaidCardConstant;
 use App\Constants\RecordConstant;
 use App\Constants\ChopRecordConstant;
-use App\Criterias\LimitOffsetCriteria;
 use App\Constants\TransactionConstant;
+use App\Criterias\LimitOffsetCriteria;
 use App\Criterias\RequestDateRangeCriteria;
+use App\Criterias\OnlyTodayCriteria;
 use App\Repositories\ChopExpiredSettingRepository;
 use App\Repositories\ChopRecordRepository;
 use App\Repositories\ChopRepository;
@@ -20,6 +21,7 @@ use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Arr;
+use Carbon\Carbon;
 
 class ReportService
 {
@@ -45,6 +47,7 @@ class ReportService
         $startAt = $request->get('start');
         $endAt = $request->get('end');
 
+        // TODO: move to repository
         $memberCount = $this->memberRepository->findWhere(['status' => 1])->count();
         $branchCount = $this->branchRepository->count();
         $totalChops = $this->chopRepository->sum('chops');
@@ -60,7 +63,6 @@ class ReportService
         $voidConsumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS])->sum('consume_chops');
 
         $totalAmount = $this->transactionRepository->findWhere(['status' => 1])->sum('amount');
-        $ranks = $this->rankRepository->withCount('members')->all();
 
         return [
             'member_count' => (int)$memberCount,
@@ -70,11 +72,96 @@ class ReportService
             'earn_chops' => (int)($earnChops + $voidEarnChops),
             'consume_chops' => (int)($consumeChops + $voidConsumeChops),
             'total_amount' => $totalAmount,
-            'rank_members' => $ranks->map->only(['id', 'name', 'members_count']),
-            
             'total_balance' => (int)$totalBalance,
             'total_topup' => (int)$prepaidCardTopup,
             'total_paymnet' => (int)($prepaidCardPayment + $voidPrepaidCardPayment),
+        ];
+    }
+
+    public function getTodayDashboardData()
+    {
+        $this->memberRepository->pushCriteria(new OnlyTodayCriteria());
+        $this->branchRepository->pushCriteria(new OnlyTodayCriteria());
+        $this->chopRepository->pushCriteria(new OnlyTodayCriteria());
+        $this->prepaidCardRepository->pushCriteria(new OnlyTodayCriteria());
+        $this->prepaidCardRecordRepository->pushCriteria(new OnlyTodayCriteria());
+        $this->chopRecordRepository->pushCriteria(new OnlyTodayCriteria());
+        $this->transactionRepository->pushCriteria(new OnlyTodayCriteria());
+        // TODO: move to repository
+        $memberCount = $this->memberRepository->findWhere(['status' => 1])->count();
+        $branchCount = $this->branchRepository->count();
+        $totalChops = $this->chopRepository->sum('chops');
+        $totalBalance = $this->prepaidCardRepository->sum('balance');
+        $prepaidCardTopup = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->sum('topup');
+        $prepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])->sum('payment');
+        $voidPrepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT])->sum('payment');
+
+        $manualAddChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_ADD_CHOPS])->sum('chops');
+        $earnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_EARN_CHOPS])->sum('chops');
+        $voidEarnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS])->sum('chops');
+        $consumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS])->sum('consume_chops');
+        $voidConsumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS])->sum('consume_chops');
+
+        $totalAmount = $this->transactionRepository->findWhere(['status' => 1])->sum('amount');
+
+        return [
+            'member_count' => (int)$memberCount,
+            'branch_count' => (int)$branchCount,
+            'total_chops' => (int)$totalChops,
+            'manual_add_chops' => (int)$manualAddChops,
+            'earn_chops' => (int)($earnChops + $voidEarnChops),
+            'consume_chops' => (int)($consumeChops + $voidConsumeChops),
+            'total_amount' => $totalAmount,
+            'total_balance' => (int)$totalBalance,
+            'total_topup' => (int)$prepaidCardTopup,
+            'total_paymnet' => (int)($prepaidCardPayment + $voidPrepaidCardPayment),
+        ];
+    }
+
+    public function getRankMemberSummary(Request $request)
+    {
+        $ranks = $this->rankRepository->getWithMemberCount();
+        return $ranks->map->only(['name', 'members_count']);
+    }
+
+    public function getMemberGenderTransactionAmountPercentageSummary(Request $request)
+    {
+        return $this->transactionRepository->getWithMemberGender()->groupBy('member.gender')->map(function($item){
+            return $item->sum('amount');
+        });
+    }
+
+    public function getBranchChopConsumeChopSummary(Request $request)
+    {
+        $branchChopRecord = $this->chopRecordRepository->all();
+        $branchChopConsumeChop = $branchChopRecord->groupBy('branch.name', function($item) {
+            return $item->type;
+        })->map(function($item) {
+            return $item->groupBy('type')->map(function ($item) {
+                return [
+                    'chops' => $item->sum('chops'), 
+                    'consume_chops' => $item->sum('consume_chops')
+                ];
+            });
+        });
+        $branchChopConsumeChop = $branchChopConsumeChop->map(function ($item) {
+            return [
+                'earn_chop' => Arr::get($item, 'EARN_CHOPS.chops', 0) - Arr::get($item, 'VOID_EARN_CHOPS.chops', 0),
+                'consume_chop' => Arr::get($item, 'CONSUME_CHOPS.consume_chops', 0) - Arr::get($item, 'VOID_ECONSUME_CHOPS.consume_chops', 0)
+            ];
+        });
+
+        return $branchChopConsumeChop;
+    }
+
+    public function getBranchRegisterMemberSummary(Request $request)
+    {
+        $newBranchRegisterMember = $this->branchRepository->getWithNewRegisterMember();
+        $oldBranchRegisterMember = $this->branchRepository->getWithOldRegisterMember();
+
+        return [
+            'new_branch_register_member' => $newBranchRegisterMember->map->only(['id', 'name', 'code', 'register_members_count']),
+            'old_branch_register_member' => $oldBranchRegisterMember->map->only(['id', 'name', 'code', 'register_members_count']),
         ];
     }
 

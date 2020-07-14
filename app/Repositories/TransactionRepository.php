@@ -72,4 +72,10 @@ class TransactionRepository extends BaseRepository
         $transaction->void();
         return $transaction;
     }
+
+    public function getWithMemberGender()
+    {
+        $data = $this->with(['member:id,gender'])->findWhere(['status' => 1]);
+        return $data;
+    }
 }

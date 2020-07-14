@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Branch;
 use App\Repositories\BaseRepository;
+use Carbon\Carbon;
 use DB;
 
 /**
@@ -73,5 +74,19 @@ class BranchRepository extends BaseRepository
             $query->where('created_at', '>=', $startAt)
                     ->where('created_at', '<', $endAt);
         }]);
+    }
+
+    public function getWithNewRegisterMember()
+    {
+        return $this->withCount(['registerMembers' => function ($query) {
+            $query->where('created_at', '>=', Carbon::now()->startOfDay());
+        }])->all();
+    }
+
+    public function getWithOldRegisterMember()
+    {
+        return $this->withCount(['registerMembers' => function ($query) {
+            $query->where('created_at', '<', Carbon::now()->startOfDay());
+        }])->all();
     }
 }

@@ -246,7 +246,7 @@ class MemberAPIController extends AppBaseController
         $balance = $this->memberPrepaidCardServiceManager->getMemberBalance([
             'phone' => $phone
         ]);
-        return $this->sendResponse($balance, 'Member retrieved successfully');
+        return $this->sendResponse(['balance' => $balance], 'Member retrieved successfully');
     }
 
     public function getPrepaidcardRecords($phone)

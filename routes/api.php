@@ -32,6 +32,11 @@ Route::group(['prefix' => 'v1'], function () {
             Route::resource('customers', 'CustomerAPIController');
             Route::group(['prefix' => 'report'], function () {
                 Route::get('/dashboard', 'ReportAPIController@dashboard');
+                Route::get('/dashboard/today', 'ReportAPIController@todayDashboard');
+                Route::get('/rankMemberSummary', 'ReportAPIController@rankMemberSummary');
+                Route::get('/memberGenderTransactionAmountPercentageSummary', 'ReportAPIController@memberGenderTransactionAmountPercentageSummary');
+                Route::get('/branchChopConsumeChopSummary', 'ReportAPIController@branchChopConsumeChopSummary');
+                Route::get('/branchRegisterMemberSummary', 'ReportAPIController@branchRegisterMemberSummary');
                 Route::get('/prepaidcards/topup', 'ReportAPIController@getPrepaidcardTopupRecords');
                 Route::get('/prepaidcards/payment', 'ReportAPIController@getPrepaidcardPaymentRecords');
                 Route::get('/chops/add', 'ReportAPIController@getAddChopsRecords');
