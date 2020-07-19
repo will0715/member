@@ -12,8 +12,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(PassportInitialSeeder::class);
         $this->call(AdminSchemaSeeder::class);
         $this->call(CustomerTableSeeder::class);
+        $this->call(PassportInitialSeeder::class);
     }
 }
