@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateCustomerAPIRequest;
 use App\Http\Requests\API\UpdateBranchAPIRequest;
+use App\Http\Requests\API\UpdateAdminRolePermissionRequest;
 use App\Http\Resources\Customer;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
@@ -65,11 +66,11 @@ class CustomerAPIController extends AppBaseController
         }
     }
 
-    public function setAdminRolePermission($id, Request $request)
+    public function setAdminRolePermission(UpdateAdminRolePermissionRequest $request)
     {
         $input = $request->all();
 
-        $customer = $this->customerService->setAdminRolePermission($input, $id);
-        return $this->sendResponse(Customer::collection($customer), 'Customers create successfully');
+        $customer = $this->customerService->setAdminRolePermission($input);
+        return $this->sendResponse($customer, 'Customers create successfully');
     }
 }

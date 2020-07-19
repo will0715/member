@@ -73,6 +73,7 @@ class NewCustomer extends Command
             $this->customerService->initCustomer([
                 'name' => $name,
                 'expired_at' => $expiredAt,
+                'permissions' => $permissions
             ]);
             DB::commit();
 

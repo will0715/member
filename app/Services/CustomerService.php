@@ -9,8 +9,10 @@ use App\Repositories\CustomerRepository;
 use App\Repositories\BranchRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\RoleRepository;
+use App\Repositories\PermissionRepository;
 use App\Repositories\RankRepository;
 use App\Repositories\ChopExpiredSettingRepository;
+use App\Services\RoleService;
 use App\Helpers\CustomerHelper;
 use App\Events\NewCustomer;
 use App\Exceptions\ResourceNotFoundException;
@@ -21,6 +23,7 @@ use Artisan;
 use Cache;
 use Hash;
 use DB;
+use Arr;
 
 class CustomerService
 {
@@ -32,6 +35,8 @@ class CustomerService
         $this->userRepository = app(UserRepository::class);
         $this->roleRepository = app(RoleRepository::class);
         $this->rankRepository = app(RankRepository::class);
+        $this->permissionRepository = app(PermissionRepository::class);
+        $this->roleService = app(RoleService::class);
         $this->chopExpiredSettingRepository = app(ChopExpiredSettingRepository::class);
     }
 
@@ -97,11 +102,27 @@ class CustomerService
         return $this->customerRepository->delete($id);
     }
 
+    public function setAdminRolePermission($data)
+    {
+        $customerAccount = $data['customer'];
+        $permissions = $data['permissions'];
+        $customer = $this->findCustomerByAccount($customerAccount);
+        $schema = $customer->getSchema();
+
+        PGSchema::schema($schema, 'pgsql');
+        $adminRole = $this->roleRepository->findAdminRole();
+        $adminRole->syncPermissions($permissions);
+
+        // TODO: 移除客戶下所有未在list中的權限
+
+        return $adminRole;
+    }
+
     public function initCustomer($data)
     {
         $name = $data['name'];
         $account = $data['account'];
-        $password = Hash::make($data['password']);
+        $password = $data['password'];
         $permissions = $data['permissions'];
         $schema = 'db_'.$name;
 
