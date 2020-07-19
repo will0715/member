@@ -17,9 +17,9 @@ use Illuminate\Http\Request;
 // for customer login
 Route::post('/auth/login', 'UserAPIController@login');
 
-Route::group(['prefix' => 'internal'], function () {
-    Route::middleware(['internal.customer.switch', 'auth:api'])->group(function () {
-
+Route::group(['prefix' => 'client'], function () {
+    Route::middleware(['customer.switch'])->group(function () {
+        Route::post('members', 'MemberAPIController@store');
     });
 });
 
