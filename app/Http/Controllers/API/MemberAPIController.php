@@ -59,15 +59,10 @@ class MemberAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $members = $this->memberService->listMembers($request);
-            $members->load(MemberConstant::BASE_MEMBER_RELATIONS);
+        $members = $this->memberService->listMembers($request);
+        $members->load(MemberConstant::BASE_MEMBER_RELATIONS);
 
-            return $this->sendResponse(Member::collection($members), 'Members retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(Member::collection($members), 'Members retrieved successfully');
     }
 
     /**
@@ -82,13 +77,8 @@ class MemberAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $member = $this->memberRegisterManager->registerMember($input);
-            return $this->sendResponse(new Member($member), 'Member saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $member = $this->memberRegisterManager->registerMember($input);
+        return $this->sendResponse(new Member($member), 'Member saved successfully');
     }
 
     /**
@@ -101,15 +91,10 @@ class MemberAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $member = $this->memberService->findMember($id);
-            $member->load(MemberConstant::BASE_MEMBER_RELATIONS);
+        $member = $this->memberService->findMember($id);
+        $member->load(MemberConstant::BASE_MEMBER_RELATIONS);
 
-            return $this->sendResponse(new Member($member), 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new Member($member), 'Member retrieved successfully');
     }
 
     /**
@@ -125,13 +110,8 @@ class MemberAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $member = $this->memberService->updateMember($input, $id);
-            return $this->sendResponse(new Member($member), 'Member updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $member = $this->memberService->updateMember($input, $id);
+        return $this->sendResponse(new Member($member), 'Member updated successfully');
     }
 
     /**
@@ -147,14 +127,8 @@ class MemberAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $member = $this->memberService->updateMemberByPhone($input, $phone);
-
-            return $this->sendResponse(new Member($member), 'Member updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $member = $this->memberService->updateMemberByPhone($input, $phone);
+        return $this->sendResponse(new Member($member), 'Member updated successfully');
     }
 
     /**
@@ -169,13 +143,8 @@ class MemberAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $member = $this->memberService->deleteMember($id);
-            return $this->sendSuccess('Member deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $member = $this->memberService->deleteMember($id);
+        return $this->sendSuccess('Member deleted successfully');
     }
 
     /**
@@ -190,13 +159,8 @@ class MemberAPIController extends AppBaseController
      */
     public function forceDelete($id)
     {
-        try {
-            $member = $this->memberService->forceDeleteMember($id);
-            return $this->sendSuccess('Member deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $member = $this->memberService->forceDeleteMember($id);
+        return $this->sendSuccess('Member deleted successfully');
     }
 
     public function queryByPhone(Request $request)
@@ -204,18 +168,13 @@ class MemberAPIController extends AppBaseController
         $phone = $request->get('phone');
         $branchId = $request->get('branch_id');
 
-        try {
-            $member = $this->memberChopServiceManager->getMemberWithChops([
-                'phone' => $phone,
-                'branch_id' => $branchId
-            ]);
-            $member->load(MemberConstant::BASE_MEMBER_RELATIONS);
+        $member = $this->memberChopServiceManager->getMemberWithChops([
+            'phone' => $phone,
+            'branch_id' => $branchId
+        ]);
+        $member->load(MemberConstant::BASE_MEMBER_RELATIONS);
 
-            return $this->sendResponse(new MemberByQuery($member), 'Member query successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new MemberByQuery($member), 'Member query successfully');
     }
 
     /**
@@ -228,15 +187,10 @@ class MemberAPIController extends AppBaseController
      */
     public function getChops($phone)
     {
-        try {
-            $chops = $this->memberChopServiceManager->getMemberTotalChops([
-                'phone' => $phone
-            ]);
-            return $this->sendResponse(['chops' => $chops], 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chops = $this->memberChopServiceManager->getMemberTotalChops([
+            'phone' => $phone
+        ]);
+        return $this->sendResponse(['chops' => $chops], 'Member retrieved successfully');
     }
 
     /**
@@ -249,15 +203,10 @@ class MemberAPIController extends AppBaseController
      */
     public function getChopsDetail($phone)
     {
-        try {
-            $chops = $this->memberChopServiceManager->getMemberChopsDetail([
-                'phone' => $phone
-            ]);
-            return $this->sendResponse($chops, 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $chops = $this->memberChopServiceManager->getMemberChopsDetail([
+            'phone' => $phone
+        ]);
+        return $this->sendResponse($chops, 'Member retrieved successfully');
     }
 
     /**
@@ -270,15 +219,10 @@ class MemberAPIController extends AppBaseController
      */
     public function getChopsRecords($phone)
     {
-        try {
-            $records = $this->memberChopServiceManager->getMemberChopsRecords([
-                'phone' => $phone
-            ]);
-            return $this->sendResponse(ChopRecord::collection($records), 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $records = $this->memberChopServiceManager->getMemberChopsRecords([
+            'phone' => $phone
+        ]);
+        return $this->sendResponse(ChopRecord::collection($records), 'Member retrieved successfully');
     }
 
     /**
@@ -291,15 +235,10 @@ class MemberAPIController extends AppBaseController
      */
     public function getOrderRecords($phone)
     {
-        try {
-            $orderRecords = $this->transactionManager->listByMemberPhone($phone);
-            $orderRecords->load(TransactionConstant::BASIC_RELATIONS);
+        $orderRecords = $this->transactionManager->listByMemberPhone($phone);
+        $orderRecords->load(TransactionConstant::BASIC_RELATIONS);
 
-            return $this->sendResponse($orderRecords, 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse($orderRecords, 'Member retrieved successfully');
     }
 
     public function getBalance($phone)
@@ -312,41 +251,26 @@ class MemberAPIController extends AppBaseController
 
     public function getPrepaidcardRecords($phone)
     {
-        try {
-            $records = $this->memberPrepaidCardServiceManager->getMemberPrepaidCardRecords([
-                'phone' => $phone
-            ]);
-            return $this->sendResponse(PrepaidcardRecord::collection($records), 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $records = $this->memberPrepaidCardServiceManager->getMemberPrepaidCardRecords([
+            'phone' => $phone
+        ]);
+        return $this->sendResponse(PrepaidcardRecord::collection($records), 'Member retrieved successfully');
     }
 
 
     public function information($phone)
     {
-        try {
-            $member = $this->memberService->findMemberByPhone($phone);
-            $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
+        $member = $this->memberService->findMemberByPhone($phone);
+        $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
 
-            return $this->sendResponse(new Member($member), 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new Member($member), 'Member retrieved successfully');
     }
 
     public function detail($id)
     {
-        try {
-            $member = $this->memberService->findMember($id);
-            $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
+        $member = $this->memberService->findMember($id);
+        $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
 
-            return $this->sendResponse(new Member($member), 'Member retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new Member($member), 'Member retrieved successfully');
     }
 }

@@ -40,14 +40,9 @@ class UserAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $users = $this->userService->listUsers($request);
+        $users = $this->userService->listUsers($request);
 
-            return $this->sendResponse(User::collection($users), 'Users retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(User::collection($users), 'Users retrieved successfully');
     }
 
     public function login(Request $request)
@@ -75,15 +70,10 @@ class UserAPIController extends AppBaseController
 
     public function me()
     {
-        try {
-            $user = $this->authService->getLoginedUser();
-            $user->load(UserConstant::USER_RELATIONS);
+        $user = $this->authService->getLoginedUser();
+        $user->load(UserConstant::USER_RELATIONS);
 
-            return $this->sendResponse(new User($user), 'User retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new User($user), 'User retrieved successfully');
     }
 
     /**
@@ -98,14 +88,9 @@ class UserAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $user = $this->userService->newUser($input);
+        $user = $this->userService->newUser($input);
 
-            return $this->sendResponse(new User($user), 'User saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new User($user), 'User saved successfully');
     }
 
     /**
@@ -118,15 +103,10 @@ class UserAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $user = $this->userService->findUser($id);
-            $user->load(UserConstant::USER_RELATIONS);
-            
-            return $this->sendResponse(new User($user), 'User retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $user = $this->userService->findUser($id);
+        $user->load(UserConstant::USER_RELATIONS);
+        
+        return $this->sendResponse(new User($user), 'User retrieved successfully');
     }
 
     /**
@@ -142,13 +122,8 @@ class UserAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $user = $this->userService->updateUser($input, $id);
-            return $this->sendResponse(new User($user), 'User updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $user = $this->userService->updateUser($input, $id);
+        return $this->sendResponse(new User($user), 'User updated successfully');
     }
 
     /**
@@ -163,12 +138,7 @@ class UserAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $user = $this->userService->deleteUser($id);
-            return $this->sendSuccess('User deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $user = $this->userService->deleteUser($id);
+        return $this->sendSuccess('User deleted successfully');
     }
 }

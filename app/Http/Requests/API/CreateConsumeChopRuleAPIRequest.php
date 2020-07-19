@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\ConsumeChopRule;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class CreateConsumeChopRuleAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class CreateConsumeChopRuleAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-chops');
     }
 
     /**

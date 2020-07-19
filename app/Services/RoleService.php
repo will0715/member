@@ -4,10 +4,13 @@ namespace App\Services;
 
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Criterias\LimitOffsetCriteria;
+use App\Exceptions\EditAdminException;
 use App\Repositories\RoleRepository;
+use App\Repositories\PermissionRepository;
 use App\Helpers\CustomerHelper;
 use App\Exceptions\ResourceNotFoundException;
 use Cache;
+use Arr;
 
 class RoleService
 {
@@ -15,6 +18,7 @@ class RoleService
     public function __construct()
     {
         $this->roleRepository = app(RoleRepository::class);
+        $this->permissionRepository = app(PermissionRepository::class);
     }
 
     public function listRoles($request)
@@ -50,5 +54,17 @@ class RoleService
     public function deleteRole($id)
     {
         return $this->roleRepository->delete($id);
+    }
+
+    public function setPermission($data, $id)
+    {
+        $role = $this->findRole($id);
+        if ($role->name === 'admin') {
+            throw new EditAdminException('can not edit admin role');
+        }
+        $permissions = $this->permissionRepository->findWhereIn('name', $data['permissions']);
+        $role->syncPermissions(Arr::wrap($permissions->pluck('name')));
+
+        return $role;
     }
 }

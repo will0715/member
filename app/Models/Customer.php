@@ -26,7 +26,10 @@ class Customer extends Model
 
 
     protected $fillable = [
-        'name', 'db_schema'
+        'name', 
+        'db_schema', 
+        'status', 
+        'expired_at'
     ];
 
     /**
@@ -35,6 +38,10 @@ class Customer extends Model
      * @var array
      */
     protected $casts = [
+        'name' => 'string',
+        'db_schema' => 'string',
+        'status' => 'integer',
+        'expired_at' => 'datetime',
     ];
 
     /**
@@ -43,6 +50,9 @@ class Customer extends Model
      * @var array
      */
     public static $rules = [
+        'name' => 'required',
+        'db_schema' => 'required',
+        'status' => 'required|numeric',
     ];
 
     public function getSchema(){

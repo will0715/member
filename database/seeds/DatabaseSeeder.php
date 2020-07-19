@@ -12,8 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        // init admin customer: poyi
         $this->call(AdminSchemaSeeder::class);
-        $this->call(CustomerTableSeeder::class);
+        $this->call(AdminCustomerTableSeeder::class);
+        // init all permissions
+        $this->call(PermissionDataSeeder::class);
+        // init passport
         $this->call(PassportInitialSeeder::class);
     }
 }

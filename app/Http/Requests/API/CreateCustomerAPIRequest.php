@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\API;
 
-use App\Models\Rank;
+use App\Models\Customer;
 use InfyOm\Generator\Request\APIRequest;
 use Auth;
 
-class UpdateRankAPIRequest extends APIRequest
+class CreateCustomerAPIRequest extends APIRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,7 +15,7 @@ class UpdateRankAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return Auth::user()->can('edit-rank');
+        return Auth::user()->can('super-admin');
     }
 
     /**
@@ -25,11 +25,12 @@ class UpdateRankAPIRequest extends APIRequest
      */
     public function rules()
     {
-        $rules = [
-            'rank' => 'required',
-            'name' => 'required|unique:App\Models\Rank,name,' . $this->route('rank')
+        return [
+            'name' => 'required',
+            'account' => 'required|email',
+            'password' => 'required|string',
+            'expired_at' => 'date',
+            'permissions.*' => 'string',
         ];
-        
-        return $rules;
     }
 }

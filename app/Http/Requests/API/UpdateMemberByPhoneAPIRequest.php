@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\Member;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class UpdateMemberByPhoneAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class UpdateMemberByPhoneAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-member');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\EarnChopRule;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class UpdateEarnChopRuleAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class UpdateEarnChopRuleAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-chops');
     }
 
     /**

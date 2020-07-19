@@ -30,7 +30,6 @@ class ChopAPIController extends AppBaseController
     {
         $this->memberChopServiceManager = app(MemberChopServiceManager::class);
         $this->chopService = app(ChopService::class);
-        
     }
 
     /**
@@ -42,13 +41,8 @@ class ChopAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $records = $this->chopService->listRecords($request);
-            return $this->sendResponse(ChopRecord::collection($records), 'Chops retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $records = $this->chopService->listRecords($request);
+        return $this->sendResponse(ChopRecord::collection($records), 'Chops retrieved successfully');
     }
     
     public function manualAddChops(ManualAddChopAPIRequest $request)

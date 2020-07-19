@@ -41,15 +41,10 @@ class TransactionAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $transactions = $this->transactionService->listTransactions($request);
-            $transactions->load(TransactionConstant::BASIC_RELATIONS);
+        $transactions = $this->transactionService->listTransactions($request);
+        $transactions->load(TransactionConstant::BASIC_RELATIONS);
 
-            return $this->sendResponse(Transaction::collection($transactions), 'Transactions retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(Transaction::collection($transactions), 'Transactions retrieved successfully');
     }
 
     /**
@@ -112,15 +107,10 @@ class TransactionAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $transaction = $this->transactionService->findTransaction($id);
-            $transaction->load(TransactionConstant::BASIC_RELATIONS);
+        $transaction = $this->transactionService->findTransaction($id);
+        $transaction->load(TransactionConstant::BASIC_RELATIONS);
 
-            return $this->sendResponse(new Transaction($transaction), 'Transaction retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return $this->sendResponse(new Transaction($transaction), 'Transaction retrieved successfully');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\User;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class UpdateUserAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class UpdateUserAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-user');
     }
 
     /**
