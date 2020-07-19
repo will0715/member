@@ -24,7 +24,9 @@ class ChopRecordRepository extends BaseRepository
         'branch_id',
         'type',
         'chops',
-        'consume_chops'
+        'consume_chops',
+        'transaction_no',
+        'remark'
     ];
 
     /**
@@ -53,6 +55,8 @@ class ChopRecordRepository extends BaseRepository
             'type' => ChopRecordConstant::CHOP_RECORD_ADD_CHOPS,
             'chops' => $data['chops'],
             'consume_chops' => 0,
+            'transaction_no' => Arr::get($data, 'transaction_no'),
+            'remark' => Arr::get($data, 'remark'),
         ]);
     }
 
@@ -64,8 +68,9 @@ class ChopRecordRepository extends BaseRepository
             'type' => ChopRecordConstant::CHOP_RECORD_EARN_CHOPS,
             'chops' => $data['chops'],
             'consume_chops' => 0,
-            'transaction_id' => $data['transaction_id'],
-            'rule_id' => $data['rule_id']
+            'rule_id' => $data['rule_id'],
+            'transaction_no' => Arr::get($data, 'transaction_no'),
+            'remark' => Arr::get($data, 'remark'),
         ]);
     }
 
@@ -77,7 +82,8 @@ class ChopRecordRepository extends BaseRepository
             'type' => ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS,
             'chops' => $data['chops'],
             'consume_chops' => 0,
-            'void_id' => $data['void_id']
+            'void_id' => $data['void_id'],
+            'remark' => Arr::get($data, 'remark'),
         ]);
     }
 
@@ -90,6 +96,8 @@ class ChopRecordRepository extends BaseRepository
             'chops' => 0,
             'consume_chops' => $data['consume_chops'],
             'rule_id' => $data['rule_id'],
+            'transaction_no' => Arr::get($data, 'transaction_no'),
+            'remark' => Arr::get($data, 'remark'),
         ]);
     }
 
@@ -101,47 +109,8 @@ class ChopRecordRepository extends BaseRepository
             'type' => ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS,
             'chops' => 0,
             'consume_chops' => $data['consume_chops'],
-            'void_id' => $data['void_id']
+            'void_id' => $data['void_id'],
+            'remark' => Arr::get($data, 'remark'),
         ]);
-    }
-
-    public function voidRecord($id)
-    {
-        $record = $this->find($id);
-        if ($record->voidRecord) {
-            return null;
-        }
-        $voidRecord = null;
-        switch ($record->type) {
-            case ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS:
-                $voidRecord = $this->create([
-                    'member_id' => $record->member_id,
-                    'branch_id' => $record->branch_id,
-                    'type' => ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS,
-                    'chops' => 0,
-                    'consume_chops' => -1 * $record->consume_chops,
-                    'void_id' => $record->id
-                ]);
-                break;
-                
-            case ChopRecordConstant::CHOP_RECORD_EARN_CHOPS:
-                $voidRecord = $this->create([
-                    'member_id' => $record->member_id,
-                    'branch_id' => $record->branch_id,
-                    'type' => ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS,
-                    'chops' => -1 * $record->chops,
-                    'consume_chops' => 0,
-                    'void_id' => $record->id
-                ]);
-                break;
-            
-            default:
-                break;
-        }
-        if ($voidRecord) {
-            return $voidRecord;
-        }
-
-        return null;
     }
 }

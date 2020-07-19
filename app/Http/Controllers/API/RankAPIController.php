@@ -35,6 +35,7 @@ class RankAPIController extends AppBaseController
     {
         try {
             $ranks = $this->rankService->listRanks($request);
+            $ranks->loadCount('members');
             return $this->sendResponse(Rank::collection($ranks), 'Ranks retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);

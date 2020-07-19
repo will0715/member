@@ -27,6 +27,7 @@ class PrepaidcardRecord extends JsonResource
             'branch' => new Branch($resource->whenLoaded('branch')),
             'void_record' => new PrepaidcardRecord($resource->whenLoaded('voidRecord')),
             'voided_record' => new PrepaidcardRecord($resource->whenLoaded('voidedRecord')),
+            'created_at' => $resource->created_at,
         ];
     }
 }

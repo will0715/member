@@ -29,6 +29,9 @@ class RoleService
     public function findRole($id)
     {
         $role = $this->roleRepository->findWithoutFail($id);
+        if (!$role) {
+            throw new ResourceNotFoundException('Role not exist');
+        }
         return $role;
     }
 
@@ -46,8 +49,6 @@ class RoleService
 
     public function deleteRole($id)
     {
-        $role = $this->findRole($id);
-        $role->delete();
-        return $role;
+        return $this->roleRepository->delete($id);
     }
 }

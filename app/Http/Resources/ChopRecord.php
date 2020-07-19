@@ -22,11 +22,14 @@ class ChopRecord extends JsonResource
             'type' => $resource->type,
             'chops' => $resource->chops,
             'consume_chops' => $resource->consume_chops,
+            'remark' => $resource->remark,
+            'transaction_no' => $resource->transaction_no,
             'member' => new Member($resource->whenLoaded('member')),
             'branch' => new Branch($resource->whenLoaded('branch')),
             'transaction' => new Transaction($resource->whenLoaded('transaction')),
             'void_record' => new ChopRecord($resource->whenLoaded('voidRecord')),
             'voided_record' => new ChopRecord($resource->whenLoaded('voidedRecord')),
+            'created_at' => $resource->created_at,
         ];
     }
 }

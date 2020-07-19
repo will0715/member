@@ -2,9 +2,15 @@
 namespace App\Constants;
 
 class MemberConstant {
+    const SIMPLE_MEMBER_RELATIONS = [
+        'rank',
+        'registerBranch'
+    ];
+
     const BASE_MEMBER_RELATIONS = [
         'rank', 
-        'chops'
+        'chops', 
+        'prepaidcard'
     ];
     
     const ALL_MEMBER_RELATIONS = [
@@ -14,13 +20,14 @@ class MemberConstant {
         'orderRecords', 
         'orderRecords.branch', 
         'orderRecords.transactionItems', 
-        'orderRecords.chopRecords', 
+        'orderRecords.transactionItems.condiments', 
         'chopRecords', 
         'chopRecords.branch', 
         'chopRecords.voidRecord', 
         'prepaidcard', 
         'prepaidcardRecords',
         'prepaidcardRecords.branch', 
-        'prepaidcardRecords.voidRecord'
+        'prepaidcardRecords.voidRecord',
+        'registerBranch'
     ];
 }

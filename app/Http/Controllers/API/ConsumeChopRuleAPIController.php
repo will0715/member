@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\ChopsRuleConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateConsumeChopRuleAPIRequest;
 use App\Http\Requests\API\UpdateConsumeChopRuleAPIRequest;
@@ -9,6 +10,7 @@ use App\Http\Resources\ConsumeChopRule;
 use App\Services\ConsumeChopRuleService;
 use Illuminate\Http\Request;
 use Response;
+use Log;
 
 /**
  * Class ConsumeChopRuleAPIController
@@ -34,7 +36,7 @@ class ConsumeChopRuleAPIController extends AppBaseController
     {
         try {
             $consumeChopRules = $this->consumeChopRuleService->listConsumeChopRules($request);
-            $consumeChopRules->load(['rank']);
+            $consumeChopRules->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(ConsumeChopRule::collection($consumeChopRules), 'ConsumeChopRules retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -56,7 +58,7 @@ class ConsumeChopRuleAPIController extends AppBaseController
 
         try {
             $consumeChopRule = $this->consumeChopRuleService->newConsumeChopRule($input);
-            $consumeChopRule->load(['rank']);
+            $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule saved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -76,7 +78,7 @@ class ConsumeChopRuleAPIController extends AppBaseController
     {
         try {
             $consumeChopRule = $this->consumeChopRuleService->findConsumeChopRule($id);
-            $consumeChopRule->load(['rank']);
+            $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
@@ -99,7 +101,7 @@ class ConsumeChopRuleAPIController extends AppBaseController
 
         try {
             $consumeChopRule = $this->consumeChopRuleService->updateConsumeChopRule($input, $id);
-            $consumeChopRule->load(['rank']);
+            $consumeChopRule->load(ChopsRuleConstant::BASIC_RELATIONS);
             return $this->sendResponse(new ConsumeChopRule($consumeChopRule), 'ConsumeChopRule updated successfully');
         } catch (\Exception $e) {
             Log::error($e);

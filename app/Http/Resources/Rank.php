@@ -21,7 +21,8 @@ class Rank extends JsonResource
             'id' => $resource->id,
             'name' => $resource->name,
             'rank' => $resource->rank,
-            'created_at' => $resource->created_at
+            'created_at' => $resource->created_at,
+            'members_count' => $resource->members_count
         ];
     }
 }

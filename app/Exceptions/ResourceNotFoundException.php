@@ -3,12 +3,8 @@
 namespace App\Exceptions;
 
 use App\Constants\ExceptionCode;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class ResourceNotFoundException extends Exception
+class ResourceNotFoundException extends NotFoundHttpException
 {
-    public function __construct($message, $code = ExceptionCode::RESOURCE_NOT_FOUND_EXCEPTION)
-    {
-        parent::__construct($message, $code);
-    }
 }

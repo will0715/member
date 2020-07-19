@@ -29,6 +29,9 @@ class EarnChopRuleService
     public function findEarnChopRule($id)
     {
         $earnChopRule = $this->earnChopRuleRepository->findWithoutFail($id);
+        if (!$earnChopRule) {
+            throw new ResourceNotFoundException('Earn Consume rule Not Found');
+        }
         return $earnChopRule;
     }
 
@@ -46,8 +49,6 @@ class EarnChopRuleService
 
     public function deleteEarnChopRule($id)
     {
-        $earnChopRule = $this->findEarnChopRule($id);
-        $earnChopRule->delete();
-        return $earnChopRule;
+        return $this->earnChopRuleRepository->delete($id);
     }
 }

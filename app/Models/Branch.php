@@ -105,4 +105,9 @@ class Branch extends Model
     {
         return $this->is_independent;
     }
+
+    public function registerMembers()
+    {
+        return $this->hasMany(\App\Models\Member::class, 'register_branch_id');
+    }
 }

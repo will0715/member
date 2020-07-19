@@ -81,7 +81,6 @@ class UserAPIController extends AppBaseController
 
             return $this->sendResponse(new User($user), 'User retrieved successfully');
         } catch (\Exception $e) {
-            dd($e);
             Log::error($e);
             throw $e;
         }

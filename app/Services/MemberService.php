@@ -11,6 +11,7 @@ use App\Helpers\CustomerHelper;
 use App\Events\MemberRegistered;
 use App\Exceptions\ResourceNotFoundException;
 use Poyi\PGSchema\Facades\PGSchema;
+use Arr;
 use Auth;
 use Cache;
 
@@ -39,12 +40,18 @@ class MemberService
     public function findMember($id)
     {
         $member = $this->memberRepository->findWithoutFail($id);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member not exist');
+        }
         return $member;
     }
 
     public function findMemberByPhone($phone)
     {
         $member = $this->memberRepository->findByPhone($phone);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member not exist');
+        }
         return $member;
     }
 
@@ -64,10 +71,33 @@ class MemberService
         return $member;
     }
 
+    public function updateMemberByPhone($data, $phone)
+    {
+        $oldMember = $this->findMemberByPhone($phone);
+
+        // only can edit some column
+        $member = $this->memberRepository->updateMember(Arr::only($data, [
+            'first_name',
+            'last_name',
+            'password',
+            'gender',
+            'email',
+            'address',
+            'birthday',
+            'remark',
+        ]), $oldMember->id);
+
+        return $member;
+    }
+
     public function deleteMember($id)
     {
-        $member = $this->findMember($id);
-        $member->delete();
+        return $this->memberRepository->delete($id);
+    }
+
+    public function forceDeleteMember($id)
+    {
+        $member = $this->memberRepository->forceDelete($id);
         return $member;
     }
 }

@@ -8,6 +8,7 @@ use App\Repositories\RankRepository;
 use App\Helpers\CustomerHelper;
 use App\Exceptions\ResourceNotFoundException;
 use Cache;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class RankService
 {
@@ -29,6 +30,9 @@ class RankService
     public function findRank($id)
     {
         $rank = $this->rankRepository->findWithoutFail($id);
+        if (!$rank) {
+            throw new ResourceNotFoundException('Rank not exist');
+        }
         return $rank;
     }
 
@@ -47,8 +51,10 @@ class RankService
     public function deleteRank($id)
     {
         $rank = $this->findRank($id);
-        $rank->delete();
-        return $rank;
+        if ($rank->members->count() > 0) {
+            throw new ConflictHttpException('The rank has members. Can not be deleted.');
+        }
+        return $this->rankRepository->delete($id);
     }
 
     public function getBasicRank()

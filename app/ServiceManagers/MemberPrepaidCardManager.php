@@ -35,6 +35,21 @@ class MemberPrepaidCardServiceManager {
         return $member->prepaidCard;
     }
 
+    public function getMemberPrepaidCardRecords($attributes)
+    {
+        $phone = $attributes['phone'];
+
+        // search member
+        $member = $this->memberService->findMemberByPhone($phone);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member not exist');
+        }
+
+        $records = $this->prepaidCardService->findPrepaidcardRecordsByMember($member->id);
+
+        return $records;
+    }
+
     public function topup($attributes)
     {
         $customer = CustomerHelper::getCustomer();

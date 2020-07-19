@@ -58,7 +58,8 @@ class Member extends Authenticatable
         'birthday',
         'remark',
         'rank_id',
-        'status'
+        'status',
+        'register_branch_id'
     ];
 
     /**
@@ -77,6 +78,7 @@ class Member extends Authenticatable
         'address' => 'string',
         'remark' => 'string',
         'birthday' => 'date',
+        'register_branch_id' => 'string',
     ];
 
     /**
@@ -90,7 +92,7 @@ class Member extends Authenticatable
         'last_name' => 'required',
         'password' => 'required',
         'gender' => 'required|in:male,female,others,unknown',
-        'email' => 'email',
+        'email' => 'nullable|email',
         'birthday' => 'date',
     ];
 
@@ -127,6 +129,11 @@ class Member extends Authenticatable
     public function prepaidcardRecords()
     {
         return $this->hasMany(\App\Models\PrepaidCardRecord::class);
+    }
+
+    public function registerBranch()
+    {
+        return $this->belongsTo(\App\Models\Branch::class, 'register_branch_id');
     }
     
 }

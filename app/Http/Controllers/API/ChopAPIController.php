@@ -4,6 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\API\CreateChopAPIRequest;
 use App\Http\Requests\API\UpdateChopAPIRequest;
+use App\Http\Requests\API\ManualAddChopAPIRequest;
+use App\Http\Requests\API\ConsumeChopAPIRequest;
+use App\Http\Requests\API\EarnChopAPIRequest;
 use App\Http\Resources\Chop;
 use App\Http\Resources\ChopRecord;
 use App\Services\ChopService;
@@ -40,15 +43,15 @@ class ChopAPIController extends AppBaseController
     public function index(Request $request)
     {
         try {
-            $chops = $this->chopService->listChops($request);
-            return $this->sendResponse(Chop::collection($chops), 'Chops retrieved successfully');
+            $records = $this->chopService->listRecords($request);
+            return $this->sendResponse(ChopRecord::collection($records), 'Chops retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             throw $e;
         }
     }
     
-    public function manualAddChops(Request $request)
+    public function manualAddChops(ManualAddChopAPIRequest $request)
     {
         $input = $request->all();
 
@@ -64,7 +67,39 @@ class ChopAPIController extends AppBaseController
         }
     }
     
-    public function consumeChops(Request $request)
+    public function earnChops(EarnChopAPIRequest $request)
+    {
+        $input = $request->all();
+
+        DB::beginTransaction();
+        try {
+            $chops = $this->memberChopServiceManager->earnChops($input);
+            DB::commit();
+
+            return $this->sendResponse(new ChopRecord($chops), 'Add Chops successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+    
+    public function voidEarnChops($id, Request $request)
+    {
+        $input = $request->all();
+
+        DB::beginTransaction();
+        try {
+            $chops = $this->memberChopServiceManager->voidEarnChops($id, $input);
+            DB::commit();
+
+            return $this->sendResponse(new ChopRecord($chops), 'Void successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+    
+    public function consumeChops(ConsumeChopAPIRequest $request)
     {
         $input = $request->all();
 

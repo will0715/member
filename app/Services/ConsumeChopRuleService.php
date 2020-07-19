@@ -29,6 +29,9 @@ class ConsumeChopRuleService
     public function findConsumeChopRule($id)
     {
         $consumeChopRule = $this->consumeChopRuleRepository->findWithoutFail($id);
+        if (!$consumeChopRule) {
+            throw new ResourceNotFoundException('Chop Consume rule Not Found');
+        }
         return $consumeChopRule;
     }
 
@@ -46,8 +49,6 @@ class ConsumeChopRuleService
 
     public function deleteConsumeChopRule($id)
     {
-        $consumeChopRule = $this->findConsumeChopRule($id);
-        $consumeChopRule->delete();
-        return $consumeChopRule;
+        return $this->consumeChopRuleRepository->delete($id);
     }
 }

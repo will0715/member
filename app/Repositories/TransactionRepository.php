@@ -54,6 +54,11 @@ class TransactionRepository extends BaseRepository
         return $this->findByField('order_id', $orderId)->first();
     }
 
+    public function getByMemberId($memberId)
+    {
+        return $this->findByField('member_id', $memberId);
+    }
+
     public function createTransaction(array $attributes)
     {
         $transaction =  $this->create($attributes);
@@ -66,5 +71,11 @@ class TransactionRepository extends BaseRepository
         $transaction = $this->find($id);
         $transaction->void();
         return $transaction;
+    }
+
+    public function getWithMemberGender()
+    {
+        $data = $this->with(['member:id,gender'])->findWhere(['status' => 1]);
+        return $data;
     }
 }

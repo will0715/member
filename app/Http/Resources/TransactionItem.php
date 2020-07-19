@@ -21,12 +21,12 @@ class TransactionItem extends JsonResource
             'id' => $resource->id,
             'item_no' => $resource->item_no,
             'item_name' => $resource->item_name,
-            'item_condiments' => $resource->item_condiments,
             'quantity' => $resource->quantity,
             'price' => $resource->price,
             'subtotal' => $resource->subtotal,
             'remark' => $resource->remark,
-            'transaction' => new Transaction($resource->whenLoaded('transaction'))
+            'transaction' => new Transaction($resource->whenLoaded('transaction')),
+            'condiments' => TransactionItemCondiment::collection($resource->whenLoaded('condiments'))
         ];
     }
 }

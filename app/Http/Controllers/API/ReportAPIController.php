@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\TransactionConstant;
 use App\Repositories\CustomerRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Prettus\Repository\Criteria\RequestCriteria;
+use App\Http\Resources\ChopRecord;
+use App\Http\Resources\PrepaidcardRecord;
+use App\Http\Resources\Transaction;
 use App\Criterias\LimitOffsetCriteria;
 use App\Services\ReportService;
+use App\Services\TransactionService;
 use Response;
 use Auth;
 use Log;
@@ -26,7 +31,8 @@ class ReportAPIController extends AppBaseController
     public function __construct(UserRepository $userRepo)
     {
         $this->userRepository = $userRepo;
-        $this->reportService = new ReportService();
+        $this->reportService = app(ReportService::class);
+        $this->transactionService = app(TransactionService::class);
     }
 
     /**
@@ -40,11 +46,194 @@ class ReportAPIController extends AppBaseController
     {
         $startAt = $request->get('start');
         $endAt = $request->get('end');
-        $chops = $request->get('chops');
         
         try {
-            $data = $this->reportService->dashboard($startAt, $endAt);
-            return $this->sendResponse($data, 'Users retrieved successfully');
+            $data = $this->reportService->dashboard($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function todayDashboard(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getTodayDashboardData($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function rankMemberSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getRankMemberSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function memberGenderTransactionAmountPercentageSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getMemberGenderTransactionAmountPercentageSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function branchChopConsumeChopSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getBranchChopConsumeChopSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    /**
+     * Display a listing of the User.
+     * GET|HEAD /users
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function branchRegisterMemberSummary(Request $request)
+    {
+        $startAt = $request->get('start');
+        $endAt = $request->get('end');
+        
+        try {
+            $data = $this->reportService->getBranchRegisterMemberSummary($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getPrepaidcardTopupRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getPrepaidcardTopupRecords($request);
+            return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getPrepaidcardPaymentRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getPrepaidcardPaymentRecords($request);
+            return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getAddChopsRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getAddChopsRecords($request);
+            return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getConsumeChopsRecords(Request $request)
+    {
+        try {
+            $data = $this->reportService->getConsumeChopsRecords($request);
+            return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getTransactionRecords(Request $request)
+    {
+        try {
+            $data = $this->transactionService->listTransactions($request);
+            $data->load(TransactionConstant::BASIC_RELATIONS);
+
+            return $this->sendResponse(Transaction::collection($data), 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getMemberRegisterBranchDetail(Request $request)
+    {
+        try {
+            $data = $this->reportService->getMemberRegisterBranchDetail($request);
+            return $this->sendResponse($data, 'retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->sendError('Get Dashboard Data Failed', 500);
+        }
+    }
+
+    public function getMemberRegisterBranchStatistics(Request $request)
+    {
+        try {
+            $data = $this->reportService->getMemberRegisterBranchStatistics($request);
+            return $this->sendResponse($data, 'retrieved successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return $this->sendError('Get Dashboard Data Failed', 500);

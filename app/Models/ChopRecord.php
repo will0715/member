@@ -31,12 +31,13 @@ class ChopRecord extends Model
     public $fillable = [
         'member_id',
         'branch_id',
-        'transaction_id',
         'rule_id',
         'type',
         'chops',
         'consume_chops',
-        'void_id'
+        'void_id',
+        'transaction_no',
+        'remark'
     ];
 
     /**
@@ -48,12 +49,13 @@ class ChopRecord extends Model
         'id' => 'string',
         'member_id' => 'string',
         'branch_id' => 'string',
-        'transaction_id' => 'string',
         'rule_id' => 'string',
         'type' => 'string',
         'chops' => 'integer',
         'consume_chops' => 'integer',
-        'void_id' => 'string'
+        'void_id' => 'string',
+        'transaction_no' => 'string',
+        'remark' => 'string'
     ];
 
     /**
@@ -66,7 +68,9 @@ class ChopRecord extends Model
         'branch_id' => 'required',
         'type' => 'required',
         'chops' => 'required',
-        'consume_chops' => 'required'
+        'consume_chops' => 'required',
+        'transaction_no' => 'max:255',
+        'remark' => 'max:255'
     ];
 
     /**
@@ -106,7 +110,7 @@ class ChopRecord extends Model
      **/
     public function transaction()
     {
-        return $this->belongsTo(\App\Models\Transaction::class, 'transaction_id');
+        return $this->belongsTo(\App\Models\Transaction::class, 'transaction_no', 'order_id');
     }
 
     /**

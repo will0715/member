@@ -3,12 +3,8 @@
 namespace App\Exceptions;
 
 use App\Constants\ExceptionCode;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-class TransactionDuplicateException extends Exception
+class TransactionDuplicateException extends ConflictHttpException
 {
-    public function __construct($message, $code = ExceptionCode::TRANSACTION_DUPLICATE_EXCEPTION)
-    {
-        parent::__construct($message, $code);
-    }
 }

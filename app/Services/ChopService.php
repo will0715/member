@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use Prettus\Repository\Criteria\RequestCriteria;
 use App\Constants\ChopRecordConstant;
+use App\Criterias\LimitOffsetCriteria;
+use App\Criterias\RequestDateRangeCriteria;
 use App\Exceptions\CannotVoidException;
 use App\Exceptions\ChopsNotEnoughException;
 use App\Exceptions\AlreadyVoidedException;
@@ -18,6 +21,7 @@ use App\Events\MemberRegistered;
 use Carbon\Carbon;
 use Cache;
 use DB;
+use Arr;
 
 class ChopService
 {
@@ -38,6 +42,9 @@ class ChopService
     public function findChopRecord($id)
     {
         $chopRecord = $this->chopRecordRepository->findWithoutFail($id);
+        if (!$chopRecord) {
+            throw new ResourceNotFoundException('Chop Record Not Found');
+        }
         return $chopRecord;
     }
 
@@ -50,11 +57,28 @@ class ChopService
         return $chops;
     }
 
+    public function listRecords($request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $records = $this->chopRecordRepository->all();
+
+        return $records;
+    }
+
+    public function findChopsRecordsByMember($memberId)
+    {
+        return $this->chopRecordRepository->findWhere(['member_id' => $memberId]);
+    }
+
     public function manualAddChops($attributes)
     {
         $memberId = $attributes['member_id'];
         $branchId = $attributes['branch_id'];
         $addChops = $attributes['chops'];
+        $transactionNo = Arr::get($attributes, 'transaction_no');
+        $remark = Arr::get($attributes, 'remark');
         $expiredSetting = $this->getChopsExpiredSetting();
         
         // add chop
@@ -62,6 +86,7 @@ class ChopService
         if (!$chop) {
             $newChop = $this->chopRepository->create([
                 'member_id' => $memberId,
+                'branch_id' => $branchId,
                 'chops' => $addChops,
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
@@ -76,7 +101,9 @@ class ChopService
         $record = $this->chopRecordRepository->newManualChopRecord([
             'member_id' => $memberId,
             'branch_id' => $branchId,
-            'chops' => $addChops
+            'chops' => $addChops,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
         ]);
 
         return $record;
@@ -86,9 +113,10 @@ class ChopService
     {
         $memberId = $attributes['member_id'];
         $branchId = $attributes['branch_id'];
-        $transactionId = $attributes['transaction_id'];
-        $earnChopsRule = $attributes['earn_chop_rule'];
         $addChops = $attributes['chops'];
+        $transactionNo = Arr::get($attributes, 'transaction_no');
+        $earnChopsRuleId = Arr::get($attributes, 'earn_chop_rule_id');
+        $remark = Arr::get($attributes, 'remark');
         $expiredSetting = $this->getChopsExpiredSetting();
         
         // add chop
@@ -96,6 +124,7 @@ class ChopService
         if (!$chop) {
             $newChop = $this->chopRepository->create([
                 'member_id' => $memberId,
+                'branch_id' => $branchId,
                 'chops' => $addChops,
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
@@ -110,9 +139,10 @@ class ChopService
         $record = $this->chopRecordRepository->newEarnChopRecord([
             'member_id' => $memberId,
             'branch_id' => $branchId,
-            'transaction_id' => $transactionId,
             'chops' => $addChops,
-            'rule_id' => $earnChopsRule->id
+            'rule_id' => $earnChopsRuleId,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
         ]);
 
         return $record;
@@ -124,6 +154,8 @@ class ChopService
         $branchId = $attributes['branch_id'];
         $consumeChops = $attributes['chops'];
         $ruleId = $attributes['rule_id'];
+        $transactionNo = Arr::get($attributes, 'transaction_no');
+        $remark = Arr::get($attributes, 'remark');
         
         $totalChops = $this->getTotalChops($memberId, $branchId);
         if ($totalChops < $consumeChops) {
@@ -144,6 +176,8 @@ class ChopService
             'branch_id' => $branchId,
             'rule_id' => $ruleId,
             'consume_chops' => $consumeChops,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
         ]);
 
         return $record;
@@ -151,12 +185,13 @@ class ChopService
 
     public function voidEarnChops($id, $attributes = [])
     {
+        $remark = Arr::get($attributes, 'remark');
         $record = $this->chopRecordRepository->find($id);
         if ($record->type != ChopRecordConstant::CHOP_RECORD_EARN_CHOPS) {
             throw new CannotVoidException('Can\'t not void not earn record');
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('consume already voided', $record);
+            throw new AlreadyVoidedException('consume already voided');
         }
         $memberId = $record->member_id;
         $branchId = $record->branch_id;
@@ -175,7 +210,8 @@ class ChopService
             'member_id' => $memberId,
             'branch_id' => $branchId,
             'chops' => -1 * $voidEarnChops,
-            'void_id' => $record->id
+            'void_id' => $record->id,
+            'remark' => $remark
         ]);
 
         return $voidRecord;
@@ -183,12 +219,13 @@ class ChopService
 
     public function voidConsumeChops($id, $attributes = [])
     {
+        $remark = Arr::get($attributes, 'remark');
         $record = $this->chopRecordRepository->find($id);
         if ($record->type != ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS) {
             throw new CannotVoidException('Can\'t not void not consume record');
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('consume already voided', $record);
+            throw new AlreadyVoidedException('consume already voided');
         }
         $memberId = $record->member_id;
         $branchId = $record->branch_id;
@@ -207,7 +244,8 @@ class ChopService
             'member_id' => $memberId,
             'branch_id' => $branchId,
             'consume_chops' => -1 * $voidConsumeChops,
-            'void_id' => $record->id
+            'void_id' => $record->id,
+            'remark' => $remark
         ]);
 
         return $voidRecord;

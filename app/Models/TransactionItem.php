@@ -82,4 +82,9 @@ class TransactionItem extends Model
     {
         return $this->belongsTo(\App\Models\Transaction::class, 'transaction_id');
     }
+
+    public function condiments()
+    {
+        return $this->hasMany(\App\Models\TransactionItemCondiment::class);
+    }
 }

@@ -17,9 +17,9 @@ use Illuminate\Http\Request;
 // for customer login
 Route::post('/auth/login', 'UserAPIController@login');
 
-Route::group(['prefix' => 'internal'], function () {
-    Route::middleware(['internal.customer.switch', 'auth:api'])->group(function () {
-
+Route::group(['prefix' => 'client'], function () {
+    Route::middleware(['customer.switch'])->group(function () {
+        Route::post('members', 'MemberAPIController@store');
     });
 });
 
@@ -30,28 +30,51 @@ Route::group(['prefix' => 'v1'], function () {
     Route::group(['middleware' => 'auth:api'], function(){
         
         Route::middleware(['customer.switch'])->group(function () {
-            Route::get('/report/dashboard', 'ReportAPIController@dashboard');
+            Route::group(['prefix' => 'report'], function () {
+                Route::get('/dashboard', 'ReportAPIController@dashboard');
+                Route::get('/dashboard/today', 'ReportAPIController@todayDashboard');
+                Route::get('/rankMemberSummary', 'ReportAPIController@rankMemberSummary');
+                Route::get('/memberGenderTransactionAmountPercentageSummary', 'ReportAPIController@memberGenderTransactionAmountPercentageSummary');
+                Route::get('/branchChopConsumeChopSummary', 'ReportAPIController@branchChopConsumeChopSummary');
+                Route::get('/branchRegisterMemberSummary', 'ReportAPIController@branchRegisterMemberSummary');
+                Route::get('/prepaidcards/topup', 'ReportAPIController@getPrepaidcardTopupRecords');
+                Route::get('/prepaidcards/payment', 'ReportAPIController@getPrepaidcardPaymentRecords');
+                Route::get('/chops/add', 'ReportAPIController@getAddChopsRecords');
+                Route::get('/chops/consume', 'ReportAPIController@getConsumeChopsRecords');
+                Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
+                Route::get('/memberRegisterBranch/detail', 'ReportAPIController@getMemberRegisterBranchDetail');
+                Route::get('/memberRegisterBranch/statistics', 'ReportAPIController@getMemberRegisterBranchStatistics');
+            });
 
             Route::get('/user/me', 'UserAPIController@me');
             
-            Route::post('members/query', 'MemberAPIController@queryByPhone');
-            Route::get('members/{phone}/chops', 'MemberAPIController@getChops');
-            Route::get('members/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
-            Route::get('members/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
-            Route::get('members/{phone}/prepaidcard', 'MemberAPIController@getBalance');
-            Route::get('members/{phone}/information', 'MemberAPIController@information');
-            Route::get('members/{id}/detail', 'MemberAPIController@detail');
+            Route::group(['prefix' => 'members'], function () {
+                Route::post('/query', 'MemberAPIController@queryByPhone');
+                Route::get('/{phone}/chops', 'MemberAPIController@getChops');
+                Route::get('/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
+                Route::get('/{phone}/chopsRecords', 'MemberAPIController@getChopsRecords');
+                Route::get('/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
+                Route::get('/{phone}/balance', 'MemberAPIController@getBalance');
+                Route::get('/{phone}/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
+                Route::get('/{phone}/information', 'MemberAPIController@information');
+                Route::get('/{id}/detail', 'MemberAPIController@detail');
+            });
             Route::resource('members', 'MemberAPIController');
+            Route::patch('/members/{phone}/byPhone', 'MemberAPIController@updateByPhone');
+            Route::delete('/members/{phone}/force', 'MemberAPIController@forceDelete');
     
             Route::get('/earnChopRules', 'EarnChopRuleAPIController@index');
             Route::get('/consumeChopRules', 'ConsumeChopRuleAPIController@index');
 
             Route::post('/chops/add', 'ChopAPIController@manualAddChops');
+            Route::post('/chops/earn', 'ChopAPIController@earnChops');
+            Route::post('/chops/earn/{id}/void', 'ChopAPIController@voidEarnChops');
             Route::post('/chops/consume', 'ChopAPIController@consumeChops');
             Route::post('/chops/consume/{id}/void', 'ChopAPIController@voidConsumeChops');
             Route::delete('/chops/consume/{id}', 'ChopAPIController@voidConsumeChops');
 
             Route::group(['prefix' => 'prepaidcards'], function () {
+                Route::get('/', 'PrepaidCardAPIController@index');
                 Route::post('/topup', 'PrepaidCardAPIController@topup');
                 Route::post('/payment', 'PrepaidCardAPIController@payment');
                 Route::post('/payment/{id}/void', 'PrepaidCardAPIController@voidPayment');
@@ -68,6 +91,7 @@ Route::group(['prefix' => 'v1'], function () {
             
             Route::resource('earnChopRules', 'EarnChopRuleAPIController');
             
+            Route::post('/transactions/withoutEarnChops', 'TransactionAPIController@newTransactionWithoutEarnChops');
             Route::resource('transactions', 'TransactionAPIController');
             Route::post('/transactions/{id}/void', 'TransactionAPIController@destroy');
     

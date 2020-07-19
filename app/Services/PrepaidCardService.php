@@ -2,12 +2,16 @@
 
 namespace App\Services;
 
+use Prettus\Repository\Criteria\RequestCriteria;
+use App\Criterias\LimitOffsetCriteria;
+use App\Criterias\RequestDateRangeCriteria;
 use App\Exceptions\PrepaidCardsNotEnoughException;
 use App\Exceptions\AlreadyVoidedException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\Member;
 use App\Repositories\PrepaidCardRecordRepository;
 use App\Repositories\PrepaidCardRepository;
+use Illuminate\Http\Request;
 use Arr;
 use DB;
 
@@ -22,6 +26,21 @@ class PrepaidCardService
     {
         $this->prepaidCardRepository = app(PrepaidCardRepository::class);
         $this->prepaidCardRecordRepository = app(PrepaidCardRecordRepository::class);
+    }
+
+    public function listRecords($request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $records = $this->prepaidCardRecordRepository->all();
+
+        return $records;
+    }
+
+    public function findPrepaidcardRecordsByMember($memberId)
+    {
+        return $this->prepaidCardRecordRepository->findWhere(['member_id' => $memberId]);
     }
 
     public function topup($attributes)
@@ -90,7 +109,7 @@ class PrepaidCardService
 
         $record = $this->prepaidCardRecordRepository->find($id);
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('payment already voided', $record);
+            throw new AlreadyVoidedException('payment already voided');
         }
 
         // need lock row for update

@@ -60,8 +60,6 @@ class CustomerService
 
     public function deleteCustomer($id)
     {
-        $customer = $this->findCustomer($id);
-        $customer->delete();
-        return $customer;
+        return $this->customerRepository->delete($id);
     }
 }

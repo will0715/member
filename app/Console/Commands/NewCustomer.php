@@ -3,12 +3,16 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\User;
 use App\Models\Role;
-use PGSchema;
+use App\Models\Rank;
+use App\Models\ChopExpiredSetting;
+use Poyi\PGSchema\Facades\PGSchema;
 use Artisan;
 use DB;
+use Hash;
 
 class NewCustomer extends Command
 {
@@ -17,7 +21,7 @@ class NewCustomer extends Command
      *
      * @var string
      */
-    protected $signature = 'customer:add';
+    protected $signature = 'customer:add {name : customer name} {--account= : admin account} {--password= : admin password}';
 
     /**
      * The console command description.
@@ -43,33 +47,54 @@ class NewCustomer extends Command
      */
     public function handle()
     {
-        $name = $this->option('name');
+        $name = $this->argument('name');
         $account = $this->option('account');
         $password = $this->option('password');
         $schema = 'db_'.$name;
         
-        //Add customer data in public
-        Customer::create([
-            'db_name' => $schema,
-            'name' => $name,
-        ]);
-        
-        $createSchema = DB::connection()->statement('create schema ' . $schema . ' IF NOT EXIST');
+        $createSchema = DB::connection()->statement('create schema IF NOT EXISTS ' . $schema);
         PGSchema::schema($schema, 'pgsql');
 
-        DB::select('CREATE SEQUENCE "migrations_id_seq";');
-        DB::select('CREATE TABLE "migrations" ("id" int4 not null PRIMARY KEY, "migration" varchar(255) not null, "batch" int4 not null)');
-        DB::select('ALTER SEQUENCE "migrations_id_seq" START 1 MINVALUE 1 OWNED BY "migrations"."id";');
-        DB::select('ALTER TABLE "migrations" ALTER "id" set DEFAULT nextval(\''. $schema .'.migrations_id_seq\'::regclass);');
+        DB::beginTransaction();
+        try {
         
-        $migrate = Artisan::call('pgschema:migrate', ["--schema" => $schema , "--force" => "true"]);
+            //Add customer data in public
+            Customer::create([
+                'db_schema' => $schema,
+                'name' => $name,
+            ]);
+            
+            $migrate = Artisan::call('pgschema:migrate', ["--schema" => $schema , "--force" => "true"]);
+    
+            //Add HQ branch
+            $branch = Branch::create(array('code' => 'HQ', 'name' => 'HQ', 'store_name' => 'HQ'));
+    
+            //Add user
+            $user = User::create(array('name' => $name, 'email' => $account, 'password' => Hash::make($password)));
+            $user = User::where('name', $name)->first();
+    
+            //Add admin role
+            $admin = Role::create(array('name' => 'admin', 'guard_name' => 'api' ));
+    
+            $user->assignRole('admin');
+    
+            //Add basic rank
+            $rank = Rank::create([
+                'rank' => 1,
+                'name' => '一般會員'
+            ]);
+    
+            //Add basic chop expired setting
+            $chopExpiredSetting = ChopExpiredSetting::create([
+                'expired_date' => 365,
+            ]);
+            DB::commit();
 
-        //Add user
-        $user = User::create(array('name' => $name, 'email' => $account, 'password' =>  bcrypt($userPassword)));
-        $user = User::where('name', $userAccount)->first();
-
-        //Add admin role
-        $admin = Role::create(array('name' => 'admin', 'guard_name' => 'admin' ));
-        $user->assignRole('admin');
+            $this->info('Create Customer Done');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->error('Create Customer Failed');
+            throw $e;
+        }
     }
 }
