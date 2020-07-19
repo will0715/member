@@ -45,10 +45,6 @@ class AdminCustomerTableSeeder extends Seeder
         $admin = Role::create(array('name' => 'admin', 'guard_name' => 'api' ));
         $user->assignRole('admin');
 
-        //Add superadmin admin permission
-        $superAdmin = Permission::where('name', 'super-admin')->get();
-        $user->givePermissionTo($superAdmin);
-
         //Add basic rank
         $rank = Rank::create([
             'rank' => 1,

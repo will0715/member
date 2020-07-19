@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminCustomerTableSeeder::class);
         // init all permissions
         $this->call(PermissionDataSeeder::class);
+        // give super admin permission
+        $this->call(GiveSuperAdminSeeder::class);
         // init passport
         $this->call(PassportInitialSeeder::class);
     }
