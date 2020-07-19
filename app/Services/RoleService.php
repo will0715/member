@@ -62,8 +62,7 @@ class RoleService
         if ($role->name === 'admin') {
             throw new EditAdminException('can not edit admin role');
         }
-        $permissions = $this->permissionRepository->findWhereIn('name', $data['permissions']);
-        $role->syncPermissions(Arr::wrap($permissions->pluck('name')));
+        $role->syncPermissions($permissions);
 
         return $role;
     }

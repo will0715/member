@@ -38,4 +38,9 @@ class RoleRepository extends BaseRepository
     {
         return Role::class;
     }
+
+    public function findAdminRole()
+    {
+        return $this->findByField('name', 'admin')->first();
+    }
 }

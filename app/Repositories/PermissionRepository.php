@@ -38,4 +38,9 @@ class PermissionRepository extends BaseRepository
     {
         return Permission::class;
     }
+
+    public function findByNames($names)
+    {
+        return $this->findWhereIn('name', $names);
+    }
 }

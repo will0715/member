@@ -29,7 +29,9 @@ Route::group(['prefix' => 'v1'], function () {
     Route::group(['middleware' => 'auth:api'], function(){
         
         Route::middleware(['customer.switch'])->group(function () {
+            Route::patch('customers/adminPermission', 'CustomerAPIController@setAdminRolePermission');
             Route::resource('customers', 'CustomerAPIController');
+
             Route::group(['prefix' => 'report'], function () {
                 Route::get('/dashboard', 'ReportAPIController@dashboard');
                 Route::get('/dashboard/today', 'ReportAPIController@todayDashboard');
