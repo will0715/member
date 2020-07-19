@@ -21,6 +21,6 @@ class PassportInitialSeeder extends Seeder
     {
 
         // passport init
-        $migrate = Artisan::call('php artisan passport:install');
+        $migrate = Artisan::call('passport:install');
     }
 }
