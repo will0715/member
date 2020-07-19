@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\Branch;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class CreateBranchAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class CreateBranchAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-branch');
     }
 
     /**

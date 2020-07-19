@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\RoleConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRoleAPIRequest;
 use App\Http\Requests\API\UpdateRoleAPIRequest;
+use App\Http\Requests\API\UpdateRolePermissionsAPIRequest;
 use App\Http\Resources\Role;
 use App\Services\RoleService;
 use Illuminate\Http\Request;
@@ -33,13 +35,10 @@ class RoleAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        try {
-            $roles = $this->roleService->listRoles($request);
-            return $this->sendResponse(Role::collection($roles), 'Roles retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $roles = $this->roleService->listRoles($request);
+        $roles->load(RoleConstant::ROLE_RELATIONS);
+
+        return $this->sendResponse(Role::collection($roles), 'Roles retrieved successfully');
     }
 
     /**
@@ -54,13 +53,8 @@ class RoleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $role = $this->roleService->newRole($input);
-            return $this->sendResponse(new Role($role), 'Role saved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $role = $this->roleService->newRole($input);
+        return $this->sendResponse(new Role($role), 'Role saved successfully');
     }
 
     /**
@@ -73,13 +67,10 @@ class RoleAPIController extends AppBaseController
      */
     public function show($id)
     {
-        try {
-            $role = $this->roleService->findRole($id);
-            return $this->sendResponse(new Role($role), 'Role retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $role = $this->roleService->findRole($id);
+        $role->load(RoleConstant::ROLE_RELATIONS);
+
+        return $this->sendResponse(new Role($role), 'Role retrieved successfully');
     }
 
     /**
@@ -95,13 +86,8 @@ class RoleAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        try {
-            $role = $this->roleService->updateRole($input, $id);
-            return $this->sendResponse(new Role($role), 'Role updated successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $role = $this->roleService->updateRole($input, $id);
+        return $this->sendResponse(new Role($role), 'Role updated successfully');
     }
 
     /**
@@ -116,12 +102,15 @@ class RoleAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        try {
-            $role = $this->roleService->deleteRole($id);
-            return $this->sendSuccess('Role deleted successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        $role = $this->roleService->deleteRole($id);
+        return $this->sendSuccess('Role deleted successfully');
+    }
+
+    public function setPermission($id, UpdateRolePermissionsAPIRequest $request)
+    {
+        $input = $request->all();
+
+        $role = $this->roleService->setPermission($input, $id);
+        return $this->sendSuccess('Role set permission successfully');
     }
 }

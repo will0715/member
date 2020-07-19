@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Models\Role;
 use InfyOm\Generator\Request\APIRequest;
+use Auth;
 
 class CreateRoleAPIRequest extends APIRequest
 {
@@ -14,7 +15,7 @@ class CreateRoleAPIRequest extends APIRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('edit-role');
     }
 
     /**

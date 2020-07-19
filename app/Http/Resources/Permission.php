@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class Customer extends JsonResource
+class Permission extends JsonResource
 {
     
     /**
@@ -19,11 +19,8 @@ class Customer extends JsonResource
 
         return [
             'id' => $resource->id,
-            'db_schema' => $resource->db_schema,
             'name' => $resource->name,
-            'status' => $resource->status,
-            'expired_at' => $resource->expired_at,
-            'created_at' => $resource->created_at,
+            'created_at' => $resource->created_at
         ];
     }
 }

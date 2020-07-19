@@ -24,10 +24,14 @@ class SwitchCustomer
         // set customer name
         // $customer = Auth::guard('api')->user();
         $account = $request->header('X-Customer-Account');
+        if (empty($account)) {
+            abort(403, 'Customer name is required');
+        }
+
         $customer = app(CustomerRepository::class)->getByAccount($account);
 
         if (empty($customer)) {
-            abort(403, 'Customer name is required');
+            abort(403, 'Customer is not exist or expired');
         }
 
         $dbSchemaName = $customer->getSchema();

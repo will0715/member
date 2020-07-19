@@ -25,11 +25,11 @@ Route::group(['prefix' => 'client'], function () {
 
 Route::group(['prefix' => 'v1'], function () {
     Route::post('/auth/login', 'UserAPIController@login');
-    Route::resource('customers', 'CustomerAPIController');
     
     Route::group(['middleware' => 'auth:api'], function(){
         
         Route::middleware(['customer.switch'])->group(function () {
+            Route::resource('customers', 'CustomerAPIController');
             Route::group(['prefix' => 'report'], function () {
                 Route::get('/dashboard', 'ReportAPIController@dashboard');
                 Route::get('/dashboard/today', 'ReportAPIController@todayDashboard');
@@ -82,6 +82,7 @@ Route::group(['prefix' => 'v1'], function () {
             });
 
             Route::resource('roles', 'RoleAPIController');
+            Route::patch('/roles/{id}/permissions', 'RoleAPIController@setPermission');
     
             Route::resource('branches', 'BranchAPIController');
     

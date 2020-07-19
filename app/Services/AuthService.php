@@ -41,6 +41,8 @@ class AuthService
     {
         $user = Auth::guard('api')->user();
         $user = $this->userRepository->find($user->id);
+        
+        $user['permissions'] = $user->getAllPermissions();
 
         return $user;
     }

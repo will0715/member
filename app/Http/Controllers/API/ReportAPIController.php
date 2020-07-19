@@ -47,13 +47,8 @@ class ReportAPIController extends AppBaseController
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         
-        try {
-            $data = $this->reportService->dashboard($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->dashboard($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     /**
@@ -163,80 +158,45 @@ class ReportAPIController extends AppBaseController
 
     public function getPrepaidcardTopupRecords(Request $request)
     {
-        try {
-            $data = $this->reportService->getPrepaidcardTopupRecords($request);
-            return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getPrepaidcardTopupRecords($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getPrepaidcardPaymentRecords(Request $request)
     {
-        try {
-            $data = $this->reportService->getPrepaidcardPaymentRecords($request);
-            return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getPrepaidcardPaymentRecords($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getAddChopsRecords(Request $request)
     {
-        try {
-            $data = $this->reportService->getAddChopsRecords($request);
-            return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getAddChopsRecords($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getConsumeChopsRecords(Request $request)
     {
-        try {
-            $data = $this->reportService->getConsumeChopsRecords($request);
-            return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getConsumeChopsRecords($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getTransactionRecords(Request $request)
     {
-        try {
-            $data = $this->transactionService->listTransactions($request);
-            $data->load(TransactionConstant::BASIC_RELATIONS);
+        $data = $this->transactionService->listTransactions($request);
+        $data->load(TransactionConstant::BASIC_RELATIONS);
 
-            return $this->sendResponse(Transaction::collection($data), 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getMemberRegisterBranchDetail(Request $request)
     {
-        try {
-            $data = $this->reportService->getMemberRegisterBranchDetail($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getMemberRegisterBranchDetail($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getMemberRegisterBranchStatistics(Request $request)
     {
-        try {
-            $data = $this->reportService->getMemberRegisterBranchStatistics($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getMemberRegisterBranchStatistics($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 }

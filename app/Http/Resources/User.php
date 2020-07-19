@@ -23,7 +23,7 @@ class User extends JsonResource
             'email' => $resource->email,
             'created_at' => $resource->created_at,
             'roles' => Role::collection($resource->whenLoaded('roles')),
-            'permissions' => $resource->whenLoaded('permissions')
+            'permissions' => Permission::collection($resource->whenLoaded('permissions'))
         ];
     }
 }
