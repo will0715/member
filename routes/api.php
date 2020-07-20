@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 // for customer login
 Route::post('/auth/login', 'UserAPIController@login');
 
-Route::group(['prefix' => 'client'], function () {
+Route::namespace('Client')->prefix('client')->group(function () {
     Route::middleware(['customer.switch'])->group(function () {
         Route::post('members', 'MemberAPIController@store');
     });
