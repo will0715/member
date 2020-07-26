@@ -68,4 +68,9 @@ class MemberRepository extends BaseRepository
     {
         return $this->findByField('phone', $phone)->first();
     }
+
+    public function findValid()
+    {
+        return $this->findWhere(['status' => 1]);
+    }
 }

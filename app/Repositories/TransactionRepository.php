@@ -49,6 +49,11 @@ class TransactionRepository extends BaseRepository
         return Transaction::class;
     }
 
+    public function findValid()
+    {
+        return $this->findWhere(['status' => 1]);
+    }
+
     public function findByOrderId($orderId)
     {
         return $this->findByField('order_id', $orderId)->first();

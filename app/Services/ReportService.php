@@ -9,6 +9,7 @@ use App\Constants\TransactionConstant;
 use App\Criterias\LimitOffsetCriteria;
 use App\Criterias\RequestDateRangeCriteria;
 use App\Criterias\OnlyTodayCriteria;
+use App\Helpers\ReportHelper;
 use App\Repositories\ChopExpiredSettingRepository;
 use App\Repositories\ChopRecordRepository;
 use App\Repositories\ChopRepository;
@@ -54,33 +55,29 @@ class ReportService
         $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
         $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
 
-        $memberCount = $this->memberRepository->findWhere(['status' => 1])->count();
+        $memberCount = $this->memberRepository->findValid()->count();
         $branchCount = $this->branchRepository->count();
-        // $totalChops = $this->chopRepository->sum('chops');
-        // $totalBalance = $this->prepaidCardRepository->sum('balance');
-        $prepaidCardTopup = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->sum('topup');
-        $prepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])->sum('payment');
-        $voidPrepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT])->sum('payment');
+        $prepaidCardTopup = $this->prepaidCardRecordRepository->findTopup()->sum('topup');
+        $prepaidCardPayment = $this->prepaidCardRecordRepository->findPayment()->sum('payment');
+        $voidPrepaidCardPayment = $this->prepaidCardRecordRepository->findVoidPayment()->sum('payment');
 
-        $manualAddChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_ADD_CHOPS])->sum('chops');
-        $earnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_EARN_CHOPS])->sum('chops');
-        $voidEarnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS])->sum('chops');
-        $consumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS])->sum('consume_chops');
-        $voidConsumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS])->sum('consume_chops');
+        $manualAddChops = $this->chopRecordRepository->findManualAddChops()->sum('chops');
+        $earnChops = $this->chopRecordRepository->findEarnChops()->sum('chops');
+        $voidEarnChops = $this->chopRecordRepository->findVoidEarnChops()->sum('chops');
+        $consumeChops = $this->chopRecordRepository->findConsumeChops()->sum('consume_chops');
+        $voidConsumeChops = $this->chopRecordRepository->findVoidConsumeChops()->sum('consume_chops');
 
-        $totalTransactionCount = $this->transactionRepository->findWhere(['status' => 1])->count();
-        $totalAmount = $this->transactionRepository->findWhere(['status' => 1])->sum('amount');
+        $totalTransactionCount = $this->transactionRepository->findValid()->count();
+        $totalAmount = $this->transactionRepository->findValid()->sum('amount');
 
         return [
             'member_count' => (int)$memberCount,
             'branch_count' => (int)$branchCount,
-            // 'total_chops' => (int)$totalChops,
             'manual_add_chops' => (int)$manualAddChops,
             'earn_chops' => (int)($earnChops + $voidEarnChops),
             'consume_chops' => (int)($consumeChops + $voidConsumeChops),
             'total_amount' => $totalAmount,
             'total_transaction_count' => $totalTransactionCount,
-            // 'total_balance' => (int)$totalBalance,
             'total_topup' => (int)$prepaidCardTopup,
             'total_paymnet' => (int)($prepaidCardPayment + $voidPrepaidCardPayment),
         ];
@@ -96,43 +93,111 @@ class ReportService
         $this->chopRecordRepository->pushCriteria(new OnlyTodayCriteria());
         $this->transactionRepository->pushCriteria(new OnlyTodayCriteria());
         
-        $memberCount = $this->memberRepository->findWhere(['status' => 1])->count();
+        $memberCount = $this->memberRepository->findValid()->count();
         $branchCount = $this->branchRepository->count();
-        // $totalChops = $this->chopRepository->sum('chops');
-        // $totalBalance = $this->prepaidCardRepository->sum('balance');
-        $prepaidCardTopup = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->sum('topup');
-        $prepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])->sum('payment');
-        $voidPrepaidCardPayment = $this->prepaidCardRecordRepository->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT])->sum('payment');
+        $prepaidCardTopup = $this->prepaidCardRecordRepository->findTopup()->sum('topup');
+        $prepaidCardPayment = $this->prepaidCardRecordRepository->findPayment()->sum('payment');
+        $voidPrepaidCardPayment = $this->prepaidCardRecordRepository->findVoidPayment()->sum('payment');
 
-        $manualAddChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_ADD_CHOPS])->sum('chops');
-        $earnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_EARN_CHOPS])->sum('chops');
-        $voidEarnChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS])->sum('chops');
-        $consumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS])->sum('consume_chops');
-        $voidConsumeChops = $this->chopRecordRepository->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS])->sum('consume_chops');
+        $manualAddChops = $this->chopRecordRepository->findManualAddChops()->sum('chops');
+        $earnChops = $this->chopRecordRepository->findEarnChops()->sum('chops');
+        $voidEarnChops = $this->chopRecordRepository->findVoidEarnChops()->sum('chops');
+        $consumeChops = $this->chopRecordRepository->findConsumeChops()->sum('consume_chops');
+        $voidConsumeChops = $this->chopRecordRepository->findVoidConsumeChops()->sum('consume_chops');
 
-        $totalTransactionCount = $this->transactionRepository->findWhere(['status' => 1])->count();
-        $totalAmount = $this->transactionRepository->findWhere(['status' => 1])->sum('amount');
+        $totalTransactionCount = $this->transactionRepository->findValid()->count();
+        $totalAmount = $this->transactionRepository->findValid()->sum('amount');
 
         return [
             'member_count' => (int)$memberCount,
             'branch_count' => (int)$branchCount,
-            // 'total_chops' => (int)$totalChops,
             'manual_add_chops' => (int)$manualAddChops,
             'earn_chops' => (int)($earnChops + $voidEarnChops),
             'consume_chops' => (int)($consumeChops + $voidConsumeChops),
             'total_amount' => $totalAmount,
             'total_transaction_count' => $totalTransactionCount,
-            // 'total_balance' => (int)$totalBalance,
             'total_topup' => (int)$prepaidCardTopup,
             'total_paymnet' => (int)($prepaidCardPayment + $voidPrepaidCardPayment),
         ];
+    }
+
+    public function getMemberCountByDate($request)
+    {
+        $this->memberRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $memberCount = $this->memberRepository->findValid()->countBy(ReportHelper::groupByCreatedDate());
+
+        return $memberCount;
+    }
+
+    public function getBranchCountByDate($request)
+    {
+        $this->branchRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $branchCount = $this->branchRepository->all()->countBy(ReportHelper::groupByCreatedDate());
+
+        return $branchCount;
+    }
+
+    public function getEarnChopsByDate($request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $chopRecord = $this->chopRecordRepository->findAllAddChops()->groupBy(ReportHelper::groupByCreatedDate())->map(ReportHelper::sumByColumn('chops'));
+
+        return $chopRecord;
+    }
+
+    public function getConsumeChopsByDate($request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $chopRecord = $this->chopRecordRepository->findAllConsumeChops()->groupBy(ReportHelper::groupByCreatedDate())->map(ReportHelper::sumByColumn('consume_chops'));
+
+        return $chopRecord;
+    }
+
+    public function getTransactionCountByDate($request)
+    {
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $transactionCount = $this->transactionRepository->findValid()->countBy(ReportHelper::groupByCreatedDate());
+
+        return $transactionCount;
+    }
+
+    public function getTransactionAmountByDate($request)
+    {
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $transactionAmount = $this->transactionRepository->findValid()->groupBy(ReportHelper::groupByCreatedDate())->map(ReportHelper::sumByColumn('amount'));
+
+        return $transactionAmount;
+    }
+
+    public function getPrepaidCardTopupByDate($request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $prepaidCardTopup = $this->prepaidCardRecordRepository->findTopup()->groupBy(ReportHelper::groupByCreatedDate())->map(ReportHelper::sumByColumn('topup'));
+
+        return $prepaidCardTopup;
+    }
+
+    public function getPrepaidCardPaymentByDate($request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+
+        $prepaidCardTopup = $this->prepaidCardRecordRepository->findPayment()->groupBy(ReportHelper::groupByCreatedDate())->map(ReportHelper::sumByColumn('payment'));
+
+        return $prepaidCardTopup;
     }
 
     public function getRankMemberSummary(Request $request)
     {
         $this->memberRepository->pushCriteria(new RequestDateRangeCriteria($request));
 
-        $member = $this->memberRepository->with(['rank'])->findWhere(['status' => 1]);
+        $member = $this->memberRepository->with(['rank'])->findValid();
         $memberCount = $member->countBy(function ($item) {
             return optional($item->rank)->name;
         });
@@ -191,7 +256,7 @@ class ReportService
         $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
         $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
         $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $prepaidCardRecord = $this->prepaidCardRecordRepository->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP])->with(RecordConstant::BASIC_RELATIONS)->all();
+        $prepaidCardRecord = $this->prepaidCardRecordRepository->with(RecordConstant::BASIC_RELATIONS)->findTopup()->all();
 
         return $prepaidCardRecord;
     }
@@ -202,8 +267,8 @@ class ReportService
         $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
         $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
         $prepaidCardRecord = $this->prepaidCardRecordRepository
-                            ->whereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT])
                             ->with(RecordConstant::BASIC_RELATIONS)
+                            ->findPayment()
                             ->all();
 
         return $prepaidCardRecord;
@@ -215,12 +280,8 @@ class ReportService
         $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
         $this->chopRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
         $chopRecord = $this->chopRecordRepository
-                        ->whereIn('type', [
-                            ChopRecordConstant::CHOP_RECORD_ADD_CHOPS, 
-                            ChopRecordConstant::CHOP_RECORD_EARN_CHOPS,
-                            ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS
-                        ])
                         ->with(RecordConstant::BASIC_RELATIONS)
+                        ->findAllAddChops()
                         ->all();
 
         return $chopRecord;
@@ -232,11 +293,8 @@ class ReportService
         $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
         $this->chopRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
         $chopRecord = $this->chopRecordRepository
-                        ->whereIn('type', [
-                            ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS, 
-                            ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS
-                        ])
                         ->with(RecordConstant::BASIC_RELATIONS)
+                        ->findAllConsumeChops()
                         ->all();
 
         return $chopRecord;

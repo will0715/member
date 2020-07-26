@@ -199,4 +199,52 @@ class ReportAPIController extends AppBaseController
         $data = $this->reportService->getMemberRegisterBranchStatistics($request);
         return $this->sendResponse($data, 'retrieved successfully');
     }
+
+    public function getMemberCountByDate(Request $request)
+    {
+        $data = $this->reportService->getMemberCountByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getBranchCountByDate(Request $request)
+    {
+        $data = $this->reportService->getBranchCountByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getEarnChopsByDate(Request $request)
+    {
+        $data = $this->reportService->getEarnChopsByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getConsumeChopsByDate(Request $request)
+    {
+        $data = $this->reportService->getConsumeChopsByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getTransactionCountByDate(Request $request)
+    {
+        $data = $this->reportService->getTransactionCountByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getTransactionAmountByDate(Request $request)
+    {
+        $data = $this->reportService->getTransactionAmountByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getPrepaidCardTopupByDate(Request $request)
+    {
+        $data = $this->reportService->getPrepaidCardTopupByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
+
+    public function getPrepaidCardPaymentByDate(Request $request)
+    {
+        $data = $this->reportService->getPrepaidCardPaymentByDate($request);
+        return $this->sendResponse($data, 'retrieved successfully');
+    }
 }

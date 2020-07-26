@@ -85,4 +85,19 @@ class PrepaidCardRecordRepository extends BaseRepository
             'remark' => $data['remark'],
         ]);
     }
+
+    public function findTopup()
+    {
+        return $this->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_TOPUP]);
+    }
+
+    public function findPayment()
+    {
+        return $this->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT]);
+    }
+
+    public function findVoidPayment()
+    {
+        return $this->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT]);
+    }
 }
