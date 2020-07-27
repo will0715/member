@@ -86,7 +86,7 @@ class PrepaidCardService
         $newBalance = $memberPrepaidCard ? $memberPrepaidCard->balance - $payment : -1 * $payment;
 
         if ($newBalance < 0) {
-            throw new PrepaidCardsNotEnoughException('balance not enough');
+            throw new PrepaidCardsNotEnoughException();
         }
 
         $newMemberPrepaidCard = $this->prepaidCardRepository->update([
@@ -109,7 +109,7 @@ class PrepaidCardService
 
         $record = $this->prepaidCardRecordRepository->find($id);
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('payment already voided');
+            throw new AlreadyVoidedException();
         }
 
         // need lock row for update

@@ -60,7 +60,7 @@ class RoleService
     {
         $role = $this->findRole($id);
         if ($role->name === 'admin') {
-            throw new EditAdminException('can not edit admin role');
+            throw new EditAdminException();
         }
         $role->syncPermissions($permissions);
 

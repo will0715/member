@@ -30,7 +30,7 @@ class EarnChopRuleService
     {
         $earnChopRule = $this->earnChopRuleRepository->findWithoutFail($id);
         if (!$earnChopRule) {
-            throw new ResourceNotFoundException('Earn Consume rule Not Found');
+            throw new ResourceNotFoundException('Earn Chop Rule Not Found');
         }
         return $earnChopRule;
     }
