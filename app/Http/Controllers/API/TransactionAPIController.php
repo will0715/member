@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Constants\TransactionConstant;
 use App\Constants\RecordConstant;
 use App\Http\Controllers\AppBaseController;
-use App\Exceptions\TransactionDuplicateException;
 use App\Http\Requests\API\CreateTransactionAPIRequest;
 use App\Http\Requests\API\UpdateTransactionAPIRequest;
 use App\Http\Resources\Transaction;

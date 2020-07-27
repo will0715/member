@@ -159,7 +159,7 @@ class ChopService
         
         $totalChops = $this->getTotalChops($memberId, $branchId);
         if ($totalChops < $consumeChops) {
-            throw new ChopsNotEnoughException('Chops not enough');
+            throw new ChopsNotEnoughException();
         }
         
         // consume chop
@@ -188,10 +188,10 @@ class ChopService
         $remark = Arr::get($attributes, 'remark');
         $record = $this->chopRecordRepository->find($id);
         if ($record->type != ChopRecordConstant::CHOP_RECORD_EARN_CHOPS) {
-            throw new CannotVoidException('Can\'t not void not earn record');
+            throw new CannotVoidException();
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('consume already voided');
+            throw new AlreadyVoidedException();
         }
         $memberId = $record->member_id;
         $branchId = $record->branch_id;
@@ -222,10 +222,10 @@ class ChopService
         $remark = Arr::get($attributes, 'remark');
         $record = $this->chopRecordRepository->find($id);
         if ($record->type != ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS) {
-            throw new CannotVoidException('Can\'t not void not consume record');
+            throw new CannotVoidException();
         }
         if (!empty($record->voidRecord)) {
-            throw new AlreadyVoidedException('consume already voided');
+            throw new AlreadyVoidedException();
         }
         $memberId = $record->member_id;
         $branchId = $record->branch_id;

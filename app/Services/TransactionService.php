@@ -89,7 +89,7 @@ class TransactionService
         $orderId = $transactionData['order_id'];
         $order = $this->findByOrderId($orderId);
         if ($order) {
-            throw new TransactionDuplicateException($orderId . ' is already exist');
+            throw new TransactionDuplicateException($orderId);
         }
 
         $transaction = $this->transactionRepository->createTransaction([
@@ -150,7 +150,7 @@ class TransactionService
     {
         $transaction = $this->transactionRepository->find($id);
         if (!$transaction->isValid()) {
-            throw new AlreadyVoidedException('Transaction already been voided');
+            throw new AlreadyVoidedException();
         }
         $voidTransaction = $this->transactionRepository->voidTransaction($transaction->id);
 

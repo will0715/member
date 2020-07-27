@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Criterias\ChopRuleValidCriteria;
 use App\Constants\PaymentTypeConstant;
-use App\Exceptions\TransactionDuplicateException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Repositories\EarnChopRuleRepository;
 use App\Models\Member;
