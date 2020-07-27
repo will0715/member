@@ -47,9 +47,6 @@ class MemberChopServiceManager
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
-        if (!$member) {
-            throw new ResourceNotFoundException('Member not exist');
-        }
 
         $records = $this->chopService->findChopsRecordsByMember($member->id);
 

@@ -28,9 +28,6 @@ class MemberPrepaidCardServiceManager {
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
-        if (!$member) {
-            throw new ResourceNotFoundException('Member not exist');
-        }
 
         return $member->prepaidCard;
     }
@@ -41,9 +38,6 @@ class MemberPrepaidCardServiceManager {
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
-        if (!$member) {
-            throw new ResourceNotFoundException('Member not exist');
-        }
 
         $records = $this->prepaidCardService->findPrepaidcardRecordsByMember($member->id);
 

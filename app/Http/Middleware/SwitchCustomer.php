@@ -37,7 +37,7 @@ class SwitchCustomer
         $dbSchemaName = $customer->getSchema();
 
         if (!PGSchema::schemaExists($dbSchemaName, 'pgsql')) {
-            abort(403, 'Customer is not exist');
+            abort(403, 'Customer Not Found');
         }
 
         PGSchema::schema($dbSchemaName, 'pgsql');

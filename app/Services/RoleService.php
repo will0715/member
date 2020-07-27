@@ -34,7 +34,7 @@ class RoleService
     {
         $role = $this->roleRepository->findWithoutFail($id);
         if (!$role) {
-            throw new ResourceNotFoundException('Role not exist');
+            throw new ResourceNotFoundException('Role Not Found');
         }
         return $role;
     }

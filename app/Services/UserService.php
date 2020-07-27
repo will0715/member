@@ -34,7 +34,7 @@ class UserService
     {
         $user = $this->userRepository->findWithoutFail($id);
         if (!$user) {
-            throw new ResourceNotFoundException('User not exist');
+            throw new ResourceNotFoundException('User Not Found');
         }
         return $user;
     }
