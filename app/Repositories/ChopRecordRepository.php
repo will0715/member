@@ -113,4 +113,46 @@ class ChopRecordRepository extends BaseRepository
             'remark' => Arr::get($data, 'remark'),
         ]);
     }
+
+    public function findManualAddChops()
+    {
+        return $this->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_ADD_CHOPS]);
+    }
+
+    public function findEarnChops()
+    {
+        return $this->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_EARN_CHOPS]);
+    }
+
+    public function findVoidEarnChops()
+    {
+        return $this->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS]);
+    }
+
+    public function findConsumeChops()
+    {
+        return $this->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS]);
+    }
+
+    public function findVoidConsumeChops()
+    {
+        return $this->findWhereIn('type', [ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS]);
+    }
+
+    public function findAllAddChops()
+    {
+        return $this->findWhereIn('type', [
+            ChopRecordConstant::CHOP_RECORD_ADD_CHOPS, 
+            ChopRecordConstant::CHOP_RECORD_EARN_CHOPS,
+            ChopRecordConstant::CHOP_RECORD_VOID_EARN_CHOPS
+        ]);
+    }
+
+    public function findAllConsumeChops()
+    {
+        return $this->findWhereIn('type', [
+            ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS, 
+            ChopRecordConstant::CHOP_RECORD_VOID_CONSUME_CHOPS
+        ]);
+    }
 }

@@ -31,7 +31,7 @@ class RankService
     {
         $rank = $this->rankRepository->findWithoutFail($id);
         if (!$rank) {
-            throw new ResourceNotFoundException('Rank not exist');
+            throw new ResourceNotFoundException('Rank Not Found');
         }
         return $rank;
     }

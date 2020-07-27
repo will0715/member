@@ -62,7 +62,7 @@ class TransactionService
     {
         $transaction = $this->transactionRepository->findWithoutFail($id);
         if (!$transaction) {
-            throw new ResourceNotFoundException('Transaction not exist');
+            throw new ResourceNotFoundException('Transaction Not Found');
         }
         return $transaction;
     }

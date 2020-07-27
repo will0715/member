@@ -41,7 +41,7 @@ class MemberService
     {
         $member = $this->memberRepository->findWithoutFail($id);
         if (!$member) {
-            throw new ResourceNotFoundException('Member not exist');
+            throw new ResourceNotFoundException('Member Not Found');
         }
         return $member;
     }
@@ -50,7 +50,7 @@ class MemberService
     {
         $member = $this->memberRepository->findByPhone($phone);
         if (!$member) {
-            throw new ResourceNotFoundException('Member not exist');
+            throw new ResourceNotFoundException('Member Not Found');
         }
         return $member;
     }

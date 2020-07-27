@@ -63,7 +63,7 @@ class CustomerService
     {
         $customer = $this->customerRepository->findWithoutFail($id);
         if (!$customer) {
-            throw new ResourceNotFoundException('Customer not exist');
+            throw new ResourceNotFoundException('Customer Not Found');
         }
         return $customer;
     }
@@ -72,7 +72,7 @@ class CustomerService
     {
         $customer = $this->customerRepository->getByAccount($account);
         if (!$customer) {
-            throw new ResourceNotFoundException('Customer not exist');
+            throw new ResourceNotFoundException('Customer Not Found');
         }
         return $customer;
     }

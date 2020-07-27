@@ -46,6 +46,16 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
                 Route::get('/memberRegisterBranch/detail', 'ReportAPIController@getMemberRegisterBranchDetail');
                 Route::get('/memberRegisterBranch/statistics', 'ReportAPIController@getMemberRegisterBranchStatistics');
+
+                Route::get('/memberCount/groupByDate', 'ReportAPIController@getMemberCountByDate');
+                Route::get('/branchCount/groupByDate', 'ReportAPIController@getBranchCountByDate');
+                Route::get('/earnChops/groupByDate', 'ReportAPIController@getEarnChopsByDate');
+                Route::get('/consumeChops/groupByDate', 'ReportAPIController@getConsumeChopsByDate');
+                Route::get('/transactions/groupByDate', 'ReportAPIController@getTransactionCountByDate');
+                Route::get('/transactionsAmount/groupByDate', 'ReportAPIController@getTransactionAmountByDate');
+                Route::get('/topup/groupByDate', 'ReportAPIController@getPrepaidCardTopupByDate');
+                Route::get('/payment/groupByDate', 'ReportAPIController@getPrepaidCardPaymentByDate');
+                
             });
 
             Route::get('/user/me', 'UserAPIController@me');
