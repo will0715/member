@@ -30,7 +30,7 @@ class ConsumeChopRuleService
     {
         $consumeChopRule = $this->consumeChopRuleRepository->findWithoutFail($id);
         if (!$consumeChopRule) {
-            throw new ResourceNotFoundException('Chop Consume rule Not Found');
+            throw new ResourceNotFoundException('Chop Consume Rule Not Found');
         }
         return $consumeChopRule;
     }
