@@ -54,7 +54,7 @@ class UserService
     public function updateUser($data, $id)
     {
         $roleId = Arr::get($data, 'role');
-        $user = $this->userRepository->update($data, $id);
+        $user = $this->userRepository->updateUser($data, $id);
 
         if ($roleId) {
             $this->setRole($user, $roleId);
