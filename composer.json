@@ -20,6 +20,7 @@
         "laravel/tinker": "^2.0",
         "laravelcollective/html": "^6.0",
         "poyi/pgschema": "dev-master",
+        "predis/predis": "^1.1",
         "prettus/l5-repository": "^2.6",
         "spatie/laravel-permission": "^3.11"
     },
