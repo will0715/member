@@ -41,23 +41,25 @@ class UserService
 
     public function newUser($data)
     {
-        $roleId = Arr::get($data, 'role');
-        $user = $this->userRepository->create($data);
+        $roleId = Arr::get($data, 'role_id');
+        $user = $this->userRepository->newUser($data);
 
-        if ($roleId) {
-            $this->setRole($user, $roleId);
+        // 預設使用與創建者一樣的權限
+        if (!$roleId) {
+            $roleId = Auth::user()->roles->pluck('id');
         }
+        $this->setRoles($user, Arr::wrap($roleId));
 
         return $user;
     }
 
     public function updateUser($data, $id)
     {
-        $roleId = Arr::get($data, 'role');
+        $roleId = Arr::get($data, 'role_id');
         $user = $this->userRepository->updateUser($data, $id);
 
         if ($roleId) {
-            $this->setRole($user, $roleId);
+            $this->setRoles($user, Arr::wrap($roleId));
         }
 
         return $user;
@@ -68,10 +70,10 @@ class UserService
         return $this->userRepository->delete($id);
     }
 
-    public function setRole($user, $roleId)
+    public function setRoles($user, $roleIds)
     {
-        $role = $this->roleRepository->find($roleId);
-        $user->assignRole($role->name);
+        $roles = $this->roleRepository->findWhereIn('id', $roleIds);
+        $user->syncRoles([$roles]);
 
         return $user;
     }

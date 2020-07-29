@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateCustomerAPIRequest;
-use App\Http\Requests\API\UpdateBranchAPIRequest;
+use App\Http\Requests\API\UpdateCustomerAPIRequest;
 use App\Http\Requests\API\UpdateAdminRolePermissionRequest;
 use App\Http\Resources\Customer;
 use App\Services\CustomerService;
@@ -42,8 +42,8 @@ class CustomerAPIController extends AppBaseController
     }
 
     /**
-     * Store a newly created Role in storage.
-     * POST /roles
+     * Store a newly created Customer in storage.
+     * POST /customers
      *
      * @param CreateCustomerAPIRequest $request
      *
@@ -64,6 +64,54 @@ class CustomerAPIController extends AppBaseController
             Log::error($e);
             throw $e;
         }
+    }
+
+    /**
+     * Display the specified Customer.
+     * GET|HEAD /customers/{id}
+     *
+     * @param int $id
+     *
+     * @return Response
+     */
+    public function show($id)
+    {
+        $customer = $this->customerService->findCustomer($id);
+
+        return $this->sendResponse(new Customer($customer), 'Customer retrieved successfully');
+    }
+
+    /**
+     * Update the specified Customer in storage.
+     * PUT/PATCH /customers/{id}
+     *
+     * @param int $id
+     * @param UpdateCustomerAPIRequest $request
+     *
+     * @return Response
+     */
+    public function update($id, UpdateCustomerAPIRequest $request)
+    {
+        $input = $request->all();
+
+        $customer = $this->customerService->updateCustomer($input, $id);
+        return $this->sendResponse(new Customer($customer), 'Customer updated successfully');
+    }
+
+    /**
+     * Remove the specified Customer from storage.
+     * DELETE /customers/{id}
+     *
+     * @param int $id
+     *
+     * @throws \Exception
+     *
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        $customer = $this->customerService->deleteCustomer($id);
+        return $this->sendSuccess('Customer deleted successfully');
     }
 
     public function setAdminRolePermission(UpdateAdminRolePermissionRequest $request)

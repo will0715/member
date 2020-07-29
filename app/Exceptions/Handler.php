@@ -119,6 +119,7 @@ class Handler extends ExceptionHandler
         if (config('app.debug')) {
             $response['trace'] = $exception->getTrace();
             $response['code'] = $exception->getCode();
+            dd($exception);
         }
 
         return response()->json($response, $statusCode);

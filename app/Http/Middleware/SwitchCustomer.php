@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Repositories\CustomerRepository;
 use App\Utils\CustomResponseUtil;
 use App\Helpers\CustomerHelper;
+use App\Helpers\CustomerCacheHelper;
 use Illuminate\Support\Facades\Config;
 use Closure;
 use Poyi\PGSchema\Facades\PGSchema;
@@ -44,6 +45,7 @@ class SwitchCustomer
         $request->merge(['_customerName' => $customer->name]);
         $request->merge(['_customer' => $customer]);
         CustomerHelper::setCustomer($customer);
+        CustomerCacheHelper::setPrefix($customer->name);
 
         return $next($request);
     }
