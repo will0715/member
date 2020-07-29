@@ -29,8 +29,10 @@ Route::group(['prefix' => 'v1'], function () {
     Route::group(['middleware' => 'auth:api'], function(){
         
         Route::middleware(['customer.switch'])->group(function () {
-            Route::patch('customers/adminPermission', 'CustomerAPIController@setAdminRolePermission');
-            Route::resource('customers', 'CustomerAPIController');
+            Route::middleware(['can:super-admin'])->group(function () {
+                Route::patch('customers/adminPermission', 'CustomerAPIController@setAdminRolePermission');
+                Route::resource('customers', 'CustomerAPIController');
+            });
 
             Route::group(['prefix' => 'report'], function () {
                 Route::get('/dashboard', 'ReportAPIController@dashboard');
@@ -39,14 +41,6 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/memberGenderTransactionAmountPercentageSummary', 'ReportAPIController@memberGenderTransactionAmountPercentageSummary');
                 Route::get('/branchChopConsumeChopSummary', 'ReportAPIController@branchChopConsumeChopSummary');
                 Route::get('/branchRegisterMemberSummary', 'ReportAPIController@branchRegisterMemberSummary');
-                Route::get('/prepaidcards/topup', 'ReportAPIController@getPrepaidcardTopupRecords');
-                Route::get('/prepaidcards/payment', 'ReportAPIController@getPrepaidcardPaymentRecords');
-                Route::get('/chops/add', 'ReportAPIController@getAddChopsRecords');
-                Route::get('/chops/consume', 'ReportAPIController@getConsumeChopsRecords');
-                Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
-                Route::get('/memberRegisterBranch/detail', 'ReportAPIController@getMemberRegisterBranchDetail');
-                Route::get('/memberRegisterBranch/statistics', 'ReportAPIController@getMemberRegisterBranchStatistics');
-
                 Route::get('/memberCount/groupByDate', 'ReportAPIController@getMemberCountByDate');
                 Route::get('/branchCount/groupByDate', 'ReportAPIController@getBranchCountByDate');
                 Route::get('/earnChops/groupByDate', 'ReportAPIController@getEarnChopsByDate');
@@ -55,12 +49,22 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/transactionsAmount/groupByDate', 'ReportAPIController@getTransactionAmountByDate');
                 Route::get('/topup/groupByDate', 'ReportAPIController@getPrepaidCardTopupByDate');
                 Route::get('/payment/groupByDate', 'ReportAPIController@getPrepaidCardPaymentByDate');
+
+                Route::middleware(['can:view-report'])->group(function () {
+                    Route::get('/prepaidcards/topup', 'ReportAPIController@getPrepaidcardTopupRecords');
+                    Route::get('/prepaidcards/payment', 'ReportAPIController@getPrepaidcardPaymentRecords');
+                    Route::get('/chops/add', 'ReportAPIController@getAddChopsRecords');
+                    Route::get('/chops/consume', 'ReportAPIController@getConsumeChopsRecords');
+                    Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
+                    Route::get('/memberRegisterBranch/detail', 'ReportAPIController@getMemberRegisterBranchDetail');
+                    Route::get('/memberRegisterBranch/statistics', 'ReportAPIController@getMemberRegisterBranchStatistics');
+                });
                 
             });
 
             Route::get('/user/me', 'UserAPIController@me');
             
-            Route::group(['prefix' => 'members'], function () {
+            Route::middleware(['can:view-member'])->prefix('members')->group(function () {
                 Route::post('/query', 'MemberAPIController@queryByPhone');
                 Route::get('/{phone}/chops', 'MemberAPIController@getChops');
                 Route::get('/{phone}/chopsDetail', 'MemberAPIController@getChopsDetail');
@@ -70,22 +74,27 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/{phone}/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
                 Route::get('/{phone}/information', 'MemberAPIController@information');
                 Route::get('/{id}/detail', 'MemberAPIController@detail');
+                Route::resource('/', 'MemberAPIController');
+                Route::patch('/{phone}/byPhone', 'MemberAPIController@updateByPhone');
+                Route::delete('/{phone}/force', 'MemberAPIController@forceDelete');
             });
-            Route::resource('members', 'MemberAPIController');
-            Route::patch('/members/{phone}/byPhone', 'MemberAPIController@updateByPhone');
-            Route::delete('/members/{phone}/force', 'MemberAPIController@forceDelete');
     
-            Route::get('/earnChopRules', 'EarnChopRuleAPIController@index');
-            Route::get('/consumeChopRules', 'ConsumeChopRuleAPIController@index');
+            Route::middleware(['can:view-rule'])->group(function () {
+                Route::resource('consumeChopRules', 'ConsumeChopRuleAPIController');
+                Route::resource('earnChopRules', 'EarnChopRuleAPIController');
+            });
 
-            Route::post('/chops/add', 'ChopAPIController@manualAddChops');
-            Route::post('/chops/earn', 'ChopAPIController@earnChops');
-            Route::post('/chops/earn/{id}/void', 'ChopAPIController@voidEarnChops');
-            Route::post('/chops/consume', 'ChopAPIController@consumeChops');
-            Route::post('/chops/consume/{id}/void', 'ChopAPIController@voidConsumeChops');
-            Route::delete('/chops/consume/{id}', 'ChopAPIController@voidConsumeChops');
+            Route::middleware(['can:view-chops'])->prefix('chops')->group(function () {
+                Route::post('/add', 'ChopAPIController@manualAddChops');
+                Route::post('/earn', 'ChopAPIController@earnChops');
+                Route::post('/earn/{id}/void', 'ChopAPIController@voidEarnChops');
+                Route::post('/consume', 'ChopAPIController@consumeChops');
+                Route::post('/consume/{id}/void', 'ChopAPIController@voidConsumeChops');
+                Route::delete('/consume/{id}', 'ChopAPIController@voidConsumeChops');
+                Route::resource('/', 'ChopAPIController');
+            });
 
-            Route::group(['prefix' => 'prepaidcards'], function () {
+            Route::middleware(['can:view-chops'])->prefix('prepaidcards')->group(function () {
                 Route::get('/', 'PrepaidCardAPIController@index');
                 Route::post('/topup', 'PrepaidCardAPIController@topup');
                 Route::post('/payment', 'PrepaidCardAPIController@payment');
@@ -93,26 +102,32 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::delete('/payment/{id}', 'PrepaidCardAPIController@voidPayment');
             });
 
-            Route::resource('roles', 'RoleAPIController');
-            Route::patch('/roles/{id}/permissions', 'RoleAPIController@setPermission');
+            Route::middleware(['can:view-user'])->group(function () {
+                Route::resource('roles', 'RoleAPIController');
+                Route::patch('/roles/{id}/permissions', 'RoleAPIController@setPermission');
+            });
     
-            Route::resource('branches', 'BranchAPIController');
+            Route::middleware(['can:view-branch'])->group(function () {
+                Route::resource('branches', 'BranchAPIController');
+            });
     
-            Route::resource('ranks', 'RankAPIController');
-    
-            Route::resource('consumeChopRules', 'ConsumeChopRuleAPIController');
+            Route::middleware(['can:view-rank'])->group(function () {
+                Route::resource('ranks', 'RankAPIController');
+            });
             
-            Route::resource('earnChopRules', 'EarnChopRuleAPIController');
-            
-            Route::post('/transactions/withoutEarnChops', 'TransactionAPIController@newTransactionWithoutEarnChops');
-            Route::resource('transactions', 'TransactionAPIController');
-            Route::post('/transactions/{id}/void', 'TransactionAPIController@destroy');
+            Route::middleware(['can:view-branch'])->prefix('transactions')->group(function () {
+                Route::post('/withoutEarnChops', 'TransactionAPIController@newTransactionWithoutEarnChops');
+                Route::resource('', 'TransactionAPIController');
+                Route::post('/{id}/void', 'TransactionAPIController@destroy');
+            });
     
-            Route::resource('chopExpiredSettings', 'ChopExpiredSettingAPIController');
+            Route::middleware(['can:view-chops'])->group(function () {
+                Route::resource('chopExpiredSettings', 'ChopExpiredSettingAPIController');
+            });
     
-            Route::resource('chops', 'ChopAPIController');
-    
-            Route::resource('users', 'UserAPIController');
+            Route::middleware(['can:view-user'])->group(function () {
+                Route::resource('users', 'UserAPIController');
+            });
         });
     });
 });

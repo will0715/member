@@ -14,10 +14,12 @@ use App\Repositories\RankRepository;
 use App\Repositories\ChopExpiredSettingRepository;
 use App\Services\RoleService;
 use App\Helpers\CustomerHelper;
+use App\Helpers\CustomerCacheHelper;
 use App\Events\NewCustomer;
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\Customer;
 use Poyi\PGSchema\Facades\PGSchema;
+use Spatie\Permission\PermissionRegistrar;
 use Auth;
 use Artisan;
 use Cache;
@@ -115,6 +117,9 @@ class CustomerService
 
         // TODO: 移除客戶下所有未在list中的權限
 
+        // clear cache
+        $this->clearCustomerPermissionCache($customer);
+
         return $adminRole;
     }
 
@@ -165,5 +170,13 @@ class CustomerService
         $chopExpiredSetting = $this->chopExpiredSettingRepository->create([
             'expired_date' => 365,
         ]);
+    }
+
+    private function clearCustomerPermissionCache($customer)
+    {
+        $currentCustomer = CustomerHelper::getCustomer();
+        CustomerCacheHelper::setPrefix($customer->name);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        CustomerCacheHelper::setPrefix($currentCustomer->name);
     }
 }

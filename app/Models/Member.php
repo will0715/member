@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Uuid;
 use App\Models\BaseModel as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Passport\HasApiTokens;
@@ -26,6 +27,7 @@ class Member extends Authenticatable
 {
     use SoftDeletes;
     use HasApiTokens, Notifiable;
+    use Uuid;
 
     public $incrementing = false;
     protected $keyType = 'string';
