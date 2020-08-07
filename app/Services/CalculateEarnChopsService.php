@@ -42,7 +42,7 @@ class CalculateEarnChopsService
             $chops = 0;
 
             // 兌點後無法繼續累點
-            if ($earnChopRule->earn_chops_after_consume && $consumeChops != 0) {
+            if (!$earnChopRule->earn_chops_after_consume && $consumeChops != 0) {
                 continue;
             }
 
