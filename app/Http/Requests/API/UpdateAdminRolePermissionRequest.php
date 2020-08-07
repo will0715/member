@@ -25,7 +25,6 @@ class UpdateAdminRolePermissionRequest extends APIRequest
     public function rules()
     {
         return [
-            'customer' => 'required',
             'permissions' => 'required|array',
             'permissions.*' => 'string'
         ];

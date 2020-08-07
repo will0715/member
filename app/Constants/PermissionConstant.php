@@ -10,10 +10,6 @@ class PermissionConstant {
             'view-user',
             'edit-user'
         ],
-        'role' => [
-            'view-role',
-            'edit-role'
-        ],
         'member' => [
             'view-member',
             'edit-member'

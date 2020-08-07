@@ -104,11 +104,20 @@ class CustomerService
         return $this->customerRepository->delete($id);
     }
 
-    public function setAdminRolePermission($data)
+    public function getAdminRolePermission($id)
     {
-        $customerAccount = $data['customer'];
+        $customer = $this->findCustomer($id);
+        $schema = $customer->getSchema();
+
+        PGSchema::schema($schema, 'pgsql');
+        $adminRole = $this->roleRepository->findAdminRole();
+        return $adminRole;
+    }
+
+    public function setAdminRolePermission($data, $id)
+    {
         $permissions = $data['permissions'];
-        $customer = $this->findCustomerByAccount($customerAccount);
+        $customer = $this->findCustomer($id);
         $schema = $customer->getSchema();
 
         PGSchema::schema($schema, 'pgsql');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\RoleConstant;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateCustomerAPIRequest;
 use App\Http\Requests\API\UpdateCustomerAPIRequest;
@@ -114,11 +115,19 @@ class CustomerAPIController extends AppBaseController
         return $this->sendSuccess('Customer deleted successfully');
     }
 
-    public function setAdminRolePermission(UpdateAdminRolePermissionRequest $request)
+    public function getAdminRolePermission($id)
+    {
+        $role = $this->customerService->getAdminRolePermission($id);
+        $role->load(RoleConstant::ROLE_RELATIONS);
+
+        return $this->sendResponse($role, 'Rule retrieved successfully');
+    }
+
+    public function setAdminRolePermission($id, UpdateAdminRolePermissionRequest $request)
     {
         $input = $request->all();
 
-        $customer = $this->customerService->setAdminRolePermission($input);
-        return $this->sendResponse($customer, 'Customers create successfully');
+        $customer = $this->customerService->setAdminRolePermission($input, $id);
+        return $this->sendResponse($customer, 'Rule update successfully');
     }
 }
