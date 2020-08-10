@@ -30,7 +30,8 @@ Route::group(['prefix' => 'v1'], function () {
         
         Route::middleware(['customer.switch'])->group(function () {
             Route::middleware(['can:super-admin'])->group(function () {
-                Route::patch('customers/adminPermission', 'CustomerAPIController@setAdminRolePermission');
+                Route::get('customers/{id}/adminPermission', 'CustomerAPIController@getAdminRolePermission');
+                Route::patch('customers/{id}/adminPermission', 'CustomerAPIController@setAdminRolePermission');
                 Route::resource('customers', 'CustomerAPIController');
             });
 

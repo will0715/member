@@ -11,6 +11,8 @@ use Prettus\Repository\Criteria\RequestCriteria;
 use App\Http\Resources\ChopRecord;
 use App\Http\Resources\PrepaidcardRecord;
 use App\Http\Resources\Transaction;
+use App\Http\Resources\Member;
+use App\Http\Resources\BranchWithMemberCount;
 use App\Criterias\LimitOffsetCriteria;
 use App\Services\ReportService;
 use App\Services\TransactionService;
@@ -63,13 +65,8 @@ class ReportAPIController extends AppBaseController
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         
-        try {
-            $data = $this->reportService->getTodayDashboardData($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getTodayDashboardData($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     /**
@@ -84,13 +81,8 @@ class ReportAPIController extends AppBaseController
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         
-        try {
-            $data = $this->reportService->getRankMemberSummary($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getRankMemberSummary($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     /**
@@ -105,13 +97,8 @@ class ReportAPIController extends AppBaseController
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         
-        try {
-            $data = $this->reportService->getMemberGenderTransactionAmountPercentageSummary($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getMemberGenderTransactionAmountPercentageSummary($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     /**
@@ -126,13 +113,8 @@ class ReportAPIController extends AppBaseController
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         
-        try {
-            $data = $this->reportService->getBranchChopConsumeChopSummary($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getBranchChopConsumeChopSummary($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     /**
@@ -147,37 +129,32 @@ class ReportAPIController extends AppBaseController
         $startAt = $request->get('start');
         $endAt = $request->get('end');
         
-        try {
-            $data = $this->reportService->getBranchRegisterMemberSummary($request);
-            return $this->sendResponse($data, 'retrieved successfully');
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->sendError('Get Dashboard Data Failed', 500);
-        }
+        $data = $this->reportService->getBranchRegisterMemberSummary($request);
+        return $this->sendResponse($data, 'retrieved successfully');
     }
 
     public function getPrepaidcardTopupRecords(Request $request)
     {
         $data = $this->reportService->getPrepaidcardTopupRecords($request);
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
     }
 
     public function getPrepaidcardPaymentRecords(Request $request)
     {
         $data = $this->reportService->getPrepaidcardPaymentRecords($request);
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
     }
 
     public function getAddChopsRecords(Request $request)
     {
         $data = $this->reportService->getAddChopsRecords($request);
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
     }
 
     public function getConsumeChopsRecords(Request $request)
     {
         $data = $this->reportService->getConsumeChopsRecords($request);
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
     }
 
     public function getTransactionRecords(Request $request)
@@ -185,19 +162,19 @@ class ReportAPIController extends AppBaseController
         $data = $this->transactionService->listTransactions($request);
         $data->load(TransactionConstant::BASIC_RELATIONS);
 
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(Transaction::collection($data), 'retrieved successfully');
     }
 
     public function getMemberRegisterBranchDetail(Request $request)
     {
         $data = $this->reportService->getMemberRegisterBranchDetail($request);
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(Member::collection($data), 'retrieved successfully');
     }
 
     public function getMemberRegisterBranchStatistics(Request $request)
     {
         $data = $this->reportService->getMemberRegisterBranchStatistics($request);
-        return $this->sendResponse($data, 'retrieved successfully');
+        return $this->sendResponse(BranchWithMemberCount::collection($data), 'retrieved successfully');
     }
 
     public function getMemberCountByDate(Request $request)
