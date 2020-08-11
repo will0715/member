@@ -11,6 +11,7 @@ use App\ServiceManagers\MemberRegisterManager;
 use App\Http\Requests\API\CreateMemberAPIRequest;
 use App\Http\Requests\API\UpdateMemberAPIRequest;
 use App\Http\Requests\API\UpdateMemberByPhoneAPIRequest;
+use App\Http\Requests\API\QueryMemberByAPIRequest;
 use App\Http\Helpers\MemberResourceHelper;
 use App\Http\Resources\Member;
 use App\Http\Resources\MemberByQuery;
@@ -163,13 +164,18 @@ class MemberAPIController extends AppBaseController
         return $this->sendSuccess('Member deleted successfully');
     }
 
-    public function queryByPhone(Request $request)
+    public function queryByPhone(QueryMemberByAPIRequest $request)
     {
-        $phone = $request->get('phone');
         $branchId = $request->get('branch_id');
+        
+        $search = $request->only([
+            'phone',
+            'card_carrier_no',
+            'invoice_carrier_no'
+        ]);
 
         $member = $this->memberChopServiceManager->getMemberWithChops([
-            'phone' => $phone,
+            'search' => $search,
             'branch_id' => $branchId
         ]);
         $member->load(MemberConstant::BASE_MEMBER_RELATIONS);

@@ -44,4 +44,34 @@ abstract class BaseRepository extends InfyOmBaseRepository
         $data->forceDelete();
         return $data;
     }
+
+    public function findBySearchableField(array $searchable)
+    {
+        $this->scopeSeachableField($searchable);
+        
+        $data = $this->model->get();
+        $this->resetModel();
+        
+        return $data;
+    }
+
+    public function findFirstBySearchableField(array $searchable)
+    {
+        $this->scopeSeachableField($searchable);
+
+        $data = $this->model->first();
+        $this->resetModel();
+        
+        return $data;
+    }
+
+    private function scopeSeachableField(array $searchable)
+    {
+        foreach ($searchable as $searchableField => $searchableValue) {
+            if (array_key_exists($searchableField, $this->getFieldsSearchable()) || 
+                in_array($searchableField, $this->getFieldsSearchable())) {
+                    $this->model = $this->model->orWhere($searchableField, $searchableValue);
+            }
+        }
+    }
 }

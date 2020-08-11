@@ -10,6 +10,8 @@ use App\Repositories\RankRepository;
 use App\Helpers\CustomerHelper;
 use App\Events\MemberRegistered;
 use App\Exceptions\ResourceNotFoundException;
+use App\Exceptions\SearchFieldEmptyException;
+use App\Models\Member;
 use Poyi\PGSchema\Facades\PGSchema;
 use Arr;
 use Auth;
@@ -49,6 +51,19 @@ class MemberService
     public function findMemberByPhone($phone)
     {
         $member = $this->memberRepository->findByPhone($phone);
+        if (!$member) {
+            throw new ResourceNotFoundException('Member Not Found');
+        }
+        return $member;
+    }
+
+    public function findMemberByQuerySearch(array $search): Member
+    {
+        if (empty($search)) {
+            throw new SearchFieldEmptyException();
+        }
+
+        $member = $this->memberRepository->findFirstBySearchableField($search);
         if (!$member) {
             throw new ResourceNotFoundException('Member Not Found');
         }

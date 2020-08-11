@@ -24,10 +24,10 @@ class MemberChopServiceManager
 
     public function getMemberWithChops($attributes)
     {
-        $phone = $attributes['phone'];
+        $search = $attributes['search'];
         $branchId = $attributes['branch_id'];
 
-        $member = $this->memberService->findMemberByPhone($phone);
+        $member = $this->memberService->findMemberByQuerySearch($search);
 
         // search branch
         $branch = $this->branchService->findBranchByCode($branchId);
@@ -35,8 +35,6 @@ class MemberChopServiceManager
         // chops branch can use
         $chops = $this->chopService->getTotalChops($member->id, $branch->id);
         $member->totalChops = $chops;
-        // $member = $member->toArray();
-        // $member['chops'] = $chops;
 
         return $member;
     }
