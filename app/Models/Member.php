@@ -61,7 +61,9 @@ class Member extends Authenticatable
         'remark',
         'rank_id',
         'status',
-        'register_branch_id'
+        'register_branch_id',
+        'card_carrier_no',
+        'invoice_carrier_no'
     ];
 
     /**
@@ -81,6 +83,8 @@ class Member extends Authenticatable
         'remark' => 'string',
         'birthday' => 'date',
         'register_branch_id' => 'string',
+        'card_carrier_no' => 'string',
+        'invoice_carrier_no' => 'string'
     ];
 
     /**
@@ -96,6 +100,8 @@ class Member extends Authenticatable
         'gender' => 'required|in:male,female,others,unknown',
         'email' => 'nullable|email',
         'birthday' => 'date',
+        'card_carrier_no' => 'max:255',
+        'invoice_carrier_no' => 'max:255'
     ];
 
     public function getFullNameAttribute()

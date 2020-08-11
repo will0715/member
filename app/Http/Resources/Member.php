@@ -28,6 +28,8 @@ class Member extends JsonResource
             'remark' => $resource->remark,
             'status' => $resource->status,
             'birthday' => $resource->birthday,
+            'card_carrier_no' => $resource->card_carrier_no,
+            'invoice_carrier_no' => $resource->invoice_carrier_no,
             'rank' => new Rank($resource->whenLoaded('rank')),
             'chops' => Chop::collection($resource->whenLoaded('chops')),
             'order_records' => Transaction::collection($resource->whenLoaded('orderRecords')),

@@ -28,6 +28,8 @@ class MemberByQuery extends JsonResource
             'remark' => $resource->remark,
             'status' => $resource->status,
             'birthday' => $resource->birthday,
+            'card_carrier_no' => $resource->card_carrier_no,
+            'invoice_carrier_no' => $resource->invoice_carrier_no,
             'rank' => new Rank($resource->whenLoaded('rank')),
             'totalChops' => $resource->totalChops,
             'created_at' => $resource->created_at,

@@ -22,11 +22,12 @@ class MemberRepository extends BaseRepository
         'phone',
         'first_name',
         'last_name',
-        'password',
         'gender',
         'email',
         'address',
-        'remark'
+        'remark',
+        'card_carrier_no',
+        'invoice_carrier_no'
     ];
 
     /**
