@@ -70,7 +70,7 @@ abstract class BaseRepository extends InfyOmBaseRepository
         foreach ($searchable as $searchableField => $searchableValue) {
             if (array_key_exists($searchableField, $this->getFieldsSearchable()) || 
                 in_array($searchableField, $this->getFieldsSearchable())) {
-                    $this->model = $this->model->orWhere($searchableField, $searchableValue);
+                    $this->model = $this->model->where($searchableField, $searchableValue);
             }
         }
     }
