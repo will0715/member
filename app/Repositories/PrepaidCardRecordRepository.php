@@ -100,4 +100,12 @@ class PrepaidCardRecordRepository extends BaseRepository
     {
         return $this->findWhereIn('type', [PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT]);
     }
+
+    public function findPaymentAndVoidPayment()
+    {
+        return $this->findWhereIn('type', [
+            PrepaidCardConstant::PREPAIDCARD_TYPE_PAYMENT,
+            PrepaidCardConstant::PREPAIDCARD_TYPE_VOID_PAYMENT
+        ]);
+    }
 }
