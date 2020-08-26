@@ -268,7 +268,7 @@ class ReportService
         $this->prepaidCardRecordRepository->pushCriteria(new LimitOffsetCriteria($request));
         $prepaidCardRecord = $this->prepaidCardRecordRepository
                             ->with(RecordConstant::BASIC_RELATIONS)
-                            ->findPayment()
+                            ->findPaymentAndVoidPayment()
                             ->all();
 
         return $prepaidCardRecord;
