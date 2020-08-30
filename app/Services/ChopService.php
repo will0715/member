@@ -156,6 +156,7 @@ class ChopService
         $ruleId = $attributes['rule_id'];
         $transactionNo = Arr::get($attributes, 'transaction_no');
         $remark = Arr::get($attributes, 'remark');
+        $expiredSetting = $this->getChopsExpiredSetting();
         
         $totalChops = $this->getTotalChops($memberId, $branchId);
         if ($totalChops < $consumeChops) {
@@ -164,7 +165,14 @@ class ChopService
         
         // consume chop
         $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
-        if ($chop) {
+        if (!$chop) {
+            $newChop = $this->chopRepository->create([
+                'member_id' => $memberId,
+                'branch_id' => $branchId,
+                'chops' => $consumeChops * -1,
+                'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
+            ]);
+        } else {
             $newChop = $this->chopRepository->update([
                 'chops' => $chop->chops - $consumeChops
             ], $chop->id);
