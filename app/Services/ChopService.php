@@ -265,7 +265,7 @@ class ChopService
         $isBranchIndependent = $branch->isIndependent();
         if ($isBranchIndependent) {
             $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
-            $totalChops = $chop->chops;
+            $totalChops = $chop ? $chop->chops : 0;
         } else {
             $unindependentBranches = $this->branchRepository->getUnindependentBranches();
             $chops = $this->chopRepository->getMemberBranchesChops($memberId, $unindependentBranches->pluck('id'));
