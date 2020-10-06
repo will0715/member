@@ -29,7 +29,10 @@ class MemberPrepaidCardServiceManager {
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
 
-        return $member->prepaidCard;
+        return $member->prepaidCard ?: [
+            'member_id' => $member->id,
+            'balance' => 0,
+        ];
     }
 
     public function getMemberPrepaidCardRecords($attributes)
