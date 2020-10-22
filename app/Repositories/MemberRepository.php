@@ -6,6 +6,7 @@ use App\Models\Member;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Hash;
 use Arr;
+use DB;
 
 /**
  * Class MemberRepository
@@ -73,5 +74,25 @@ class MemberRepository extends BaseRepository
     public function findValid()
     {
         return $this->findWhere(['status' => 1]);
+    }
+
+    public function listWithChopsCount($attribute = [])
+    {
+        $this->applyCriteria();
+        $this->applyScope();
+
+        $members = $this->model->withCount([
+            'chops AS chops_total' => function ($query) {
+                $query->select(DB::raw("SUM(chops) as total"));
+            },
+            'prepaidcard AS prepaidcard_balance' => function ($query) {
+                $query->select('balance');
+            },
+        ]);
+
+        $this->resetModel();
+        $this->resetScope();
+
+        return $members;
     }
 }

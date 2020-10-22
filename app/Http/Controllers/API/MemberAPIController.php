@@ -14,6 +14,7 @@ use App\Http\Requests\API\UpdateMemberByPhoneAPIRequest;
 use App\Http\Requests\API\QueryMemberByAPIRequest;
 use App\Http\Helpers\MemberResourceHelper;
 use App\Http\Resources\Member;
+use App\Http\Resources\MemberList;
 use App\Http\Resources\MemberByQuery;
 use App\Http\Resources\ChopRecord;
 use App\Http\Resources\PrepaidcardRecord;
@@ -60,10 +61,10 @@ class MemberAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $members = $this->memberService->listMembers($request);
-        $members->load(MemberConstant::BASE_MEMBER_RELATIONS);
+        $members = $this->memberService->memberSimpleList($request);
+        $members->load(MemberConstant::SIMPLE_MEMBER_RELATIONS);
 
-        return $this->sendResponse(Member::collection($members), 'Members retrieved successfully');
+        return $this->sendResponse(MemberList::collection($members), 'Members retrieved successfully');
     }
 
     /**
