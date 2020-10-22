@@ -39,6 +39,15 @@ class MemberService
         return $members;
     }
 
+    public function memberSimpleList($request)
+    {
+        $this->memberRepository->pushCriteria(new RequestCriteria($request));
+        $this->memberRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $members = $this->memberRepository->listWithChopsCount()->get();
+
+        return $members;
+    }
+
     public function findMember($id)
     {
         $member = $this->memberRepository->findWithoutFail($id);
