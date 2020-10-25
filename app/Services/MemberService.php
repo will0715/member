@@ -12,10 +12,14 @@ use App\Events\MemberRegistered;
 use App\Exceptions\ResourceNotFoundException;
 use App\Exceptions\SearchFieldEmptyException;
 use App\Models\Member;
+use App\Utils\MemberAuthToken;
 use Poyi\PGSchema\Facades\PGSchema;
+use Illuminate\Auth\AuthenticationException;
+use Carbon\Carbon;
 use Arr;
 use Auth;
 use Cache;
+use Hash;
 
 class MemberService
 {
@@ -44,6 +48,13 @@ class MemberService
         $this->memberRepository->pushCriteria(new RequestCriteria($request));
         $this->memberRepository->pushCriteria(new LimitOffsetCriteria($request));
         $members = $this->memberRepository->listWithChopsCount()->get();
+
+        return $members;
+    }
+
+    public function memberBasicInfo($id)
+    {
+        $members = $this->memberRepository->findWithChopsBalance($id);
 
         return $members;
     }
@@ -123,5 +134,24 @@ class MemberService
     {
         $member = $this->memberRepository->forceDelete($id);
         return $member;
+    }
+
+    public function login($attributes)
+    {
+        $phone = $attributes['phone'];
+        $password = $attributes['password'];
+        
+        $member = $this->findMemberByPhone($phone);
+
+        if ($this->checkMemberPassword($member, $password)) {
+            return MemberAuthToken::makeMemberAuthToken($member);
+        } else {
+            throw new AuthenticationException();
+    	}
+    }
+
+    public function checkMemberPassword($member, $password)
+    {
+        return Hash::check($password, $member->password);
     }
 }

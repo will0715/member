@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'customer.switch' => \App\Http\Middleware\SwitchCustomer::class,
         'scopes' => \Laravel\Passport\Http\Middleware\CheckScopes::class,
         'scope' => \Laravel\Passport\Http\Middleware\CheckForAnyScope::class,
+        'auth.member' => \App\Http\Middleware\MemberAuthJWT::class,
     ];
 
     /**

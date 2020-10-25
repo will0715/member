@@ -19,7 +19,16 @@ Route::post('/auth/login', 'UserAPIController@login');
 
 Route::namespace('Client')->prefix('client')->group(function () {
     Route::middleware(['customer.switch'])->group(function () {
+        Route::post('/auth/login', 'MemberAPIController@login');
         Route::post('members', 'MemberAPIController@store');
+
+        Route::middleware(['auth.member'])->group(function () {
+            Route::get('/information', 'MemberAPIController@information');
+            Route::get('/chopsDetail', 'MemberAPIController@getChopsDetail');
+            Route::get('/chopsRecords', 'MemberAPIController@getChopsRecords');
+            Route::get('/orderRecords', 'MemberAPIController@getOrderRecords');
+            Route::get('/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
+        });
     });
 });
 

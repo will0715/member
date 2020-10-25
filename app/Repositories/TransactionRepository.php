@@ -59,9 +59,10 @@ class TransactionRepository extends BaseRepository
         return $this->findByField('order_id', $orderId)->first();
     }
 
-    public function getByMemberId($memberId)
+    public function listByMemberId($memberId, $paginate = false)
     {
-        return $this->findByField('member_id', $memberId);
+        $this->where('member_id', $memberId);
+        return $this->getListData($paginate);
     }
 
     public function createTransaction(array $attributes)

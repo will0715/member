@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class Chop extends JsonResource
+class RecordBranch extends JsonResource
 {
     
     /**
@@ -18,9 +18,9 @@ class Chop extends JsonResource
         $resource = $this;
 
         return [
-            'chops' => $resource->chops,
-            'branch' => new RecordBranch($resource->branch),
-            'expired_at' => $resource->expired_at,
+            'id' => $resource->id,
+            'code' => $resource->code,
+            'name' => $resource->name,
         ];
     }
 }

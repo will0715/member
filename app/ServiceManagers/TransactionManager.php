@@ -28,10 +28,9 @@ class TransactionManager
 
     public function listByMemberPhone($phone)
     {
-        // search member
         $member = $this->memberService->findMemberByPhone($phone);
         
-        $transaction = $this->transactionService->getByMemberId($member->id);
+        $transaction = $this->transactionService->listByMemberId($member->id);
 
         return $transaction;
     }

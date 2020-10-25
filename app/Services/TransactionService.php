@@ -73,10 +73,12 @@ class TransactionService
         return $transaction;
     }
 
-    public function getByMemberId($memberId)
+    public function listByMemberId($memberId, $paginate = false)
     {
-        $transaction = $this->transactionRepository->getByMemberId($memberId);
-        return $transaction;
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria(request()));
+        $this->transactionRepository->pushCriteria(new RequestCriteria(request()));
+        $this->transactionRepository->pushCriteria(new LimitOffsetCriteria(request()));
+        return $this->transactionRepository->listByMemberId($memberId, $paginate);
     }
 
     public function newTransaction($attributes)
