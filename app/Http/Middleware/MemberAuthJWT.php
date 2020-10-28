@@ -8,6 +8,7 @@ use App\Utils\MemberAuthToken;
 use App\Helpers\AuthMemberHelper;
 use Closure;
 use Arr;
+use Log;
 
 class MemberAuthJWT
 {
@@ -25,10 +26,15 @@ class MemberAuthJWT
             abort(401, 'Unauthorized');
         }
 
-        $payload = MemberAuthToken::decode($token);
-        $memberId = $payload->member_id;
-        if (empty($memberId)) {
-            abort(401, 'Token is not valid');
+        try {
+            $payload = MemberAuthToken::decode($token);
+            $memberId = $payload->member_id;
+            if (empty($memberId)) {
+                throw new \Exception('Member id not exist');
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            abort(401, $e->getMessage());
         }
 
         $member = app(MemberService::class)->findMember($memberId);

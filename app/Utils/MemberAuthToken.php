@@ -14,7 +14,7 @@ class MemberAuthToken
 
         return [
             'access_token' => self::generateJWT($member, $expiredDays),
-            'expires_at' => Carbon::now()->add($expiredDays, 'days'),
+            'expired_at' => Carbon::now()->add($expiredDays, 'days'),
         ];
     }
     
