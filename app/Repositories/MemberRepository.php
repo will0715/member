@@ -81,18 +81,40 @@ class MemberRepository extends BaseRepository
         $this->applyCriteria();
         $this->applyScope();
 
-        $members = $this->model->withCount([
+        $members = $this->model->withCount(
+            $this->basicInfo()
+        );
+
+        $this->resetModel();
+        $this->resetScope();
+
+        return $members;
+    }
+
+    public function findWithChopsBalance($id)
+    {
+        $this->applyCriteria();
+        $this->applyScope();
+
+        $member = $this->model->withCount(
+            $this->basicInfo()
+        )->find($id);
+
+        $this->resetModel();
+        $this->resetScope();
+
+        return $member;
+    }
+
+    private function basicInfo()
+    {
+        return [
             'chops AS chops_total' => function ($query) {
                 $query->select(DB::raw("SUM(chops) as total"));
             },
             'prepaidcard AS prepaidcard_balance' => function ($query) {
                 $query->select('balance');
             },
-        ]);
-
-        $this->resetModel();
-        $this->resetScope();
-
-        return $members;
+        ];
     }
 }

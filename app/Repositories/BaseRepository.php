@@ -16,6 +16,15 @@ abstract class BaseRepository extends InfyOmBaseRepository
      */
     abstract public function model();
 
+    public function where($column, $where)
+    {
+        $this->scopeQuery(function($query) use ($column, $where) {
+            return $query->where($column, $where);
+        });
+
+        return $this;
+    }
+
     public function whereIn($column, $where)
     {
         $this->scopeQuery(function($query) use ($column, $where) {
@@ -65,7 +74,7 @@ abstract class BaseRepository extends InfyOmBaseRepository
         return $data;
     }
 
-    private function scopeSeachableField(array $searchable)
+    protected function scopeSeachableField(array $searchable)
     {
         foreach ($searchable as $searchableField => $searchableValue) {
             if (array_key_exists($searchableField, $this->getFieldsSearchable()) || 
@@ -73,5 +82,13 @@ abstract class BaseRepository extends InfyOmBaseRepository
                     $this->model = $this->model->where($searchableField, $searchableValue);
             }
         }
+    }
+
+    protected function getListData($paginate = false)
+    {
+        if ($paginate) {
+            return $this->paginate();
+        }
+        return $this->get();
     }
 }

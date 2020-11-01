@@ -25,7 +25,7 @@ class ChopRecord extends JsonResource
             'remark' => $resource->remark,
             'transaction_no' => $resource->transaction_no,
             'member' => new Member($resource->whenLoaded('member')),
-            'branch' => new Branch($resource->whenLoaded('branch')),
+            'branch' => new RecordBranch($resource->whenLoaded('branch')),
             'transaction' => new Transaction($resource->whenLoaded('transaction')),
             'void_record' => new ChopRecord($resource->whenLoaded('voidRecord')),
             'voided_record' => new ChopRecord($resource->whenLoaded('voidedRecord')),
