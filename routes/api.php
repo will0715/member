@@ -28,6 +28,7 @@ Route::namespace('Client')->prefix('client')->group(function () {
             Route::get('/chopsRecords', 'MemberAPIController@getChopsRecords');
             Route::get('/orderRecords', 'MemberAPIController@getOrderRecords');
             Route::get('/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
+            Route::patch('/information', 'MemberAPIController@update');
         });
     });
 });
@@ -108,7 +109,7 @@ Route::group(['prefix' => 'v1'], function () {
                 });
             });
 
-            Route::middleware(['can:view-chops'])->prefix('prepaidcards')->group(function () {
+            Route::middleware(['can:view-prepaidcard'])->prefix('prepaidcards')->group(function () {
                 Route::get('/', 'PrepaidCardAPIController@index');
                 Route::post('/topup', 'PrepaidCardAPIController@topup');
                 Route::post('/payment', 'PrepaidCardAPIController@payment');

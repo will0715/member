@@ -11,6 +11,7 @@ use App\ServiceManagers\MemberChopServiceManager;
 use App\ServiceManagers\MemberPrepaidCardServiceManager;
 use App\ServiceManagers\TransactionManager;
 use App\Http\Requests\API\Client\CreateMemberAPIRequest;
+use App\Http\Requests\API\Client\UpdateMemberAPIRequest;
 use App\Services\MemberService;
 use App\Exceptions\ResourceNotFoundException;
 use App\Helpers\AuthMemberHelper;
@@ -86,6 +87,24 @@ class MemberAPIController extends AppBaseController
         $member->load(MemberConstant::SIMPLE_MEMBER_RELATIONS);
         
         return $this->sendResponse(new MemberList($member), 'Member retrieved successfully');
+    }
+
+    /**
+     * Update the specified Member in storage.
+     * PUT/PATCH /members/{id}
+     *
+     * @param int $id
+     * @param UpdateMemberAPIRequest $request
+     *
+     * @return Response
+     */
+    public function update(UpdateMemberAPIRequest $request)
+    {
+        $authMember = $this->getAuthMember();
+        $input = $request->all();
+
+        $member = $this->memberService->updateMember($input, $authMember->id);
+        return $this->sendResponse(new Member($member), 'Member updated successfully');
     }
 
     /**
