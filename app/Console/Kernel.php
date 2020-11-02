@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
-        Commands\NewCustomer::class
+        Commands\NewCustomer::class,
+        Commands\ProcessMemberPassword::class,
     ];
 
     /**
