@@ -43,6 +43,11 @@ class PrepaidCardService
         return $this->prepaidCardRecordRepository->findWhere(['member_id' => $memberId]);
     }
 
+    public function findPrepaidcardRecordsByTransactionNo($transactionNo)
+    {
+        return $this->prepaidCardRecordRepository->findWhere(['transaction_no' => $transactionNo]);
+    }
+
     public function topup($attributes)
     {
         $memberId = $attributes['member_id'];

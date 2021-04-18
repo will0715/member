@@ -25,7 +25,8 @@ class PrepaidCardRecord extends Model
         'topup',
         'payment',
         'void_id',
-        'remark'
+        'remark',
+        'transaction_no'
     ];
 
     /**
@@ -41,7 +42,8 @@ class PrepaidCardRecord extends Model
         'topup' => 'double',
         'payment' => 'double',
         'void_id' => 'string',
-        'remark' => 'string'
+        'remark' => 'string',
+        'transaction_no' => 'string'
     ];
 
     /**

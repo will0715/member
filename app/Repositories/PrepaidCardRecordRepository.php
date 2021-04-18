@@ -56,6 +56,7 @@ class PrepaidCardRecordRepository extends BaseRepository
             'topup' => $data['topup'],
             'payment' => 0,
             'void_id' => null,
+            'transaction_no' => Arr::get($data, 'transaction_no'),
             'remark' => $data['remark'],
         ]);
     }
@@ -69,6 +70,7 @@ class PrepaidCardRecordRepository extends BaseRepository
             'topup' => 0,
             'payment' => $data['payment'],
             'void_id' => null,
+            'transaction_no' => Arr::get($data, 'transaction_no'),
             'remark' => $data['remark'],
         ]);
     }
@@ -82,6 +84,7 @@ class PrepaidCardRecordRepository extends BaseRepository
             'topup' => 0,
             'payment' => $data['payment'],
             'void_id' => $data['void_id'],
+            'transaction_no' => Arr::get($data, 'transaction_no'),
             'remark' => $data['remark'],
         ]);
     }
