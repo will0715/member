@@ -7,6 +7,7 @@ use App\Constants\MemberConstant;
 use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\MemberRepository;
 use App\Repositories\RankRepository;
+use App\Repositories\MemberSocialiteRepository;
 use App\Helpers\CustomerHelper;
 use App\Events\MemberRegistered;
 use App\Exceptions\ResourceNotFoundException;
@@ -32,6 +33,7 @@ class MemberService
     {
         $this->memberRepository = app(MemberRepository::class);
         $this->rankRepository = app(RankRepository::class);
+        $this->memberSocialiteRepository = app(MemberSocialiteRepository::class);
     }
 
     public function listMembers($request)
@@ -92,8 +94,17 @@ class MemberService
 
     public function newMember($data)
     {
+        $lineUserId = $attributes['line_user_id'];
+
         $customer = CustomerHelper::getCustomer();
         $member = $this->memberRepository->newMember($data);
+        if ($lineUserId) {
+            $memberSocialiteData = $this->memberSocialiteRepository->create([
+                'member_id' => $member->id,
+                'socialite_provider' => 'Line',
+                'socialite_user_id' => $lineUserId
+            ]);
+        }
 
         event(new MemberRegistered($customer, $member));
 
@@ -148,6 +159,21 @@ class MemberService
         } else {
             throw new AuthenticationException();
     	}
+    }
+
+    public function loginWithSocialite($attributes)
+    {
+        $socialiteProvider = $attributes['socialiteProvider'];
+        $userId = $attributes['userId'];
+        
+        $memberSocialiteData = $this->memberSocialiteRepository->findBySocialiteUserId($socialiteProvider, $userId);
+        if ($memberSocialiteData) {
+            throw new AuthenticationException();
+        }
+        
+        $member = $this->findMember($memberSocialiteData->id);
+
+        return MemberAuthToken::makeMemberAuthToken($member);
     }
 
     public function checkMemberPassword($member, $password)

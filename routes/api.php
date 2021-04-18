@@ -19,8 +19,10 @@ Route::post('/auth/login', 'UserAPIController@login');
 
 Route::namespace('Client')->prefix('client')->group(function () {
     Route::middleware(['customer.switch'])->group(function () {
+        Route::post('/auth/login/socialite/{socialiteProvider}', 'MemberAPIController@socialiteLogin');
         Route::post('/auth/login', 'MemberAPIController@login');
         Route::post('members', 'MemberAPIController@store');
+        Route::get('/socialProvider/line/liff', 'ConfigAPIController@lineLiff');
 
         Route::middleware(['auth.member'])->group(function () {
             Route::get('/information', 'MemberAPIController@information');

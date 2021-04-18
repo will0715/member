@@ -63,6 +63,24 @@ class MemberAPIController extends AppBaseController
         }
     }
 
+    public function socialiteLogin(Request $request, $socialiteProvider)
+    {
+    	$userId = $request->get('user_id');
+        try {
+            $token = $this->memberService->loginWithSocialite([
+                'socialiteProvider' => $socialiteProvider,
+                'userId' => $userId
+            ]);
+
+            return $this->sendResponse($token, 'Login successfully');
+        } catch(ResourceNotFoundException $e) {
+    		return $this->sendError('Member\'s socialite is not exist', 401);
+        } catch (\Exception $e) {
+            Log::error($e);
+    		return $this->sendError('Unauthenticated', 401);
+        }
+    }
+
     /**
      * Store a newly created Member in storage.
      * POST /members
