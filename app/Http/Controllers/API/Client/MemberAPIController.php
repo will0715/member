@@ -20,6 +20,7 @@ use App\Http\Resources\MemberList;
 use App\Http\Resources\Chop;
 use App\Http\Resources\ChopRecord;
 use App\Http\Resources\PrepaidcardRecord;
+use App\Utils\MemberAuthToken;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Response;
@@ -48,15 +49,39 @@ class MemberAPIController extends AppBaseController
     {
     	$phone = $request->get('phone');
     	$password = $request->get('password');
+    	$lineUserId = $request->get('line_user_id');
         try {
-            $token = $this->memberService->login([
+            $member = $this->memberService->login([
                 'phone' => $phone,
                 'password' => $password
             ]);
+            if ($lineUserId) {
+                $this->memberService->bindMemberLineId($member->id, $lineUserId);
+            }
+            $token = MemberAuthToken::makeMemberAuthToken($member);
 
             return $this->sendResponse($token, 'Login successfully');
         } catch(ResourceNotFoundException $e) {
     		return $this->sendError('Member\'s phone not exist', 401);
+        } catch (\Exception $e) {
+            Log::error($e);
+    		return $this->sendError('Unauthenticated', 401);
+        }
+    }
+
+    public function socialiteLogin(Request $request, $socialiteProvider)
+    {
+    	$userId = $request->get('user_id');
+        try {
+            $member = $this->memberService->loginWithSocialite([
+                'socialiteProvider' => $socialiteProvider,
+                'userId' => $userId
+            ]);
+            $token = MemberAuthToken::makeMemberAuthToken($member);
+
+            return $this->sendResponse($token, 'Login successfully');
+        } catch(ResourceNotFoundException $e) {
+    		return $this->sendError('Member\'s socialite is not exist', 401);
         } catch (\Exception $e) {
             Log::error($e);
     		return $this->sendError('Unauthenticated', 401);

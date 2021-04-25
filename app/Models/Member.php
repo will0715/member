@@ -143,5 +143,10 @@ class Member extends Authenticatable
     {
         return $this->belongsTo(\App\Models\Branch::class, 'register_branch_id');
     }
+
+    public function socialites()
+    {
+        return $this->hasMany(\App\Models\MemberSocialite::class);
+    }
     
 }
