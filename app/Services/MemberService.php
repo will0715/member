@@ -175,7 +175,7 @@ class MemberService
     {
         $memberSocialiteData = $this->memberSocialiteRepository->create([
             'member_id' => $memberId,
-            'socialite_provider' => 'Line',
+            'socialite_provider' => 'line',
             'socialite_user_id' => $lineUserId
         ]);
 
