@@ -13,7 +13,6 @@ use App\Events\MemberRegistered;
 use App\Exceptions\ResourceNotFoundException;
 use App\Exceptions\SearchFieldEmptyException;
 use App\Models\Member;
-use App\Utils\MemberAuthToken;
 use Poyi\PGSchema\Facades\PGSchema;
 use Illuminate\Auth\AuthenticationException;
 use Carbon\Carbon;
@@ -94,17 +93,8 @@ class MemberService
 
     public function newMember($data)
     {
-        $lineUserId = $attributes['line_user_id'];
-
         $customer = CustomerHelper::getCustomer();
         $member = $this->memberRepository->newMember($data);
-        if ($lineUserId) {
-            $memberSocialiteData = $this->memberSocialiteRepository->create([
-                'member_id' => $member->id,
-                'socialite_provider' => 'Line',
-                'socialite_user_id' => $lineUserId
-            ]);
-        }
 
         event(new MemberRegistered($customer, $member));
 
@@ -155,7 +145,7 @@ class MemberService
         $member = $this->findMemberByPhone($phone);
 
         if ($this->checkMemberPassword($member, $password)) {
-            return MemberAuthToken::makeMemberAuthToken($member);
+            return $member;
         } else {
             throw new AuthenticationException();
     	}
@@ -167,17 +157,28 @@ class MemberService
         $userId = $attributes['userId'];
         
         $memberSocialiteData = $this->memberSocialiteRepository->findBySocialiteUserId($socialiteProvider, $userId);
-        if ($memberSocialiteData) {
+        if (!$memberSocialiteData) {
             throw new AuthenticationException();
         }
         
-        $member = $this->findMember($memberSocialiteData->id);
+        $member = $this->findMember($memberSocialiteData->member_id);
 
-        return MemberAuthToken::makeMemberAuthToken($member);
+        return $member;
     }
 
     public function checkMemberPassword($member, $password)
     {
         return Hash::check($password, $member->password);
+    }
+
+    public function bindMemberLineId($memberId, $lineUserId)
+    {
+        $memberSocialiteData = $this->memberSocialiteRepository->create([
+            'member_id' => $memberId,
+            'socialite_provider' => 'Line',
+            'socialite_user_id' => $lineUserId
+        ]);
+
+        return $memberSocialiteData;
     }
 }

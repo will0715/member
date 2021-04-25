@@ -33,6 +33,8 @@ class MemberRegisterManager
         $phone = $attributes['phone'];
         $branchId = Arr::get($attributes, 'branch_id', null);
         $rankId = Arr::get($attributes, 'rank_id', null);
+        $rankId = Arr::get($attributes, 'rank_id', null);
+        $lineUserId = Arr::get($attributes, 'line_user_id', null);
 
         if (!$rankId) {
             $basicRank = $this->rankService->getBasicRank();
@@ -45,6 +47,11 @@ class MemberRegisterManager
         }
         
         $member = $this->memberService->newMember($attributes);
+
+        if ($lineUserId) {
+            $this->memberService->bindMemberLineId($member->id, $lineUserId);
+        }
+
         $member->load(MemberConstant::ALL_MEMBER_RELATIONS);
 
         return $member;
