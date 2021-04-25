@@ -7,12 +7,12 @@ use App\Constants\MemberConstant;
 use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\MemberRepository;
 use App\Repositories\RankRepository;
+use App\Repositories\MemberSocialiteRepository;
 use App\Helpers\CustomerHelper;
 use App\Events\MemberRegistered;
 use App\Exceptions\ResourceNotFoundException;
 use App\Exceptions\SearchFieldEmptyException;
 use App\Models\Member;
-use App\Utils\MemberAuthToken;
 use Poyi\PGSchema\Facades\PGSchema;
 use Illuminate\Auth\AuthenticationException;
 use Carbon\Carbon;
@@ -32,6 +32,7 @@ class MemberService
     {
         $this->memberRepository = app(MemberRepository::class);
         $this->rankRepository = app(RankRepository::class);
+        $this->memberSocialiteRepository = app(MemberSocialiteRepository::class);
     }
 
     public function listMembers($request)
@@ -144,14 +145,40 @@ class MemberService
         $member = $this->findMemberByPhone($phone);
 
         if ($this->checkMemberPassword($member, $password)) {
-            return MemberAuthToken::makeMemberAuthToken($member);
+            return $member;
         } else {
             throw new AuthenticationException();
     	}
     }
 
+    public function loginWithSocialite($attributes)
+    {
+        $socialiteProvider = $attributes['socialiteProvider'];
+        $userId = $attributes['userId'];
+        
+        $memberSocialiteData = $this->memberSocialiteRepository->findBySocialiteUserId($socialiteProvider, $userId);
+        if (!$memberSocialiteData) {
+            throw new AuthenticationException();
+        }
+        
+        $member = $this->findMember($memberSocialiteData->member_id);
+
+        return $member;
+    }
+
     public function checkMemberPassword($member, $password)
     {
         return Hash::check($password, $member->password);
+    }
+
+    public function bindMemberLineId($memberId, $lineUserId)
+    {
+        $memberSocialiteData = $this->memberSocialiteRepository->create([
+            'member_id' => $memberId,
+            'socialite_provider' => 'Line',
+            'socialite_user_id' => $lineUserId
+        ]);
+
+        return $memberSocialiteData;
     }
 }
