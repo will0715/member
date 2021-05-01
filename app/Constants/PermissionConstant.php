@@ -41,6 +41,10 @@ class PermissionConstant {
         'report' => [
             'view-report',
             'edit-report'
-        ]
+        ],
+        'pickup-coupon' => [
+            'view-pickup-coupon',
+            'edit-pickup-coupon'
+        ],
     ];
 }
