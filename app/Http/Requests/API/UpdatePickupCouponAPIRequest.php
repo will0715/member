@@ -25,6 +25,14 @@ class UpdatePickupCouponAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return PickupCoupon::$rules;
+        $rules = [
+            'product_name' => 'required',
+            'product_no' => 'required',
+            'quantity' => 'required',
+            'consumed_quantity' => 'required',
+            'price' => 'required',
+        ];
+        
+        return $rules;
     }
 }
