@@ -5,9 +5,9 @@ namespace App\Exceptions;
 use App\Constants\ExceptionCode;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class PrepaidCardsNotEnoughException extends BadRequestHttpException
+class QuantityNotEnoughException extends BadRequestHttpException
 {
-    protected $message = 'Balance not enough';
+    protected $message = 'Quantity not enough';
     
     public function __construct()
     {

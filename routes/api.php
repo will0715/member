@@ -147,6 +147,14 @@ Route::group(['prefix' => 'v1'], function () {
             Route::middleware(['can:view-user'])->group(function () {
                 Route::resource('users', 'UserAPIController');
             });
+    
+            Route::middleware(['can:view-pickup-coupon'])->group(function () {
+                Route::post('pickup_coupons/by_branch', 'PickupCouponAPIController@queryByBranch');
+                Route::post('pickup_coupons/{id}/giveto', 'PickupCouponAPIController@giveTo');
+                Route::post('pickup_coupons/{code}/consume', 'PickupCouponAPIController@consume');
+                Route::post('pickup_coupons/batch', 'PickupCouponAPIController@batchStore');
+                Route::resource('pickup_coupons', 'PickupCouponAPIController');
+            });
         });
     });
 });

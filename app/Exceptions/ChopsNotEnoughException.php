@@ -3,9 +3,9 @@
 namespace App\Exceptions;
 
 use App\Constants\ExceptionCode;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class ChopsNotEnoughException extends ConflictHttpException
+class ChopsNotEnoughException extends BadRequestHttpException
 {
     protected $message = 'Chops not enough';
     
