@@ -16,13 +16,19 @@ class CreatePromotionsTable extends Migration
         Schema::create('promotions', function (Blueprint $table) {
             $table->uuid('id')->default(DB::raw('public.uuid_generate_v4()'))->primary();
             $table->string('name');
+            $table->string('code')->unique();
+
+            $table->string('activated_date_start');
+            $table->string('activated_date_end');
+            $table->string('activated_time_start');
+            $table->string('activated_time_end');
+            $table->string('activated_weekday')->nullable();
+            $table->string('activated_monthday')->nullable();
 
             // earn rule type amount/item_count
+            $table->jsonb('trigger_condition');
+            $table->jsonb('discount');
 
-            $table->jsonb('discount')->nullable();
-
-            $table->timestamp('activated_at');
-            $table->timestamp('expired_at');
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
         });
