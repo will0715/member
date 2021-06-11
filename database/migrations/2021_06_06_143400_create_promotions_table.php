@@ -17,6 +17,9 @@ class CreatePromotionsTable extends Migration
             $table->uuid('id')->default(DB::raw('public.uuid_generate_v4()'))->primary();
             $table->string('name');
             $table->string('code')->unique();
+            $table->string('type');
+
+            $table->integer('sequence')->default(0);
 
             $table->string('activated_date_start');
             $table->string('activated_date_end');
@@ -25,9 +28,11 @@ class CreatePromotionsTable extends Migration
             $table->string('activated_weekday')->nullable();
             $table->string('activated_monthday')->nullable();
 
+            $table->boolean('can_trigger_others')->default(false);
+
             // earn rule type amount/item_count
             $table->jsonb('trigger_condition');
-            $table->jsonb('discount');
+            $table->jsonb('content');
 
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
