@@ -48,4 +48,9 @@ class RankRepository extends BaseRepository
     {
         return $this->withCount('members')->all();
     }
+
+    public function findInNames($names)
+    {
+        return $this->findByField('name', $names);
+    }
 }
