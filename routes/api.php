@@ -158,6 +158,7 @@ Route::group(['prefix' => 'v1'], function () {
     
             Route::middleware(['can:view-promotion'])->group(function () {
                 Route::post('promotions/byPosBranch', 'PromotionAPIController@queryByPOSBranch');
+                Route::get('promotions/{code}/byCode', 'PromotionAPIController@queryByCode');
                 Route::resource('promotions', 'PromotionAPIController');
             });
         });

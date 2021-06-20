@@ -40,6 +40,11 @@ class PromotionRepository extends BaseRepository
         return Promotion::class;
     }
 
+    public function findByCode($code)
+    {
+        return $this->findByField('code', $code)->first();
+    }
+
     public function findByType($type)
     {
         return $this->findByField('type', $type);

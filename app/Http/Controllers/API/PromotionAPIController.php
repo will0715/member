@@ -79,7 +79,7 @@ class PromotionAPIController extends AppBaseController
     {
         $promotion = $this->promotionService->findPromotion($id);
         $promotions->load(PromotionConstant::SIMPLE_PROMOTION_RELATIONS);
-        
+
         return $this->sendResponse(new Promotion($promotion), 'Promotion retrieved successfully');
     }
 
@@ -122,5 +122,13 @@ class PromotionAPIController extends AppBaseController
         $promotions->load(PromotionConstant::QUERY_PROMOTION_RELATIONS);
 
         return $this->sendResponse(Promotion::collection($promotions), 'Promotion retrieved successfully');
+    }
+
+    public function queryByCode($code)
+    {
+        $promotion = $this->promotionService->findPromotionByCode($code);
+        $promotion->load(PromotionConstant::SIMPLE_PROMOTION_RELATIONS);
+
+        return $this->sendResponse(new Promotion($promotion), 'Promotion retrieved successfully');
     }
 }

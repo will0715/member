@@ -43,6 +43,15 @@ class PromotionService
         return $promotion;
     }
 
+    public function findPromotionByCode($code)
+    {
+        $promotion = $this->promotionRepository->findByCode($code);
+        if (!$promotion) {
+            throw new ResourceNotFoundException('Promotion Not Found');
+        }
+        return $promotion;
+    }
+
     public function listPOSPromotions($request)
     {
         $branchCode = $request->get('branch');
