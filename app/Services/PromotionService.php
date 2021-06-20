@@ -67,21 +67,7 @@ class PromotionService
     {
         $promotion = $this->promotionRepository->create($data);
         
-        // limit branches
-        $branches = Arr::get($data, 'branches', []);
-        if (CollectionUtil::isNotEmpty($branches)) {
-            $limitBranches = $this->branchRepository->findInBranchIds($branches);
-            $isLimitBranch = collect($limitBranches->pluck('id'))->isNotEmpty();
-            $promotion->limitBranches()->sync($limitBranches->pluck('id'));
-        }
-        
-        // limit ranks
-        $ranks = Arr::get($data, 'ranks', []);
-        if (CollectionUtil::isNotEmpty($ranks)) {
-            $limitRanks = $this->rankRepository->findInNames($ranks);
-            $isLimitRank = collect($limitRanks->pluck('id'))->isNotEmpty();
-            $promotion->limitRanks()->sync($limitRanks->pluck('id'));
-        }
+        $this->processRequestRelation($promotion, $data);
 
         return $promotion;
     }
@@ -90,7 +76,7 @@ class PromotionService
     {
         $promotion = $this->promotionRepository->update($data, $id);
         
-        $this->processRequestRelation($data);
+        $this->processRequestRelation($promotion, $data);
 
         return $promotion;
     }

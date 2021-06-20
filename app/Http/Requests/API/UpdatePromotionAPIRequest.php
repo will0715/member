@@ -26,7 +26,7 @@ class UpdatePromotionAPIRequest extends APIRequest
     public function rules()
     {
         $rules = [
-            'code' => 'required|unique:promotions,code',
+            'code' => 'required|unique:promotions,code,' . $this->route('promotion'),
             'name' => 'required',
             'type' => 'required',
             'sequence' => 'required|integer',
