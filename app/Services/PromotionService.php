@@ -81,7 +81,7 @@ class PromotionService
         return $promotion;
     }
 
-    private function processRequestRelation($data)
+    private function processRequestRelation($promotion, $data)
     {
         // limit branches
         $branches = Arr::get($data, 'branches', []);
