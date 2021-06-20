@@ -72,6 +72,11 @@ class ChopService
         return $this->chopRecordRepository->findWhere(['member_id' => $memberId]);
     }
 
+    public function findChopsRecordsByTransactionNo($transactionNo)
+    {
+        return $this->chopRecordRepository->findWhere(['transaction_no' => $transactionNo]);
+    }
+
     public function manualAddChops($attributes)
     {
         $memberId = $attributes['member_id'];
