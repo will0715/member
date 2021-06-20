@@ -13,7 +13,7 @@ class AddTransactionNo extends Migration
      */
     public function up()
     {
-        Schema::table('prepaidcard_records', function (Blueprint $table) {
+        Schema::table('prepaid_card_records', function (Blueprint $table) {
             $table->string('transaction_no')->nullable();
             $table->index('transaction_no');
         });
