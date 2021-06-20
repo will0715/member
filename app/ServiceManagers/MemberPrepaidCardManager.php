@@ -8,6 +8,7 @@ use App\Services\BranchService;
 use App\Services\PrepaidCardService;
 use App\Events\PrepaidCardTopup;
 use App\Helpers\CustomerHelper;
+use Arr;
 
 class MemberPrepaidCardServiceManager {
 
@@ -80,6 +81,7 @@ class MemberPrepaidCardServiceManager {
         $branchId = $attributes['branch_id'];
         $payment = $attributes['payment'];
         $remark = $attributes['remark'];
+        $transactionNo = Arr::get($attributes, 'transaction_no');
 
         // search member
         $member = $this->memberService->findMemberByPhone($phone);
@@ -92,7 +94,8 @@ class MemberPrepaidCardServiceManager {
             'member_id' => $member->id,
             'branch_id' => $branch->id,
             'payment' => $payment,
-            'remark' => $remark
+            'remark' => $remark,
+            'transaction_no' => $transactionNo,
         ]);
 
         return $prepaidCard;

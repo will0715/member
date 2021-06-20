@@ -85,6 +85,7 @@ class PrepaidCardService
         $branchId = $attributes['branch_id'];
         $payment = $attributes['payment'];
         $remark = $attributes['remark'];
+        $transactionNo = Arr::get($attributes, 'transaction_no');
         
         // need lock row for update
         $memberPrepaidCard = $this->prepaidCardRepository->getByMemberIdWithLock($memberId);
@@ -102,7 +103,8 @@ class PrepaidCardService
             'member_id' => $memberId,
             'branch_id' => $branchId,
             'payment' => $payment,
-            'remark' => $remark
+            'remark' => $remark,
+            'transaction_no' => $transactionNo,
         ]);
 
         return $record;
