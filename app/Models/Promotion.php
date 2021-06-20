@@ -30,6 +30,8 @@ class Promotion extends Model
         'code',
         'type',
         'sequence',
+        'limit_branch',
+        'limit_rank',
         'activated_date_start',
         'activated_date_end',
         'activated_time_start',
@@ -52,6 +54,8 @@ class Promotion extends Model
         'name' => 'string',
         'type' => 'string',
         'sequence' => 'integer',
+        'limit_branch' => 'boolean',
+        'limit_rank' => 'boolean',
         'activated_date_start' => 'string',
         'activated_date_end' => 'string',
         'activated_time_start' => 'string',
@@ -88,6 +92,6 @@ class Promotion extends Model
 
     public function limitBranches()
     {
-        return $this->belongsToMany(\App\Models\Branches::class, 'promotion_branch');
+        return $this->belongsToMany(\App\Models\Branch::class, 'promotion_branch');
     }
 }

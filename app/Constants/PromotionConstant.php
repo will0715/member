@@ -15,4 +15,13 @@ class PromotionConstant {
     const CONTENT_SPECIFIC_PRODUCT_DISCOUNT_PERCENTAGE = 'SPECIFIC_PRODUCT_DISCOUNT_PERCENTAGE';
     const CONTENT_SPECIFIC_FIXED_PRICE = 'SPECIFIC_FIXED_PRICE';
     const CONTENT_FREE_SPECIFIC_PRODUCT = 'FREE_SPECIFIC_PRODUCT';
+
+    const SIMPLE_PROMOTION_RELATIONS = [
+        'limitRanks',
+        'limitBranches'
+    ];
+
+    const QUERY_PROMOTION_RELATIONS = [
+        'limitRanks',
+    ];
 }

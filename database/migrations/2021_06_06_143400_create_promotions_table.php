@@ -20,6 +20,8 @@ class CreatePromotionsTable extends Migration
             $table->string('type');
 
             $table->integer('sequence')->default(0);
+            $table->boolean('limit_branch')->default(false);
+            $table->boolean('limit_rank')->default(false);
 
             $table->string('activated_date_start');
             $table->string('activated_date_end');

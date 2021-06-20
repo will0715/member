@@ -149,11 +149,16 @@ Route::group(['prefix' => 'v1'], function () {
             });
     
             Route::middleware(['can:view-pickup-coupon'])->group(function () {
-                Route::post('pickup_coupons/by_branch', 'PickupCouponAPIController@queryByBranch');
-                Route::post('pickup_coupons/{id}/giveto', 'PickupCouponAPIController@giveTo');
-                Route::post('pickup_coupons/{code}/consume', 'PickupCouponAPIController@consume');
-                Route::post('pickup_coupons/batch', 'PickupCouponAPIController@batchStore');
-                Route::resource('pickup_coupons', 'PickupCouponAPIController');
+                Route::post('pickupCoupons/byBranch', 'PickupCouponAPIController@queryByBranch');
+                Route::post('pickupCoupons/{id}/giveto', 'PickupCouponAPIController@giveTo');
+                Route::post('pickupCoupons/{code}/consume', 'PickupCouponAPIController@consume');
+                Route::post('pickupCoupons/batch', 'PickupCouponAPIController@batchStore');
+                Route::resource('pickupCoupons', 'PickupCouponAPIController');
+            });
+    
+            Route::middleware(['can:view-promotion'])->group(function () {
+                Route::post('promotions/byPosBranch', 'PromotionAPIController@queryByPOSBranch');
+                Route::resource('promotions', 'PromotionAPIController');
             });
         });
     });
