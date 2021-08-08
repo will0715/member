@@ -78,7 +78,7 @@ class PromotionAPIController extends AppBaseController
     public function show($id)
     {
         $promotion = $this->promotionService->findPromotion($id);
-        $promotions->load(PromotionConstant::SIMPLE_PROMOTION_RELATIONS);
+        $promotion->load(PromotionConstant::SIMPLE_PROMOTION_RELATIONS);
 
         return $this->sendResponse(new Promotion($promotion), 'Promotion retrieved successfully');
     }
