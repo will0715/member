@@ -57,7 +57,7 @@ class BranchRepository extends BaseRepository
 
     public function findInBranchIds($branchIds)
     {
-        return $this->findByField('code', $branchIds);
+        return $this->findWhereIn('code', $branchIds);
     }
 
     public function findByBranchId($branchId)

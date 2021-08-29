@@ -51,6 +51,6 @@ class RankRepository extends BaseRepository
 
     public function findInNames($names)
     {
-        return $this->findByField('name', $names);
+        return $this->findWhereIn('name', $names);
     }
 }
