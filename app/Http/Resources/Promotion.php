@@ -32,6 +32,7 @@ class Promotion extends JsonResource
             'activated_weekday' => $resource->activated_weekday,
             'activated_monthday' => $resource->activated_monthday,
             'can_trigger_others' => $resource->can_trigger_others,
+            'can_trigger_multiple' => $resource->can_trigger_multiple,
             'trigger_condition' => $resource->trigger_condition,
             'content' => $resource->content,
             'branches' => Branch::collection($resource->whenLoaded('limitBranches')),

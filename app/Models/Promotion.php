@@ -39,6 +39,7 @@ class Promotion extends Model
         'activated_weekday',
         'activated_monthday',
         'can_trigger_others',
+        'can_trigger_multiple',
         'trigger_condition',
         'content'
     ];
@@ -63,6 +64,7 @@ class Promotion extends Model
         'activated_weekday' => 'string',
         'activated_monthday' => 'string',
         'can_trigger_others' => 'boolean',
+        'can_trigger_multiple' => 'boolean',
         'trigger_condition' => 'array',
         'content' => 'array'
     ];
