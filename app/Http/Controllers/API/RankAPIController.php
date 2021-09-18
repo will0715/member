@@ -5,7 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRankAPIRequest;
 use App\Http\Requests\API\UpdateRankAPIRequest;
+use App\Http\Requests\API\UpdateRankDiscountAPIRequest;
 use App\Http\Resources\Rank;
+use App\Http\Resources\RankDiscount;
 use App\Services\RankService;
 use Illuminate\Http\Request;
 use Response;
@@ -99,5 +101,26 @@ class RankAPIController extends AppBaseController
     {
         $rank = $this->rankService->deleteRank($id);
         return $this->sendSuccess('Rank deleted successfully');
+    }
+
+    public function listRankDiscount(Request $request)
+    {
+        $rankDiscounts = $this->rankService->listRankDiscounts($request);
+        $rankDiscounts->load('rank');
+        return $this->sendResponse(RankDiscount::collection($rankDiscounts), 'Rank Discounts retrieved successfully');
+    }
+
+    public function getRankDiscount($rankId)
+    {
+        $rankDiscount = $this->rankService->getRankDiscount($rankId);
+        return $this->sendResponse(new RankDiscount($rankDiscount), 'Rank Discount retrieved successfully');
+    }
+
+    public function setRankDiscount($rankId, UpdateRankDiscountAPIRequest $request)
+    {
+        $input = $request->all();
+
+        $rankDiscount = $this->rankService->setRankDiscount($input, $rankId);
+        return $this->sendResponse(new RankDiscount($rankDiscount), 'Rank Discount retrieved successfully');
     }
 }

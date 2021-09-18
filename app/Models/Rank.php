@@ -60,4 +60,9 @@ class Rank extends Model
     {
         return $this->hasMany(\App\Models\Member::class, 'rank_id');
     }
+
+    public function rankDiscount()
+    {
+        return $this->hasOne(\App\Models\RankDiscount::class);
+    }
 }
