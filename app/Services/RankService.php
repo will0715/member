@@ -5,6 +5,7 @@ namespace App\Services;
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\RankRepository;
+use App\Repositories\RankDiscountRepository;
 use App\Helpers\CustomerHelper;
 use App\Exceptions\ResourceNotFoundException;
 use Cache;
@@ -16,6 +17,7 @@ class RankService
     public function __construct()
     {
         $this->rankRepository = app(RankRepository::class);
+        $this->rankDiscountRepository = app(RankDiscountRepository::class);
     }
 
     public function listRanks($request)
@@ -67,5 +69,35 @@ class RankService
         //     Cache::set($this->customer . 'basicMemberRank', $basicMemberRank);
         // }
         return $basicMemberRank;
+    }
+
+    public function listRankDiscounts($request)
+    {
+        $this->rankDiscountRepository->pushCriteria(new RequestCriteria($request));
+        $this->rankDiscountRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $rankDiscounts = $this->rankDiscountRepository->all();
+
+        return $rankDiscounts;
+    }
+
+    public function getRankDiscount($rankId)
+    {
+        $rankDiscount = $this->rankDiscountRepository->findByRankId($rankId);
+        if (!$rankDiscount) {
+            $rankDiscount = $this->rankDiscountRepository->getDefaultRankDiscount($rankId);
+        }
+        return $rankDiscount;
+    }
+
+    public function setRankDiscount($data, $rankId)
+    {
+        $attributes = [
+            'is_active' => $data['is_active'],
+            'content' => $data['content'],
+        ];
+        $rankDiscount = $this->rankDiscountRepository->updateOrCreate([
+            'rank_id' => $rankId
+        ], $attributes);
+        return $rankDiscount;
     }
 }

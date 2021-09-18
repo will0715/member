@@ -130,6 +130,12 @@ Route::group(['prefix' => 'v1'], function () {
     
             Route::middleware(['can:view-rank'])->group(function () {
                 Route::resource('ranks', 'RankAPIController');
+                Route::prefix('ranks/{id}/rankDiscounts')->group(function () {
+                    Route::get('/', 'RankAPIController@getRankDiscount');
+                    Route::put('/', 'RankAPIController@setRankDiscount');
+                });
+
+                Route::get('/rankDiscounts', 'RankAPIController@listRankDiscount');
             });
             
             Route::middleware(['can:view-branch'])->group(function () {
