@@ -147,15 +147,17 @@ class MemberChopServiceManager
     public function getMemberTotalChops($phone)
     {
         $member = $this->memberService->findMemberByPhone($phone);
+        $chops = $this->chopService->listChopsByMemberId($member->id);
 
-        return $member->chops->sum('chops');
+        return collect($chops)->sum('chops');
     }
 
     public function getMemberChopsDetail($phone)
     {
         $member = $this->memberService->findMemberByPhone($phone);
+        $chops = $this->chopService->listChopsByMemberId($member->id);
 
-        return $member->chops;
+        return $chops;
     }
 
     public function getMemberOrderDetail($phone)
