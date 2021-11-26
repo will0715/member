@@ -57,6 +57,13 @@ class ChopService
         return $chops;
     }
 
+    public function listChopsByMemberId($memberId)
+    {
+        $chops = $this->chopRepository->getMemberChops($memberId);
+
+        return $chops;
+    }
+
     public function listRecords($request)
     {
         $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
