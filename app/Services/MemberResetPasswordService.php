@@ -86,7 +86,9 @@ class MemberResetPasswordService
 
         $log = $this->smsLogRepository->create([
             'phone' => $phone,
-            'content' => $message
+            'content' => [
+                'sid' =>$message->sid
+            ]
         ]);
 
         return $token;
