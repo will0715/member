@@ -10,6 +10,8 @@ use App\Services\MemberService;
 use App\Services\PrepaidCardService;
 use App\Services\ReportService;
 use App\Services\TransactionService;
+use App\Repositories\SMSLogRepository;
+use Twilio\Rest\Client as TwilioClient;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Resources\Json\Resource;
 
@@ -55,6 +57,12 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton('App\Services\TransactionService', function ($app) {
             return new TransactionService();
+        });
+        $this->app->singleton('Twilio\Rest\Client', function ($app) {
+            $twilioSid = config('sms.twilio.sid');
+            $twilioToken = config('sms.twilio.auth_token');
+            $client = new TwilioClient($twilioSid, $twilioToken);
+            return $client;
         });
 
         Resource::withoutWrapping();
