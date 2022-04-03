@@ -81,7 +81,6 @@ class NewCustomer extends Command
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error('Create Customer Failed');
-            dd($e);
         }
     }
 }

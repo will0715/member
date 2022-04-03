@@ -169,6 +169,11 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('promotions/{code}/byCode', 'PromotionAPIController@queryByCode');
                 Route::resource('promotions', 'PromotionAPIController');
             });
+    
+            Route::middleware(['can:view-register-chop-rule'])->group(function () {
+                Route::get('registerChopRule', 'RegisterChopRuleAPIController@get');
+                Route::put('registerChopRule', 'RegisterChopRuleAPIController@update');
+            });
         });
     });
 });
