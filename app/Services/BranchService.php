@@ -61,4 +61,9 @@ class BranchService
     {
         return $this->branchRepository->delete($id);
     }
+
+    public function getFirstBranch()
+    {
+        return $this->branchRepository->first();
+    }
 }
