@@ -26,6 +26,7 @@ class EarnChopRule extends JsonResource
             'rule_unit' => $resource->rule_unit,
             'rule_chops' => $resource->rule_chops,
             'exclude_product' => $resource->exclude_product,
+            'exclude_destination' => $resource->exclude_destination,
             'earn_chops_after_consume' => $resource->earn_chops_after_consume,
             'created_at' => $resource->created_at,
             'updated_at' => $resource->updated_at,
