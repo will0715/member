@@ -46,5 +46,9 @@ class PermissionConstant {
             'view-pickup-coupon',
             'edit-pickup-coupon'
         ],
+        'register-chop-rule' => [
+            'view-register-chop-rule',
+            'edit-register-chop-rule'
+        ],
     ];
 }
