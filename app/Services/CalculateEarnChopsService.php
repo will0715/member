@@ -33,6 +33,7 @@ class CalculateEarnChopsService
 
         $transactionPaymentType = Arr::get($transactionData, 'payment_type');
         $transactionItems = Arr::get($transactionData, 'items');
+        $transactionDestination = Arr::get($transactionData, 'destination');
         $consumeChops = Arr::get($transactionData, 'consume_chops');
 
         // TODO: 架構調整 - to abstract factory pattern
@@ -40,6 +41,12 @@ class CalculateEarnChopsService
         $usedChopRule = 0;
         foreach ($earnChopRules as $earnChopRule) {
             $chops = 0;
+
+            $ruleExcludeDestinations = $this->getExcludDestinations($earnChopRule->exclude_destination);
+            // 不計算的訂單類型
+            if (in_array($transactionDestination, $ruleExcludeDestinations)) {
+                continue;
+            }
 
             // 兌點後無法繼續累點
             if (!$earnChopRule->earn_chops_after_consume && $consumeChops != 0) {
@@ -55,7 +62,7 @@ class CalculateEarnChopsService
                 $excludeProducts = $earnChopRule->exclude_product ? explode(',', $earnChopRule->exclude_product) : [];
                 $excludeProductItems = collect($transactionItems)->whereIn('no', $excludeProducts);
 
-                switch($earnChopRule->type) {
+                switch ($earnChopRule->type) {
                     case "AMOUNT":
                         $amount = Arr::get($transactionData, 'amount');
                         $excludeProductAmount = $excludeProductItems->pluck('subtotal')->sum();
@@ -82,5 +89,10 @@ class CalculateEarnChopsService
             'chops' => $earnChops ?: 0,
             'used_chop_rule' => $usedChopRule
         ];
+    }
+
+    private function getExcludDestinations($excludeDestinationsJson)
+    {
+        return $excludeDestinationsJson ? explode(',', $excludeDestinationsJson) : [];
     }
 }
