@@ -24,7 +24,6 @@ class EarnChopRuleRepository extends BaseRepository
         'type',
         'rule_unit',
         'rule_chops',
-        'exclude_product'
     ];
 
     /**
