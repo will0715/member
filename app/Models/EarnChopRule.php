@@ -42,6 +42,7 @@ class EarnChopRule extends Model
         'rule_chops',
         'exclude_product',
         'exclude_destination',
+        'activated_weekday',
         'earn_chops_after_consume',
         'activated_at',
         'expired_at'
@@ -64,6 +65,7 @@ class EarnChopRule extends Model
         'earn_chops_after_consume' => 'boolean',
         'exclude_product' => 'string',
         'exclude_destination' => 'string',
+        'activated_weekday' => 'string',
         'activated_at' => 'datetime',
         'expired_at' => 'datetime'
     ];

@@ -27,6 +27,8 @@ class CalculateEarnChopsService
 
     public function calTransactionEarnChops(Member $member, $transactionData)
     {
+        $dayOfTheWeek = Carbon::now()->dayOfWeek;
+
         // get rules
         $this->earnChopRuleRepository->pushCriteria(new ChopRuleValidCriteria());
         $earnChopRules = $this->earnChopRuleRepository->findByRank($member->rank->id);
@@ -45,6 +47,11 @@ class CalculateEarnChopsService
             $ruleExcludeDestinations = $this->getExcludDestinations($earnChopRule->exclude_destination);
             // 不計算的訂單類型
             if (in_array($transactionDestination, $ruleExcludeDestinations)) {
+                continue;
+            }
+
+            // 生效的星期幾
+            if (!$this->isValidWeekday($dayOfTheWeek, $earnChopRule)) {
                 continue;
             }
 
@@ -94,5 +101,24 @@ class CalculateEarnChopsService
     private function getExcludDestinations($excludeDestinationsJson)
     {
         return $excludeDestinationsJson ? explode(',', $excludeDestinationsJson) : [];
+    }
+
+    private function getRuleValidWeekdays($validWeekdaysJson)
+    {
+        return $validWeekdaysJson ? explode(',', $validWeekdaysJson) : [];
+    }
+
+    private function isRuleNotLimitWeekdays($earnChopRule)
+    {
+        return !$earnChopRule->activated_weekday;
+    }
+
+    private function isValidWeekday($weekday, $earnChopRule)
+    {
+        if ($this->isRuleNotLimitWeekdays($earnChopRule)) {
+            return true;
+        }
+        $ruleValidWeekdays = $this->getRuleValidWeekdays($earnChopRule->activated_weekday);
+        return in_array($weekday, $ruleValidWeekdays);
     }
 }
