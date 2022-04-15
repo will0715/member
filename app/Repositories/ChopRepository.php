@@ -55,7 +55,7 @@ class ChopRepository extends BaseRepository
     {
         return $this->findWhere([
             'member_id' => $memberId,
-        ])->all();
+        ]);
     }
 
     public function getBranchChops($memberId, $branchId)
