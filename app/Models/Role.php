@@ -19,6 +19,11 @@ class Role extends BaseRole
     protected $keyType = 'string';
     public $table = 'roles';
 
+    public $fillable = [
+        'name',
+        'guard_name'
+    ];
+
     /**
      * Validation rules
      *
