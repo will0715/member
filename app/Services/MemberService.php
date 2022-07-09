@@ -53,6 +53,14 @@ class MemberService
         return $members;
     }
 
+    public function memberCount($request)
+    {
+        $this->memberRepository->pushCriteria(new RequestCriteria($request));
+        $counts = $this->memberRepository->count();
+
+        return $counts;
+    }
+
     public function memberBasicInfo($id)
     {
         $members = $this->memberRepository->findWithChopsBalance($id);

@@ -18,9 +18,20 @@ use Response;
  */
 class AppBaseController extends Controller
 {
-    public function sendResponse($result, $message)
+    public function sendResponse($result, $message, $others = [])
     {
-        return Response::json(ResponseUtil::makeResponse($message, $result));
+        return Response::json(array_merge([
+            'success' => true,
+            'message' => $message,
+            'data' => $result,
+        ], $others), 200);
+    }
+
+    public function sendResponseWithTotalCount($result, $message, $totalCount = 0)
+    {
+        return $this->sendResponse($result, $message, [
+            'totalCount' => $totalCount
+        ]);
     }
 
     public function sendError($error, $code = 404)

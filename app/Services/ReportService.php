@@ -261,6 +261,15 @@ class ReportService
         return $prepaidCardRecord;
     }
 
+    public function getPrepaidcardTopupRecordsCount(Request $request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $this->prepaidCardRecordRepository->with(RecordConstant::BASIC_RELATIONS)->findTopup()->count();
+
+        return $count;
+    }
+
     public function getPrepaidcardPaymentRecords(Request $request)
     {
         $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
@@ -272,6 +281,18 @@ class ReportService
                             ->all();
 
         return $prepaidCardRecord;
+    }
+
+    public function getPrepaidcardPaymentRecordsCount(Request $request)
+    {
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $this->prepaidCardRecordRepository
+                            ->with(RecordConstant::BASIC_RELATIONS)
+                            ->findPaymentAndVoidPayment()
+                            ->count();
+
+        return $count;
     }
 
     public function getAddChopsRecords(Request $request)
@@ -287,6 +308,18 @@ class ReportService
         return $chopRecord;
     }
 
+    public function getAddChopsRecordsCount(Request $request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $this->chopRecordRepository
+                        ->with(RecordConstant::BASIC_RELATIONS)
+                        ->findAllAddChops()
+                        ->count();
+
+        return $count;
+    }
+
     public function getConsumeChopsRecords(Request $request)
     {
         $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
@@ -300,6 +333,18 @@ class ReportService
         return $chopRecord;
     }
 
+    public function getConsumeChopsRecordsCount(Request $request)
+    {
+        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $this->chopRecordRepository
+                        ->with(RecordConstant::BASIC_RELATIONS)
+                        ->findAllConsumeChops()
+                        ->count();
+
+        return $count;
+    }
+
     public function getTransactionRecords(Request $request)
     {
         $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
@@ -308,6 +353,15 @@ class ReportService
         $transactions = $this->transactionRepository->with(TransactionConstant::BASIC_RELATIONS)->all();
 
         return $transactions;
+    }
+
+    public function getTransactionRecordsCount(Request $request)
+    {
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->transactionRepository->pushCriteria(new RequestCriteria($request));
+        $count = $this->transactionRepository->with(TransactionConstant::BASIC_RELATIONS)->count();
+
+        return $count;
     }
 
     public function getMemberRegisterBranchDetail(Request $request)
@@ -322,6 +376,19 @@ class ReportService
         $members = $this->memberRepository->with('registerBranch')->all();
 
         return $members;
+    }
+
+    public function getMemberRegisterBranchDetailCount(Request $request)
+    {
+        $startAt = Arr::get($request, 'start', null);
+        $endAt = Arr::get($request, 'end', null);
+
+        $this->memberRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->memberRepository->pushCriteria(new RequestCriteria($request));
+
+        $count = $this->memberRepository->with('registerBranch')->count();
+
+        return $count;
     }
 
     public function getMemberRegisterBranchStatistics(Request $request)
