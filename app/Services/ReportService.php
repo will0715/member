@@ -263,9 +263,10 @@ class ReportService
 
     public function getPrepaidcardTopupRecordsCount(Request $request)
     {
-        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
-        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
-        $count = $this->prepaidCardRecordRepository->with(RecordConstant::BASIC_RELATIONS)->findTopup()->count();
+        $prepaidCardRecordRepository = app(PrepaidCardRecordRepository::class);
+        $prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $prepaidCardRecordRepository->with(RecordConstant::BASIC_RELATIONS)->findTopup()->count();
 
         return $count;
     }
@@ -285,9 +286,10 @@ class ReportService
 
     public function getPrepaidcardPaymentRecordsCount(Request $request)
     {
-        $this->prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
-        $this->prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
-        $count = $this->prepaidCardRecordRepository
+        $prepaidCardRecordRepository = app(PrepaidCardRecordRepository::class);
+        $prepaidCardRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $prepaidCardRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $prepaidCardRecordRepository
                             ->with(RecordConstant::BASIC_RELATIONS)
                             ->findPaymentAndVoidPayment()
                             ->count();
@@ -310,9 +312,10 @@ class ReportService
 
     public function getAddChopsRecordsCount(Request $request)
     {
-        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
-        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
-        $count = $this->chopRecordRepository
+        $chopRecordRepository = app(ChopRecordRepository::class);
+        $chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $chopRecordRepository
                         ->with(RecordConstant::BASIC_RELATIONS)
                         ->findAllAddChops()
                         ->count();
@@ -335,9 +338,10 @@ class ReportService
 
     public function getConsumeChopsRecordsCount(Request $request)
     {
-        $this->chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
-        $this->chopRecordRepository->pushCriteria(new RequestCriteria($request));
-        $count = $this->chopRecordRepository
+        $chopRecordRepository = app(ChopRecordRepository::class);
+        $chopRecordRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $chopRecordRepository->pushCriteria(new RequestCriteria($request));
+        $count = $chopRecordRepository
                         ->with(RecordConstant::BASIC_RELATIONS)
                         ->findAllConsumeChops()
                         ->count();
@@ -357,9 +361,10 @@ class ReportService
 
     public function getTransactionRecordsCount(Request $request)
     {
-        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
-        $this->transactionRepository->pushCriteria(new RequestCriteria($request));
-        $count = $this->transactionRepository->with(TransactionConstant::BASIC_RELATIONS)->count();
+        $transactionRepository = app(TransactionRepository::class);
+        $transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $transactionRepository->pushCriteria(new RequestCriteria($request));
+        $count = $transactionRepository->with(TransactionConstant::BASIC_RELATIONS)->count();
 
         return $count;
     }
@@ -383,10 +388,11 @@ class ReportService
         $startAt = Arr::get($request, 'start', null);
         $endAt = Arr::get($request, 'end', null);
 
-        $this->memberRepository->pushCriteria(new RequestDateRangeCriteria($request));
-        $this->memberRepository->pushCriteria(new RequestCriteria($request));
+        $memberRepository = app(MemberRepository::class);
+        $memberRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $memberRepository->pushCriteria(new RequestCriteria($request));
 
-        $count = $this->memberRepository->with('registerBranch')->count();
+        $count = $memberRepository->with('registerBranch')->count();
 
         return $count;
     }
