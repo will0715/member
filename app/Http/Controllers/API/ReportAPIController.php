@@ -136,25 +136,49 @@ class ReportAPIController extends AppBaseController
     public function getPrepaidcardTopupRecords(Request $request)
     {
         $data = $this->reportService->getPrepaidcardTopupRecords($request);
-        return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
+        $count = $this->reportService->getPrepaidcardTopupRecordsCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            PrepaidcardRecord::collection($data), 
+            'retrieved successfully',
+            $count
+        );
     }
 
     public function getPrepaidcardPaymentRecords(Request $request)
     {
         $data = $this->reportService->getPrepaidcardPaymentRecords($request);
-        return $this->sendResponse(PrepaidcardRecord::collection($data), 'retrieved successfully');
+        $count = $this->reportService->getPrepaidcardPaymentRecordsCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            PrepaidcardRecord::collection($data), 
+            'retrieved successfully',
+            $count
+        );
     }
 
     public function getAddChopsRecords(Request $request)
     {
         $data = $this->reportService->getAddChopsRecords($request);
-        return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
+        $count = $this->reportService->getAddChopsRecordsCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            ChopRecord::collection($data), 
+            'retrieved successfully',
+            $count
+        );
     }
 
     public function getConsumeChopsRecords(Request $request)
     {
         $data = $this->reportService->getConsumeChopsRecords($request);
-        return $this->sendResponse(ChopRecord::collection($data), 'retrieved successfully');
+        $count = $this->reportService->getConsumeChopsRecordsCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            ChopRecord::collection($data), 
+            'retrieved successfully',
+            $count
+        );
     }
 
     public function getTransactionRecords(Request $request)
@@ -168,7 +192,13 @@ class ReportAPIController extends AppBaseController
     public function getMemberRegisterBranchDetail(Request $request)
     {
         $data = $this->reportService->getMemberRegisterBranchDetail($request);
-        return $this->sendResponse(Member::collection($data), 'retrieved successfully');
+        $count = $this->reportService->getMemberRegisterBranchDetailCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            Member::collection($data), 
+            'retrieved successfully',
+            $count
+        );
     }
 
     public function getMemberRegisterBranchStatistics(Request $request)

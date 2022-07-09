@@ -64,7 +64,13 @@ class MemberAPIController extends AppBaseController
         $members = $this->memberService->memberSimpleList($request);
         $members->load(MemberConstant::SIMPLE_MEMBER_RELATIONS);
 
-        return $this->sendResponse(MemberList::collection($members), 'Members retrieved successfully');
+        $count = $this->memberService->memberCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            MemberList::collection($members), 
+            'Members retrieved successfully', 
+            $count
+        );
     }
 
     /**
