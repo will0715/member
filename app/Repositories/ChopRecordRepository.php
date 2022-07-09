@@ -20,13 +20,10 @@ class ChopRecordRepository extends BaseRepository
      * @var array
      */
     protected $fieldSearchable = [
-        'member_id',
-        'branch_id',
-        'type',
-        'chops',
-        'consume_chops',
+        'member.first_name',
+        'member.last_name',
+        'branch.name',
         'transaction_no',
-        'remark'
     ];
 
     /**

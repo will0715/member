@@ -58,6 +58,16 @@ class TransactionService
         return $transactions;
     }
 
+    public function transactionsCount(Request $request)
+    {
+        $memberRepository = app(TransactionRepository::class);
+        $this->transactionRepository->pushCriteria(new RequestDateRangeCriteria($request));
+        $this->transactionRepository->pushCriteria(new RequestCriteria($request));
+        $transactions = $this->transactionRepository->count();
+
+        return $transactions;
+    }
+
     public function findTransaction($id)
     {
         $transaction = $this->transactionRepository->findWithoutFail($id);

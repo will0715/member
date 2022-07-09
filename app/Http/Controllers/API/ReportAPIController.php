@@ -186,7 +186,13 @@ class ReportAPIController extends AppBaseController
         $data = $this->transactionService->listTransactions($request);
         $data->load(TransactionConstant::BASIC_RELATIONS);
 
-        return $this->sendResponse(Transaction::collection($data), 'retrieved successfully');
+        $count = $this->transactionService->transactionsCount($request);
+
+        return $this->sendResponseWithTotalCount(
+            Transaction::collection($data), 
+            'retrieved successfully',
+            $count,
+        );
     }
 
     public function getMemberRegisterBranchDetail(Request $request)
