@@ -55,8 +55,9 @@ class MemberService
 
     public function memberCount($request)
     {
-        $this->memberRepository->pushCriteria(new RequestCriteria($request));
-        $counts = $this->memberRepository->count();
+        $memberRepository = app(MemberRepository::class);
+        $memberRepository->pushCriteria(new RequestCriteria($request));
+        $counts = $memberRepository->count();
 
         return $counts;
     }
