@@ -18,17 +18,11 @@ class TransactionRepository extends BaseRepository
      * @var array
      */
     protected $fieldSearchable = [
-        'branch_id',
+        'member.first_name',
+        'member.last_name',
+        'branch.name',
         'order_id',
         'payment_type',
-        'clerk',
-        'chops',
-        'consume_chops',
-        'items_count',
-        'amount',
-        'remark',
-        'status',
-        'transaction_time'
     ];
 
     /**

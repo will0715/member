@@ -20,13 +20,10 @@ class PrepaidCardRecordRepository extends BaseRepository
      * @var array
      */
     protected $fieldSearchable = [
-        'member_id',
-        'branch_id',
-        'type',
-        'topup',
-        'payment',
-        'void_id',
-        'remark'
+        'member.first_name',
+        'member.last_name',
+        'branch.name',
+        'transaction_no',
     ];
 
     /**
