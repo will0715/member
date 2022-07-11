@@ -20,9 +20,9 @@ class MemberRepository extends BaseRepository
      * @var array
      */
     protected $fieldSearchable = [
-        'phone',
-        'first_name',
-        'last_name',
+        'phone' => 'like',
+        'first_name' => 'like',
+        'last_name' => 'like',
         'gender',
         'email',
         'address',
