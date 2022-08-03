@@ -12,7 +12,7 @@ abstract class BaseCalculateEarnChopHandler
     public function __construct(EarnChopRule $earnChopRule)
     {
         $this->earnChopRuleRepository = app(EarnChopRuleRepository::class);
-        $this->earnChopRule = $earnChopRuleㄤ;
+        $this->earnChopRule = $earnChopRule;
     }
 
     protected function calculate($transactionData){}
