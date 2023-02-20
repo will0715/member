@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Member;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use Arr;
 use DB;
 
@@ -108,9 +109,13 @@ class MemberRepository extends BaseRepository
 
     private function basicInfo()
     {
+        $now = Carbon::now();
+
         return [
-            'chops AS chops_total' => function ($query) {
-                $query->select(DB::raw("SUM(chops) as total"));
+            'chops AS chops_total' => function ($query) use ($now) {
+                $query->select(DB::raw("SUM(chops) as total"))
+                        ->where('expired_at', '>=', $now)
+                        ->orWhereNull('expired_at');
             },
             'prepaidcard AS prepaidcard_balance' => function ($query) {
                 $query->select('balance');
