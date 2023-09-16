@@ -92,7 +92,7 @@ class ChopService
         $transactionNo = Arr::get($attributes, 'transaction_no');
         $remark = Arr::get($attributes, 'remark');
         $expiredSetting = $this->getChopsExpiredSetting();
-        
+
         // add chop
         $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
         if (!$chop) {
@@ -108,7 +108,7 @@ class ChopService
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ], $chop->id);
         }
-        
+
         // add add chop record
         $record = $this->chopRecordRepository->newManualChopRecord([
             'member_id' => $memberId,
@@ -130,11 +130,11 @@ class ChopService
         $earnChopsRuleId = Arr::get($attributes, 'earn_chop_rule_id');
         $remark = Arr::get($attributes, 'remark');
         $expiredSetting = $this->getChopsExpiredSetting();
-        
+
         // add chop
         $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
         if (!$chop) {
-            // TODO: if it is expired have to move to expired chops 
+            // TODO: if it is expired have to move to expired chops
             $newChop = $this->chopRepository->updateOrCreate([
                 'member_id' => $memberId,
                 'branch_id' => $branchId,
@@ -148,7 +148,7 @@ class ChopService
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ], $chop->id);
         }
-        
+
         // add add chop record
         $record = $this->chopRecordRepository->newEarnChopRecord([
             'member_id' => $memberId,
@@ -171,12 +171,11 @@ class ChopService
         $transactionNo = Arr::get($attributes, 'transaction_no');
         $remark = Arr::get($attributes, 'remark');
         $expiredSetting = $this->getChopsExpiredSetting();
-        
-        $totalChops = $this->getTotalChops($memberId, $branchId);
+        $totalChops = $this->getCanConsumeChops($memberId, $branchId);
+
         if ($totalChops < $consumeChops) {
             throw new ChopsNotEnoughException();
         }
-        
         // consume chop
         $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
         if (!$chop) {
@@ -273,17 +272,25 @@ class ChopService
         return $voidRecord;
     }
 
-    public function getTotalChops($memberId, $branchId)
+    /*
+        取得使用者在這家店所有可以看到點數
+    */
+    public function getCanConsumeChops($memberId, $branchId)
     {
         $branch = $this->branchRepository->find($branchId);
         $isBranchIndependent = $branch->isIndependent();
+        $isDisableConsumeOtherBranchChop = $branch->isDisableConsumeOtherBranchChop();
         if ($isBranchIndependent) {
             $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
             $totalChops = $chop ? $chop->chops : 0;
+        } else if ($isDisableConsumeOtherBranchChop) {
+            $currentBranchChop = $this->chopRepository->getBranchChops($memberId, $branchId);
+            $memberTotalChops = $this->chopRepository->getMemberChops($memberId);
+            $totalChops = min($currentBranchChop ? $currentBranchChop->chops : 0, $memberTotalChops->sum('chops'));
         } else {
             $unindependentBranches = $this->branchRepository->getUnindependentBranches();
             $chops = $this->chopRepository->getMemberBranchesChops($memberId, $unindependentBranches->pluck('id'));
-            $totalChops = $chops->sum('chops');
+            $totalChops = (int) $chops->sum('chops');
         }
         return $totalChops;
     }

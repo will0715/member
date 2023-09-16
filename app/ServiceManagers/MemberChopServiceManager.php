@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\ServiceManagers;
 
@@ -8,14 +8,14 @@ use App\Services\BranchService;
 use App\Services\ChopService;
 use Arr;
 
-class MemberChopServiceManager 
+class MemberChopServiceManager
 {
 
     private $memberService;
     private $branchService;
     private $chopService;
 
-    public function __construct() 
+    public function __construct()
     {
         $this->memberService = app(MemberService::class);
         $this->branchService = app(branchService::class);
@@ -33,7 +33,7 @@ class MemberChopServiceManager
         $branch = $this->branchService->findBranchByCode($branchId);
 
         // chops branch can use
-        $chops = $this->chopService->getTotalChops($member->id, $branch->id);
+        $chops = $this->chopService->getCanConsumeChops($member->id, $branch->id);
         $member->totalChops = $chops;
 
         return $member;
@@ -64,7 +64,7 @@ class MemberChopServiceManager
 
         // search branch
         $branch = $this->branchService->findBranchByCode($branchId);
-        
+
         $record = $this->chopService->manualAddChops([
             'member_id' => $member->id,
             'branch_id' => $branch->id,
@@ -90,7 +90,7 @@ class MemberChopServiceManager
 
         // search branch
         $branch = $this->branchService->findBranchByCode($branchId);
-        
+
         $record = $this->chopService->earnChops([
             'member_id' => $member->id,
             'branch_id' => $branch->id,
@@ -124,7 +124,7 @@ class MemberChopServiceManager
 
         // search branch
         $branch = $this->branchService->findBranchByCode($branchId);
-        
+
         $record = $this->chopService->consumeChops([
             'member_id' => $member->id,
             'branch_id' => $branch->id,
