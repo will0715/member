@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class Branch extends JsonResource
 {
-    
+
     /**
      * Transform the resource into an array.
      *
@@ -35,6 +35,7 @@ class Branch extends JsonResource
             'remark' => $resource->remark,
             'opening_times' => $resource->opening_times,
             'is_independent' => $resource->is_independent,
+            'disable_consume_other_branch_chop' => $resource->disable_consume_other_branch_chop,
             'created_at' => $resource->created_at,
             'register_members' => Member::collection($resource->whenLoaded('registerMembers'))
         ];

@@ -13,11 +13,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Branch extends Model
 {
     use SoftDeletes;
-    
+
     public $incrementing = false;
     protected $keyType = 'string';
     public $table = 'branches';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -42,7 +42,8 @@ class Branch extends Model
         'longitude',
         'remark',
         'opening_times',
-        'is_independent'
+        'is_independent',
+        'disable_consume_other_branch_chop'
     ];
 
     /**
@@ -68,6 +69,7 @@ class Branch extends Model
         'longitude' => 'string',
         'remark' => 'string',
         'opening_times' => 'string',
+        'disable_consume_other_branch_chop' => 'boolean'
     ];
 
     /**
@@ -95,15 +97,20 @@ class Branch extends Model
     {
         return $this->store_name.' ('.$this->code.')';
     }
-    
+
     public function getStoreName()
     {
         return $this->store_name;
     }
-    
+
     public function isIndependent()
     {
         return $this->is_independent;
+    }
+
+    public function isDisableConsumeOtherBranchChop()
+    {
+        return !$this->is_independent && $this->disable_consume_other_branch_chop;
     }
 
     public function registerMembers()
