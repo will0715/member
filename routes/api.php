@@ -39,9 +39,9 @@ Route::namespace('Client')->prefix('client')->group(function () {
 
 Route::group(['prefix' => 'v1'], function () {
     Route::post('/auth/login', 'UserAPIController@login');
-    
+
     Route::group(['middleware' => 'auth:api'], function(){
-        
+
         Route::middleware(['customer.switch'])->group(function () {
             Route::middleware(['can:super-admin'])->group(function () {
                 Route::get('customers/{id}/adminPermission', 'CustomerAPIController@getAdminRolePermission');
@@ -73,12 +73,20 @@ Route::group(['prefix' => 'v1'], function () {
                     Route::get('/transactions', 'ReportAPIController@getTransactionRecords');
                     Route::get('/memberRegisterBranch/detail', 'ReportAPIController@getMemberRegisterBranchDetail');
                     Route::get('/memberRegisterBranch/statistics', 'ReportAPIController@getMemberRegisterBranchStatistics');
+
+                    Route::get('/prepaidcards/topup/download', 'ReportAPIController@downloadPrepaidcardTopupRecords');
+                    Route::get('/prepaidcards/payment/download', 'ReportAPIController@downloadPrepaidcardPaymentRecords');
+                    Route::get('/chops/add/download', 'ReportAPIController@downloadAddChopsRecords');
+                    Route::get('/chops/consume/download', 'ReportAPIController@downloadConsumeChopsRecords');
+                    Route::get('/transactions/download', 'ReportAPIController@downloadTransactionRecords');
+                    Route::get('/memberRegisterBranch/detail/download', 'ReportAPIController@downloadMemberRegisterBranchDetail');
+                    Route::get('/memberRegisterBranch/statistics/download', 'ReportAPIController@downloadMemberRegisterBranchStatistics');
                 });
-                
+
             });
 
             Route::get('/user/me', 'UserAPIController@me');
-            
+
             Route::middleware(['can:view-member'])->group(function () {
                 Route::resource('/members', 'MemberAPIController');
                 Route::prefix('members')->group(function () {
@@ -95,7 +103,7 @@ Route::group(['prefix' => 'v1'], function () {
                     Route::delete('/{phone}/force', 'MemberAPIController@forceDelete');
                 });
             });
-    
+
             Route::middleware(['can:view-rule'])->group(function () {
                 Route::resource('consumeChopRules', 'ConsumeChopRuleAPIController');
                 Route::resource('earnChopRules', 'EarnChopRuleAPIController');
@@ -125,11 +133,11 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::resource('roles', 'RoleAPIController');
                 Route::patch('/roles/{id}/permissions', 'RoleAPIController@setPermission');
             });
-    
+
             Route::middleware(['can:view-branch'])->group(function () {
                 Route::resource('branches', 'BranchAPIController');
             });
-    
+
             Route::middleware(['can:view-rank'])->group(function () {
                 Route::resource('ranks', 'RankAPIController');
                 Route::prefix('ranks/{id}/rankDiscounts')->group(function () {
@@ -139,7 +147,7 @@ Route::group(['prefix' => 'v1'], function () {
 
                 Route::get('/rankDiscounts', 'RankAPIController@listRankDiscount');
             });
-            
+
             Route::middleware(['can:view-branch'])->group(function () {
                 Route::resource('/transactions', 'TransactionAPIController');
                 Route::prefix('transactions')->group(function () {
@@ -147,15 +155,15 @@ Route::group(['prefix' => 'v1'], function () {
                     Route::post('/{id}/void', 'TransactionAPIController@destroy');
                 });
             });
-    
+
             Route::middleware(['can:view-chops'])->group(function () {
                 Route::resource('chopExpiredSettings', 'ChopExpiredSettingAPIController');
             });
-    
+
             Route::middleware(['can:view-user'])->group(function () {
                 Route::resource('users', 'UserAPIController');
             });
-    
+
             Route::middleware(['can:view-pickup-coupon'])->group(function () {
                 Route::post('pickupCoupons/byBranch', 'PickupCouponAPIController@queryByBranch');
                 Route::post('pickupCoupons/{id}/giveto', 'PickupCouponAPIController@giveTo');
@@ -163,13 +171,13 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::post('pickupCoupons/batch', 'PickupCouponAPIController@batchStore');
                 Route::resource('pickupCoupons', 'PickupCouponAPIController');
             });
-    
+
             Route::middleware(['can:view-promotion'])->group(function () {
                 Route::post('promotions/byPosBranch', 'PromotionAPIController@queryByPOSBranch');
                 Route::get('promotions/{code}/byCode', 'PromotionAPIController@queryByCode');
                 Route::resource('promotions', 'PromotionAPIController');
             });
-    
+
             Route::middleware(['can:view-register-chop-rule'])->group(function () {
                 Route::get('registerChopRule', 'RegisterChopRuleAPIController@get');
                 Route::put('registerChopRule', 'RegisterChopRuleAPIController@update');
