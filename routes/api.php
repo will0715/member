@@ -37,6 +37,22 @@ Route::namespace('Client')->prefix('client')->group(function () {
     });
 });
 
+Route::group(['prefix' => 'v2', 'namespace' => 'v2'], function () {
+    Route::group(['middleware' => 'auth:api'], function(){
+
+        Route::middleware(['customer.switch'])->group(function () {
+            Route::middleware(['can:view-chops'])->group(function () {
+                Route::prefix('chops')->group(function () {
+                    Route::post('/consume', 'ChopAPIController@consumeChops');
+                    Route::post('/consume/{id}/void', 'ChopAPIController@voidConsumeChops');
+                    Route::delete('/consume/{id}', 'ChopAPIController@voidConsumeChops');
+                });
+            });
+        });
+
+    });
+});
+
 Route::group(['prefix' => 'v1'], function () {
     Route::post('/auth/login', 'UserAPIController@login');
 
