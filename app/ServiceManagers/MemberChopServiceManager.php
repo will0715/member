@@ -6,6 +6,7 @@ use App\Exceptions\ResourceNotFoundException;
 use App\Services\MemberService;
 use App\Services\BranchService;
 use App\Services\ChopService;
+use App\Constants\ChopRecordConstant;
 use Arr;
 
 class MemberChopServiceManager
@@ -125,7 +126,7 @@ class MemberChopServiceManager
         // search branch
         $branch = $this->branchService->findBranchByCode($branchId);
 
-        $record = $this->chopService->consumeChops([
+        $records = $this->chopService->consumeChops([
             'member_id' => $member->id,
             'branch_id' => $branch->id,
             'rule_id' => $ruleId,
@@ -133,15 +134,45 @@ class MemberChopServiceManager
             'transaction_no' => $transactionNo,
             'remark' => $remark
         ]);
+        collect($records)->map(function ($record) {
+            $record->load(ChopRecordConstant::BASIC_RELATIONS);
+        });
 
-        return $record;
+        // summary record
+        $consumeSummaryRecord = [
+            'id' => Arr::last($records)->id,
+            'type' => Arr::last($records)->type,
+            'chops' => collect($records)->sum('chops'),
+            'consume_chops' => collect($records)->sum('consume_chops'),
+            'created_at' => Arr::last($records)->created_at,
+            'transaction_no' => Arr::last($records)->transaction_no,
+            'remark' => Arr::last($records)->remark,
+            'records' => $records
+        ];
+
+        return $consumeSummaryRecord;
     }
 
     public function voidConsumeChops($id, $attributes)
     {
-        $record = $this->chopService->voidConsumeChops($id, $attributes);
+        $records = $this->chopService->voidConsumeChops($id, $attributes);
+        collect($records)->map(function ($record) {
+            $record->load(ChopRecordConstant::BASIC_RELATIONS);
+        });
 
-        return $record;
+        // summary record
+        $consumeSummaryRecord = [
+            'id' => Arr::last($records)->id,
+            'type' => Arr::last($records)->type,
+            'chops' => collect($records)->sum('chops'),
+            'consume_chops' => collect($records)->sum('consume_chops'),
+            'created_at' => Arr::last($records)->created_at,
+            'transaction_no' => Arr::last($records)->transaction_no,
+            'remark' => Arr::last($records)->remark,
+            'records' => $records
+        ];
+
+        return $consumeSummaryRecord;
     }
 
     public function getMemberTotalChops($phone)

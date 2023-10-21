@@ -9,6 +9,7 @@ use App\Http\Requests\API\ConsumeChopAPIRequest;
 use App\Http\Requests\API\EarnChopAPIRequest;
 use App\Http\Resources\Chop;
 use App\Http\Resources\ChopRecord;
+use App\Http\Resources\ConsumeChopSummaryRecord;
 use App\Services\ChopService;
 use App\ServiceManagers\MemberChopServiceManager;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ class ChopAPIController extends AppBaseController
         $records = $this->chopService->listRecords($request);
         return $this->sendResponse(ChopRecord::collection($records), 'Chops retrieved successfully');
     }
-    
+
     public function manualAddChops(ManualAddChopAPIRequest $request)
     {
         $input = $request->all();
@@ -60,7 +61,7 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function earnChops(EarnChopAPIRequest $request)
     {
         $input = $request->all();
@@ -76,7 +77,7 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function voidEarnChops($id, Request $request)
     {
         $input = $request->all();
@@ -92,33 +93,33 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function consumeChops(ConsumeChopAPIRequest $request)
     {
         $input = $request->all();
 
         DB::beginTransaction();
         try {
-            $chops = $this->memberChopServiceManager->consumeChops($input);
+            $record = $this->memberChopServiceManager->consumeChops($input);
             DB::commit();
 
-            return $this->sendResponse(new ChopRecord($chops), 'Consume Chops successfully');
+            return $this->sendResponse(new ConsumeChopSummaryRecord($record), 'Consume Chops successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
     }
-    
+
     public function voidConsumeChops($id, Request $request)
     {
         $input = $request->all();
 
         DB::beginTransaction();
         try {
-            $chops = $this->memberChopServiceManager->voidConsumeChops($id, $input);
+            $record = $this->memberChopServiceManager->voidConsumeChops($id, $input);
             DB::commit();
 
-            return $this->sendResponse(new ChopRecord($chops), 'Void successfully');
+            return $this->sendResponse(new ConsumeChopSummaryRecord($record), 'Void successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
