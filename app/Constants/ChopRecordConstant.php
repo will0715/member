@@ -9,6 +9,6 @@ class ChopRecordConstant {
     const CHOP_RECORD_VOID_CONSUME_CHOPS = 'VOID_CONSUME_CHOPS';
 
     const BASIC_RELATIONS = [
-        'branch'
+        'branch',
     ];
 }

@@ -9,7 +9,6 @@ use App\Http\Requests\API\ConsumeChopAPIRequest;
 use App\Http\Requests\API\EarnChopAPIRequest;
 use App\Http\Resources\Chop;
 use App\Http\Resources\ChopRecord;
-use App\Http\Resources\ConsumeChopSummaryRecord;
 use App\Services\ChopService;
 use App\ServiceManagers\MemberChopServiceManager;
 use Illuminate\Http\Request;
@@ -100,10 +99,10 @@ class ChopAPIController extends AppBaseController
 
         DB::beginTransaction();
         try {
-            $record = $this->memberChopServiceManager->consumeChops($input);
+            $chops = $this->memberChopServiceManager->consumeChops($input);
             DB::commit();
 
-            return $this->sendResponse(new ConsumeChopSummaryRecord($record), 'Consume Chops successfully');
+            return $this->sendResponse(new ChopRecord($chops), 'Consume Chops successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -116,10 +115,10 @@ class ChopAPIController extends AppBaseController
 
         DB::beginTransaction();
         try {
-            $record = $this->memberChopServiceManager->voidConsumeChops($id, $input);
+            $chops = $this->memberChopServiceManager->voidConsumeChops($id, $input);
             DB::commit();
 
-            return $this->sendResponse(new ConsumeChopSummaryRecord($record), 'Void successfully');
+            return $this->sendResponse(new ChopRecord($chops), 'Void successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;

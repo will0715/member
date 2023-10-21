@@ -18,7 +18,6 @@ use App\Repositories\RankRepository;
 use App\Repositories\MemberRepository;
 use App\Repositories\BranchRepository;
 use App\Events\MemberRegistered;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Cache;
 use DB;
@@ -169,7 +168,7 @@ class ChopService
         $branchId = $attributes['branch_id'];
         $consumeChops = $attributes['chops'];
         $ruleId = $attributes['rule_id'];
-        $transactionNo = Arr::get($attributes, 'transaction_no') ?: (string) Str::uuid();
+        $transactionNo = Arr::get($attributes, 'transaction_no');
         $remark = Arr::get($attributes, 'remark');
         $expiredSetting = $this->getChopsExpiredSetting();
         $totalChops = $this->getCanConsumeChops($memberId, $branchId);
@@ -177,44 +176,32 @@ class ChopService
         if ($totalChops < $consumeChops) {
             throw new ChopsNotEnoughException();
         }
-        $remainConsumeChops = $consumeChops;
-        $consumeBranches = $this->getBranchCanConsumeBranches($branchId);
-
-        // 依序扣除分店點數，直到要兌換的點數扣完為止
-        $earnChopsRecords = [];
-        foreach ($consumeBranches as $branch) {
-            $currentConsumeBranchId = $branch->id;
-            $chop = $this->chopRepository->getBranchChops($memberId, $currentConsumeBranchId);
-            if (!$chop) {
-                continue;
-            }
-            if ($chop->chops <= 0) {
-                continue;
-            }
-            $branchConsumeChops = min($chop->chops, $remainConsumeChops);
-            $remainConsumeChops -= $branchConsumeChops;
-            $chop = $this->chopRepository->update([
-                'chops' => $chop->chops - $branchConsumeChops
-            ], $chop->id);
-
-            // add consume chop record
-            $record = $this->chopRecordRepository->newConsumeChopRecord([
+        // consume chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        if (!$chop) {
+            $newChop = $this->chopRepository->create([
                 'member_id' => $memberId,
-                'branch_id' => $currentConsumeBranchId,
-                'rule_id' => $ruleId,
-                'consume_chops' => $branchConsumeChops,
-                'transaction_no' => $transactionNo,
-                'remark' => $remark
+                'branch_id' => $branchId,
+                'chops' => $consumeChops * -1,
+                'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
-            $earnChopsRecords[] = $record;
-
-            $remainConsumeChops -= $chop->chops;
-            if ($remainConsumeChops <= 0) {
-                break;
-            }
+        } else {
+            $newChop = $this->chopRepository->update([
+                'chops' => $chop->chops - $consumeChops
+            ], $chop->id);
         }
 
-        return $earnChopsRecords;
+        // add consume chop record
+        $record = $this->chopRecordRepository->newConsumeChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'rule_id' => $ruleId,
+            'consume_chops' => $consumeChops,
+            'transaction_no' => $transactionNo,
+            'remark' => $remark
+        ]);
+
+        return $record;
     }
 
     public function voidEarnChops($id, $attributes = [])
@@ -261,46 +248,28 @@ class ChopService
         if (!empty($record->voidRecord)) {
             throw new AlreadyVoidedException();
         }
+        $memberId = $record->member_id;
+        $branchId = $record->branch_id;
 
-        // 取得所有相同交易編號的消費紀錄
-        if (!$record->transaction_no) {
-            $needVoidRecord = [$record];
-        } else {
-            $needVoidRecords = $this->chopRecordRepository->findWhere([
-                'type' => ChopRecordConstant::CHOP_RECORD_CONSUME_CHOPS,
-                'transaction_no' => $record->transaction_no
-            ]);
-        }
+        // add chop
+        $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
+        $voidConsumeChops = $record->consume_chops;
 
-        $voidRecords = [];
-        foreach ($needVoidRecords as $needVoidRecord) {
-            if (!empty($needVoidRecord->voidRecord)) {
-                continue;
-            }
+        // add chops
+        $newChop = $this->chopRepository->update([
+            'chops' => $chop->chops + $voidConsumeChops
+        ], $chop->id);
 
-            $memberId = $needVoidRecord->member_id;
-            $branchId = $needVoidRecord->branch_id;
+        // add void record
+        $voidRecord = $this->chopRecordRepository->voidConsumeChopRecord([
+            'member_id' => $memberId,
+            'branch_id' => $branchId,
+            'consume_chops' => -1 * $voidConsumeChops,
+            'void_id' => $record->id,
+            'remark' => $remark
+        ]);
 
-            $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
-            $voidConsumeChops = $needVoidRecord->consume_chops;
-
-            // add chops
-            $newChop = $this->chopRepository->update([
-                'chops' => $chop->chops + $voidConsumeChops
-            ], $chop->id);
-
-            // add void record
-            $voidRecord = $this->chopRecordRepository->voidConsumeChopRecord([
-                'member_id' => $memberId,
-                'branch_id' => $branchId,
-                'consume_chops' => -1 * $voidConsumeChops,
-                'void_id' => $needVoidRecord->id,
-                'remark' => $remark
-            ]);
-            $voidRecords[] = $voidRecord;
-        }
-
-        return $voidRecords;
+        return $voidRecord;
     }
 
     /*
@@ -311,35 +280,19 @@ class ChopService
         $branch = $this->branchRepository->find($branchId);
         $isBranchIndependent = $branch->isIndependent();
         $isDisableConsumeOtherBranchChop = $branch->isDisableConsumeOtherBranchChop();
-        if ($isBranchIndependent || $isDisableConsumeOtherBranchChop) {
+        if ($isBranchIndependent) {
             $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
             $totalChops = $chop ? $chop->chops : 0;
+        } else if ($isDisableConsumeOtherBranchChop) {
+            $currentBranchChop = $this->chopRepository->getBranchChops($memberId, $branchId);
+            $memberTotalChops = $this->chopRepository->getMemberChops($memberId);
+            $totalChops = min($currentBranchChop ? $currentBranchChop->chops : 0, $memberTotalChops->sum('chops'));
         } else {
             $unindependentBranches = $this->branchRepository->getUnindependentBranches();
             $chops = $this->chopRepository->getMemberBranchesChops($memberId, $unindependentBranches->pluck('id'));
             $totalChops = (int) $chops->sum('chops');
         }
         return $totalChops;
-    }
-
-    private function getBranchCanConsumeBranches($branchId)
-    {
-        $branch = $this->branchRepository->find($branchId);
-        $isBranchIndependent = $branch->isIndependent();
-        $isDisableConsumeOtherBranchChop = $branch->isDisableConsumeOtherBranchChop();
-
-        if ($isBranchIndependent || $isDisableConsumeOtherBranchChop) {
-            return [$branch];
-        } else {
-            // 取得所有非獨立分店 (is_disable_consume_other_branch_chop 的依然要算)
-            $consumeBranches = $this->branchRepository->orderBy('code', 'asc')->findByField('is_independent', false);
-            // 將目前的分店排在第一個
-            $sortedBranches = $consumeBranches->sortBy(function ($branch) use ($branchId) {
-                return $branch->id === $branchId ? 0 : 1;
-            });
-            return $sortedBranches;
-        }
-        return [];
     }
 
     private function getChopsExpiredSetting()
