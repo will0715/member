@@ -44,7 +44,7 @@ class ChopAPIController extends AppBaseController
         $records = $this->chopService->listRecords($request);
         return $this->sendResponse(ChopRecord::collection($records), 'Chops retrieved successfully');
     }
-    
+
     public function manualAddChops(ManualAddChopAPIRequest $request)
     {
         $input = $request->all();
@@ -60,7 +60,7 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function earnChops(EarnChopAPIRequest $request)
     {
         $input = $request->all();
@@ -76,7 +76,7 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function voidEarnChops($id, Request $request)
     {
         $input = $request->all();
@@ -92,7 +92,7 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function consumeChops(ConsumeChopAPIRequest $request)
     {
         $input = $request->all();
@@ -108,7 +108,7 @@ class ChopAPIController extends AppBaseController
             throw $e;
         }
     }
-    
+
     public function voidConsumeChops($id, Request $request)
     {
         $input = $request->all();
