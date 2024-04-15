@@ -40,7 +40,7 @@ class PrepaidCardService
 
     public function findPrepaidcardRecordsByMember($memberId)
     {
-        return $this->prepaidCardRecordRepository->orderBy('id', 'desc')->findWhere(['member_id' => $memberId]);
+        return $this->prepaidCardRecordRepository->orderBy('created_at', 'desc')->findWhere(['member_id' => $memberId]);
     }
 
     public function findPrepaidcardRecordsByTransactionNo($transactionNo)
