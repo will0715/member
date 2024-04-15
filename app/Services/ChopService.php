@@ -76,7 +76,7 @@ class ChopService
 
     public function findChopsRecordsByMember($memberId)
     {
-        return $this->chopRecordRepository->orderBy('id', 'desc')->findWhere(['member_id' => $memberId]);
+        return $this->chopRecordRepository->orderBy('created_at', 'desc')->findWhere(['member_id' => $memberId]);
     }
 
     public function findChopsRecordsByTransactionNo($transactionNo)

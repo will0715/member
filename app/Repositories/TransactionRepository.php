@@ -56,7 +56,7 @@ class TransactionRepository extends BaseRepository
 
     public function listByMemberId($memberId, $paginate = false)
     {
-        $this->where('member_id', $memberId)->orderBy('id', 'desc');
+        $this->where('member_id', $memberId)->orderBy('created_at', 'desc');
         return $this->getListData($paginate);
     }
 
