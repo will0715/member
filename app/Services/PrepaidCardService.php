@@ -40,7 +40,7 @@ class PrepaidCardService
 
     public function findPrepaidcardRecordsByMember($memberId)
     {
-        return $this->prepaidCardRecordRepository->findWhere(['member_id' => $memberId]);
+        return $this->prepaidCardRecordRepository->orderBy('id', 'desc')->findWhere(['member_id' => $memberId]);
     }
 
     public function findPrepaidcardRecordsByTransactionNo($transactionNo)
@@ -86,7 +86,7 @@ class PrepaidCardService
         $payment = $attributes['payment'];
         $remark = $attributes['remark'];
         $transactionNo = Arr::get($attributes, 'transaction_no');
-        
+
         // need lock row for update
         $memberPrepaidCard = $this->prepaidCardRepository->getByMemberIdWithLock($memberId);
         $newBalance = $memberPrepaidCard ? $memberPrepaidCard->balance - $payment : -1 * $payment;
@@ -121,7 +121,7 @@ class PrepaidCardService
 
         // need lock row for update
         $memberPrepaidCard = $this->prepaidCardRepository->getByMemberIdWithLock($record->member_id);
-        
+
         $newBalance = $memberPrepaidCard->balance + $record->payment;
 
         $newMemberPrepaidCard = $this->prepaidCardRepository->update([
