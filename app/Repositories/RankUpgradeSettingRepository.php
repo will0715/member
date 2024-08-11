@@ -20,6 +20,7 @@ class RankUpgradeSettingRepository extends BaseRepository
     protected $fieldSearchable = [
         'is_active',
         'calculate_standard',
+        'calculate_standard_value',
         'calculate_time_unit',
         'calculate_time_value',
     ];

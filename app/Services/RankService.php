@@ -132,15 +132,9 @@ class RankService
     public function setRankUpgradeSetting($data, $rankId)
     {
         $rank = $this->findRank($rankId);
-        $attributes = [
-            'is_active' => $data['is_active'],
-            'calculate_standard' => $data['calculate_standard'],
-            'calculate_time_unit' => $data['calculate_time_unit'],
-            'calculate_time_value' => $data['calculate_time_value'],
-        ];
         $rankUpgradeSetting = $this->rankUpgradeSettingRepository->updateOrCreate([
             'rank_id' => $rankId
-        ], $attributes);
+        ], $data);
         return $rankUpgradeSetting;
     }
 }
