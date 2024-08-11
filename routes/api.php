@@ -155,10 +155,20 @@ Route::group(['prefix' => 'v1'], function () {
             });
 
             Route::middleware(['can:view-rank'])->group(function () {
+                Route::prefix('ranks/expiredSettings')->group(function () {
+                    Route::get('/', 'RankAPIController@getExpiredSetting');
+                    Route::put('/', 'RankAPIController@setExpiredSetting');
+                });
+
                 Route::resource('ranks', 'RankAPIController');
                 Route::prefix('ranks/{id}/rankDiscounts')->group(function () {
                     Route::get('/', 'RankAPIController@getRankDiscount');
                     Route::put('/', 'RankAPIController@setRankDiscount');
+                });
+
+                Route::prefix('ranks/{id}/upgradeSettings')->group(function () {
+                    Route::get('/', 'RankAPIController@getRankUpgradeSetting');
+                    Route::put('/', 'RankAPIController@setRankUpgradeSetting');
                 });
 
                 Route::get('/rankDiscounts', 'RankAPIController@listRankDiscount');

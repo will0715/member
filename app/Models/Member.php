@@ -32,7 +32,7 @@ class Member extends Authenticatable
     public $incrementing = false;
     protected $keyType = 'string';
     public $table = 'members';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -63,7 +63,8 @@ class Member extends Authenticatable
         'status',
         'register_branch_id',
         'card_carrier_no',
-        'invoice_carrier_no'
+        'invoice_carrier_no',
+        'rank_expired_at'
     ];
 
     /**
@@ -84,7 +85,8 @@ class Member extends Authenticatable
         'birthday' => 'date',
         'register_branch_id' => 'string',
         'card_carrier_no' => 'string',
-        'invoice_carrier_no' => 'string'
+        'invoice_carrier_no' => 'string',
+        'rank_expired_at' => 'datetime'
     ];
 
     /**
@@ -148,5 +150,5 @@ class Member extends Authenticatable
     {
         return $this->hasMany(\App\Models\MemberSocialite::class);
     }
-    
+
 }

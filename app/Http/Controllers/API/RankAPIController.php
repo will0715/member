@@ -6,8 +6,12 @@ use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateRankAPIRequest;
 use App\Http\Requests\API\UpdateRankAPIRequest;
 use App\Http\Requests\API\UpdateRankDiscountAPIRequest;
+use App\Http\Requests\API\UpdateRankExpiredSettingAPIRequest;
+use App\Http\Requests\API\UpdateRankUpgradeSettingAPIRequest;
 use App\Http\Resources\Rank;
 use App\Http\Resources\RankDiscount;
+use App\Http\Resources\RankExpiredSetting;
+use App\Http\Resources\RankUpgradeSetting;
 use App\Services\RankService;
 use Illuminate\Http\Request;
 use Response;
@@ -122,5 +126,33 @@ class RankAPIController extends AppBaseController
 
         $rankDiscount = $this->rankService->setRankDiscount($input, $rankId);
         return $this->sendResponse(new RankDiscount($rankDiscount), 'Rank Discount retrieved successfully');
+    }
+
+    public function getExpiredSetting()
+    {
+        $setting = $this->rankService->getRankExpiredSetting();
+        return $this->sendResponse(new RankExpiredSetting($setting), 'Rank Expired Setting retrieved successfully');
+    }
+
+    public function setExpiredSetting(UpdateRankExpiredSettingAPIRequest $request)
+    {
+        $input = $request->all();
+
+        $setting = $this->rankService->setRankExpiredSetting($input);
+        return $this->sendResponse(new RankExpiredSetting($setting), 'Rank Expired Setting updated successfully');
+    }
+
+    public function getRankUpgradeSetting($rankId)
+    {
+        $setting = $this->rankService->getRankUpgradeSetting($rankId);
+        return $this->sendResponse(new RankUpgradeSetting($setting), 'Rank Upgrade Setting retrieved successfully');
+    }
+
+    public function setRankUpgradeSetting($rankId, UpdateRankUpgradeSettingAPIRequest $request)
+    {
+        $input = $request->all();
+
+        $setting = $this->rankService->setRankUpgradeSetting($input, $rankId);
+        return $this->sendResponse(new RankUpgradeSetting($setting), 'Rank Upgrade Setting updated successfully');
     }
 }

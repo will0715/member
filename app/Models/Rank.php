@@ -21,7 +21,7 @@ class Rank extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $table = 'ranks';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -64,5 +64,10 @@ class Rank extends Model
     public function rankDiscount()
     {
         return $this->hasOne(\App\Models\RankDiscount::class);
+    }
+
+    public function rankUpgradeSetting()
+    {
+        return $this->hasOne(\App\Models\RankUpgradeSetting::class);
     }
 }
