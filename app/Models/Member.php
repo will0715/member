@@ -64,7 +64,7 @@ class Member extends Authenticatable
         'register_branch_id',
         'card_carrier_no',
         'invoice_carrier_no',
-        'rank_expired_at'
+        'rank_join_at'
     ];
 
     /**
@@ -86,7 +86,7 @@ class Member extends Authenticatable
         'register_branch_id' => 'string',
         'card_carrier_no' => 'string',
         'invoice_carrier_no' => 'string',
-        'rank_expired_at' => 'datetime'
+        'rank_join_at' => 'datetime'
     ];
 
     /**
