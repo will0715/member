@@ -96,9 +96,10 @@ class ChopService
         // add chop
         $chop = $this->chopRepository->getBranchChops($memberId, $branchId);
         if (!$chop) {
-            $newChop = $this->chopRepository->create([
+            $newChop = $this->chopRepository->updateOrCreate([
                 'member_id' => $memberId,
                 'branch_id' => $branchId,
+            ], [
                 'chops' => $addChops,
                 'expired_at' => Carbon::now()->add($expiredSetting->expired_date, 'days')
             ]);
