@@ -35,7 +35,7 @@ class RankUpgradeSetting extends Model
     // Enum for calculate_standard
     const CALCULATE_STANDARD_AMOUNT = 'AMOUNT';
     const CALCULATE_STANDARD_TIMES = 'TIMES';
-    const CALCULATE_STANDARD_CHOP = 'CHOP';
+    const CALCULATE_STANDARD_CHOPS = 'CHOPS';
 
     // Enum for calculate_time_unit
     const CALCULATE_TIME_UNIT_DAY = 'DAY';
@@ -72,8 +72,8 @@ class RankUpgradeSetting extends Model
     {
         return [
             self::CALCULATE_STANDARD_AMOUNT,
-            self::CALCULATE_STANDARD_PERCENTAGE,
-            self::CALCULATE_STANDARD_CHOP,
+            self::CALCULATE_STANDARD_TIMES,
+            self::CALCULATE_STANDARD_CHOPS,
         ];
     }
 

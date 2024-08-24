@@ -119,6 +119,13 @@ class RankService
         return $setting;
     }
 
+    public function listRankUpgradeSettings()
+    {
+        $rankUpgradeSettings = $this->rankUpgradeSettingRepository->with(['rank'])->all();
+
+        return $rankUpgradeSettings;
+    }
+
     public function getRankUpgradeSetting($rankId)
     {
         $rank = $this->findRank($rankId);
