@@ -29,7 +29,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new CalculateMemberRankExpired)->dailyAt('01:00');
-        $schedule->job(new CalculateMemberRankUpgrade)->everyMinute();
+        $schedule->job(new CalculateMemberRankUpgrade)->dailyAt('02:00');
     }
 
     /**
