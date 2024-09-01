@@ -6,6 +6,8 @@ use Prettus\Repository\Criteria\RequestCriteria;
 use App\Criterias\LimitOffsetCriteria;
 use App\Repositories\RankRepository;
 use App\Repositories\RankDiscountRepository;
+use App\Repositories\RankExpiredSettingRepository;
+use App\Repositories\RankUpgradeSettingRepository;
 use App\Helpers\CustomerHelper;
 use App\Exceptions\ResourceNotFoundException;
 use Cache;
@@ -18,6 +20,8 @@ class RankService
     {
         $this->rankRepository = app(RankRepository::class);
         $this->rankDiscountRepository = app(RankDiscountRepository::class);
+        $this->rankExpiredSettingRepository = app(RankExpiredSettingRepository::class);
+        $this->rankUpgradeSettingRepository = app(RankUpgradeSettingRepository::class);
     }
 
     public function listRanks($request)
@@ -82,6 +86,7 @@ class RankService
 
     public function getRankDiscount($rankId)
     {
+        $rank = $this->findRank($rankId);
         $rankDiscount = $this->rankDiscountRepository->findByRankId($rankId);
         if (!$rankDiscount) {
             $rankDiscount = $this->rankDiscountRepository->getDefaultRankDiscount($rankId);
@@ -91,6 +96,7 @@ class RankService
 
     public function setRankDiscount($data, $rankId)
     {
+        $rank = $this->findRank($rankId);
         $attributes = [
             'is_active' => $data['is_active'],
             'content' => $data['content'],
@@ -99,5 +105,43 @@ class RankService
             'rank_id' => $rankId
         ], $attributes);
         return $rankDiscount;
+    }
+
+    public function getRankExpiredSetting()
+    {
+        $setting = $this->rankExpiredSettingRepository->getSetting();
+        return $setting;
+    }
+
+    public function setRankExpiredSetting($data)
+    {
+        $setting = $this->rankExpiredSettingRepository->setSetting($data);
+        return $setting;
+    }
+
+    public function listRankUpgradeSettings()
+    {
+        $rankUpgradeSettings = $this->rankUpgradeSettingRepository->with(['rank'])->all();
+
+        return $rankUpgradeSettings;
+    }
+
+    public function getRankUpgradeSetting($rankId)
+    {
+        $rank = $this->findRank($rankId);
+        $rankUpgradeSetting = $this->rankUpgradeSettingRepository->findByRankId($rankId);
+        if (!$rankUpgradeSetting) {
+            $rankUpgradeSetting = $this->rankUpgradeSettingRepository->getDefaultRankUpgradeSetting($rankId);
+        }
+        return $rankUpgradeSetting;
+    }
+
+    public function setRankUpgradeSetting($data, $rankId)
+    {
+        $rank = $this->findRank($rankId);
+        $rankUpgradeSetting = $this->rankUpgradeSettingRepository->updateOrCreate([
+            'rank_id' => $rankId
+        ], $data);
+        return $rankUpgradeSetting;
     }
 }

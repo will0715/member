@@ -64,7 +64,6 @@ class MemberAPIController extends AppBaseController
         } catch(ResourceNotFoundException $e) {
     		return $this->sendError('Member\'s phone not exist', 401);
         } catch (\Exception $e) {
-            Log::error($e);
     		return $this->sendError('Unauthenticated', 401);
         }
     }
@@ -110,7 +109,7 @@ class MemberAPIController extends AppBaseController
 
         $member = $this->memberService->memberBasicInfo($authMember->id);
         $member->load(MemberConstant::SIMPLE_MEMBER_RELATIONS);
-        
+
         return $this->sendResponse(new MemberList($member), 'Member retrieved successfully');
     }
 
