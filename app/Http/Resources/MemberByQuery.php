@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class MemberByQuery extends JsonResource
 {
-    
+
     /**
      * Transform the resource into an array.
      *
@@ -31,6 +31,7 @@ class MemberByQuery extends JsonResource
             'card_carrier_no' => $resource->card_carrier_no,
             'invoice_carrier_no' => $resource->invoice_carrier_no,
             'rank' => new Rank($resource->whenLoaded('rank')),
+            'rank_expired_at' => $resource->rank_expired_at,
             'totalChops' => $resource->totalChops,
             'created_at' => $resource->created_at,
         ];

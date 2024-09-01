@@ -10,6 +10,7 @@ use App\Repositories\RankRepository;
 use App\Repositories\MemberSocialiteRepository;
 use App\Helpers\CustomerHelper;
 use App\Events\MemberRegistered;
+use App\Events\MemberRankChanged;
 use App\Exceptions\ResourceNotFoundException;
 use App\Exceptions\SearchFieldEmptyException;
 use App\Models\Member;
@@ -23,7 +24,7 @@ use Hash;
 
 class MemberService
 {
-    
+
     /** @var  MemberRepository */
     private $memberRepository;
     private $customer;
@@ -112,7 +113,33 @@ class MemberService
 
     public function updateMember($data, $id)
     {
-        $member = $this->memberRepository->updateMember($data, $id);
+        $member = $this->findMember($id);
+        $data_with_out_rank = Arr::except($data, ['rank_id']);
+        $member = $this->memberRepository->updateMember($data_with_out_rank, $id);
+
+        $newRankId = Arr::get($data, 'rank_id');
+        $this->updateMemberRank($newRankId, $id);
+        return $member;
+    }
+
+    public function updateMemberRank($rankId, $id)
+    {
+        $member = $this->findMember($id);
+        if (!$rankId) {
+            return;
+        }
+        if ($member->rank_id == $rankId) {
+            return;
+        }
+
+        $member = $this->memberRepository->updateMember([
+            'rank_id' => $rankId,
+            'rank_join_at' => Carbon::now(),
+        ], $id);
+
+        $customer = CustomerHelper::getCustomer();
+        event(new MemberRankChanged($customer, $member, $rankId));
+
         return $member;
     }
 
@@ -150,7 +177,7 @@ class MemberService
     {
         $phone = $attributes['phone'];
         $password = $attributes['password'];
-        
+
         $member = $this->findMemberByPhone($phone);
 
         if ($this->checkMemberPassword($member, $password)) {
@@ -164,12 +191,12 @@ class MemberService
     {
         $socialiteProvider = $attributes['socialiteProvider'];
         $userId = $attributes['userId'];
-        
+
         $memberSocialiteData = $this->memberSocialiteRepository->findBySocialiteUserId($socialiteProvider, $userId);
         if (!$memberSocialiteData) {
             throw new AuthenticationException();
         }
-        
+
         $member = $this->findMember($memberSocialiteData->member_id);
 
         return $member;
