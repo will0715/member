@@ -19,9 +19,11 @@ use App\Http\Resources\MemberList;
 use App\Http\Resources\MemberByQuery;
 use App\Http\Resources\ChopRecord;
 use App\Http\Resources\PrepaidcardRecord;
+use App\Http\Resources\Coupon;
 use App\Services\MemberService;
 use App\Services\ChopService;
 use App\Services\PrepaidCardService;
+use App\Services\CouponService;
 use App\Services\RankService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -46,6 +48,7 @@ class MemberAPIController extends AppBaseController
         $this->rankService = app(RankService::class);
         $this->chopService = app(ChopService::class);
         $this->prepaidCardService = app(PrepaidCardService::class);
+        $this->couponService = app(CouponService::class);
         $this->memberChopServiceManager = app(MemberChopServiceManager::class);
         $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
         $this->memberRegisterManager = app(MemberRegisterManager::class);
@@ -67,8 +70,8 @@ class MemberAPIController extends AppBaseController
         $count = $this->memberService->memberCount($request);
 
         return $this->sendResponseWithTotalCount(
-            MemberList::collection($members), 
-            'Members retrieved successfully', 
+            MemberList::collection($members),
+            'Members retrieved successfully',
             $count
         );
     }
@@ -174,7 +177,7 @@ class MemberAPIController extends AppBaseController
     public function queryByPhone(QueryMemberByAPIRequest $request)
     {
         $branchId = $request->get('branch_id');
-        
+
         $search = $request->only([
             'phone',
             'card_carrier_no',
@@ -270,6 +273,12 @@ class MemberAPIController extends AppBaseController
         return $this->sendResponse(PrepaidcardRecord::collection($records), 'Member retrieved successfully');
     }
 
+    public function getCoupons($phone)
+    {
+        $member = $this->memberService->findMemberByPhone($phone);
+        $coupons = $this->couponService->getAvailableCouponsForMember($member->id);
+        return $this->sendResponse(Coupon::collection($coupons), 'Member retrieved successfully');
+    }
 
     public function information($phone)
     {

@@ -113,6 +113,7 @@ Route::group(['prefix' => 'v1'], function () {
                     Route::get('/{phone}/orderRecords', 'MemberAPIController@getOrderRecords');
                     Route::get('/{phone}/balance', 'MemberAPIController@getBalance');
                     Route::get('/{phone}/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
+                    Route::get('/{phone}/coupons', 'MemberAPIController@getCoupons');
                     Route::get('/{phone}/information', 'MemberAPIController@information');
                     Route::get('/{id}/detail', 'MemberAPIController@detail');
                     Route::patch('/{phone}/byPhone', 'MemberAPIController@updateByPhone');
@@ -207,6 +208,17 @@ Route::group(['prefix' => 'v1'], function () {
             Route::middleware(['can:view-register-chop-rule'])->group(function () {
                 Route::get('registerChopRule', 'RegisterChopRuleAPIController@get');
                 Route::put('registerChopRule', 'RegisterChopRuleAPIController@update');
+            });
+
+            Route::middleware(['can:view-coupon'])->group(function () {
+                Route::resource('couponGroups', 'CouponGroupAPIController');
+                Route::post('couponGroups/{id}/issue', 'CouponGroupAPIController@issueCoupons');
+
+                Route::resource('coupons', 'CouponAPIController');
+                Route::post('coupons/{code}/use', 'CouponAPIController@useCoupon');
+                Route::post('coupons/{code}/disable', 'CouponAPIController@disableCoupon');
+                Route::get('coupons/available/{memberId}', 'CouponAPIController@getMemberAvailableCoupons');
+                Route::get('coupons/all/{memberId}', 'CouponAPIController@getMemberAllCoupons');
             });
         });
     });

@@ -50,5 +50,9 @@ class PermissionConstant {
             'view-register-chop-rule',
             'edit-register-chop-rule'
         ],
+        'coupon' => [
+            'view-coupon',
+            'edit-coupon'
+        ],
     ];
 }
