@@ -151,7 +151,7 @@ class CouponService
         return $this->couponRepository->delete($id);
     }
 
-    public function issueCouponToMember($couponGroup, $memberId)
+    public function issueCouponToMember($couponGroup, $memberId, $quantity = 1)
     {
         $member = $this->memberRepository->findWithoutFail($memberId);
 
@@ -164,27 +164,32 @@ class CouponService
             return false;
         }
 
-        $couponData = [
-            'coupon_group_id' => $couponGroup->id,
-            'member_id' => $memberId,
-            'code' => $this->generateUniqueCode($couponGroup->prefix_code),
-            'status' => Coupon::STATUS_AVAILABLE,
-            'claimed_at' => Carbon::now(),
-        ];
+        $coupons = [];
 
-        // 設置有效期
-        if ($couponGroup->calculate_time_unit === CouponGroup::CALCULATE_TIME_UNIT_FIXED) {
-            $couponData['effective_start_at'] = $couponGroup->fixed_start_time;
-            $couponData['expired_at'] = $couponGroup->fixed_end_time;
-        } elseif ($couponGroup->calculate_time_unit === CouponGroup::CALCULATE_TIME_UNIT_CLAIM) {
-            $couponData['effective_start_at'] = Carbon::now();
-            $couponData['expired_at'] = Carbon::now()->addDays($couponGroup->valid_days_after_claim);
+        for ($i = 0; $i < $quantity; $i++) {
+            $couponData = [
+                'coupon_group_id' => $couponGroup->id,
+                'member_id' => $memberId,
+                'code' => $this->generateUniqueCode($couponGroup->prefix_code),
+                'status' => Coupon::STATUS_AVAILABLE,
+                'claimed_at' => Carbon::now(),
+            ];
+
+            // 設置有效期
+            if ($couponGroup->calculate_time_unit === CouponGroup::CALCULATE_TIME_UNIT_FIXED) {
+                $couponData['effective_start_at'] = $couponGroup->fixed_start_time;
+                $couponData['expired_at'] = $couponGroup->fixed_end_time;
+            } elseif ($couponGroup->calculate_time_unit === CouponGroup::CALCULATE_TIME_UNIT_CLAIM) {
+                $couponData['effective_start_at'] = Carbon::now();
+                $couponData['expired_at'] = Carbon::now()->addDays($couponGroup->valid_days_after_claim);
+            }
+
+            $coupon = $this->couponRepository->create($couponData);
+            $coupon->load('couponGroup');
+            $coupons[] = $coupon;
         }
 
-        $coupon = $this->couponRepository->create($couponData);
-        $coupon->load('couponGroup');
-
-        return $coupon;
+        return $coupons;
     }
 
     protected function checkMemberEligibility($member, $couponGroup)
@@ -193,7 +198,7 @@ class CouponService
         return true;
     }
 
-    public function issueCouponGroupToMembers(String $couponGroupId, Collection $memberIds, Collection $rankId)
+    public function issueCouponGroupToMembers(String $couponGroupId, Collection $memberIds, Collection $rankId, $quantity = 1)
     {
         $issuedCoupons = [];
 
@@ -208,9 +213,9 @@ class CouponService
         $couponGroup = $this->couponGroupRepository->findWithoutFail($couponGroupId);
 
         foreach ($memberIds->unique() as $memberId) {
-            $coupon = $this->issueCouponToMember($couponGroup, $memberId);
-            if ($coupon) {
-                $issuedCoupons[] = $coupon;
+            $coupons = $this->issueCouponToMember($couponGroup, $memberId, $quantity);
+            if ($coupons) {
+                $issuedCoupons = array_merge($issuedCoupons, $coupons);
             }
         }
 

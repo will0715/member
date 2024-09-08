@@ -124,8 +124,9 @@ class CouponGroupAPIController extends AppBaseController
     {
         $memberIds = collect($request->input('member_ids', []));
         $rankId = collect($request->input('rank_id', []));
+        $quantity = $request->input('quantity', 1);
 
-        $issuedCoupons = $this->couponService->issueCouponGroupToMembers($id, $memberIds, $rankId);
+        $issuedCoupons = $this->couponService->issueCouponGroupToMembers($id, $memberIds, $rankId, $quantity);
 
         return $this->sendResponse(Coupon::collection($issuedCoupons), '優惠券發放成功');
     }
