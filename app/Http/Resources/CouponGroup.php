@@ -21,7 +21,6 @@ class CouponGroup extends JsonResource
             'name' => $resource->name,
             'prefix_code' => $resource->prefix_code,
             'limit_branch' => $resource->limit_branch,
-            'limit_rank' => $resource->limit_rank,
             'calculate_time_unit' => $resource->calculate_time_unit,
             'fixed_start_time' => $resource->fixed_start_time,
             'fixed_end_time' => $resource->fixed_end_time,
@@ -30,7 +29,6 @@ class CouponGroup extends JsonResource
             'trigger_condition' => $resource->trigger_condition,
             'content' => $resource->content,
             'branches' => Branch::collection($resource->whenLoaded('limitBranches')),
-            'ranks' => Rank::collection($resource->whenLoaded('limitRanks'))
         ];
     }
 }

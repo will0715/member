@@ -42,10 +42,6 @@ class CouponGroupRepository extends BaseRepository
     {
         $couponGroup = $this->create($input);
 
-        if (!empty($rankIds)) {
-            $couponGroup->limitRanks()->sync($rankIds);
-        }
-
         if (!empty($branchIds)) {
             $couponGroup->limitBranches()->sync($branchIds);
         }
@@ -56,10 +52,6 @@ class CouponGroupRepository extends BaseRepository
     public function updateWithRelations($id, array $input, array $rankIds = [], array $branchIds = [])
     {
         $couponGroup = $this->update($input, $id);
-
-        if (isset($rankIds)) {
-            $couponGroup->limitRanks()->sync($rankIds);
-        }
 
         if (isset($branchIds)) {
             $couponGroup->limitBranches()->sync($branchIds);

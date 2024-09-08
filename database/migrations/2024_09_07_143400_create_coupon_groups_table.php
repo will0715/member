@@ -18,7 +18,6 @@ class CreateCouponGroupsTable extends Migration
             $table->string('name');
             $table->string('prefix_code')->unique();
 
-            $table->boolean('limit_branch')->default(false);
             $table->boolean('limit_rank')->default(false);
 
             // 計算時間方式，固定時間、領取後有效期
@@ -38,23 +37,6 @@ class CreateCouponGroupsTable extends Migration
 
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
-        });
-
-        Schema::create('coupon_group_rank', function (Blueprint $table) {
-            $table->uuid('coupon_group_id');
-            $table->uuid('rank_id');
-
-            $table->foreign('coupon_group_id')
-                ->references('id')
-                ->on('coupon_groups')
-                ->onDelete('cascade');
-
-            $table->foreign('rank_id')
-                ->references('id')
-                ->on('ranks')
-                ->onDelete('cascade');
-
-            $table->primary(['coupon_group_id', 'rank_id']);
         });
 
         Schema::create('coupon_group_branch', function (Blueprint $table) {
@@ -83,7 +65,6 @@ class CreateCouponGroupsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('coupon_group_branch');
-        Schema::dropIfExists('coupon_group_rank');
         Schema::dropIfExists('coupon_groups');
     }
 }

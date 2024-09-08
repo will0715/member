@@ -24,7 +24,6 @@ class CouponGroup extends Model
     public $fillable = [
         'name',
         'prefix_code',
-        'limit_branch',
         'limit_rank',
         'calculate_time_unit',
         'fixed_start_time',
@@ -40,7 +39,6 @@ class CouponGroup extends Model
         'name' => 'string',
         'prefix_code' => 'string',
         'limit_branch' => 'boolean',
-        'limit_rank' => 'boolean',
         'calculate_time_unit' => 'string',
         'fixed_start_time' => 'datetime',
         'fixed_end_time' => 'datetime',
@@ -57,11 +55,6 @@ class CouponGroup extends Model
         'trigger_condition' => 'required',
         'content' => 'required',
     ];
-
-    public function limitRanks()
-    {
-        return $this->belongsToMany(\App\Models\Rank::class, 'coupon_group_rank');
-    }
 
     public function limitBranches()
     {

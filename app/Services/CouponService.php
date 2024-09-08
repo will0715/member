@@ -18,6 +18,7 @@ use App\Models\CouponGroup;
 use App\Utils\CollectionUtil;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use Arr;
 
 class CouponService
@@ -188,23 +189,25 @@ class CouponService
 
     protected function checkMemberEligibility($member, $couponGroup)
     {
-        // 檢查等級限制
-        if ($couponGroup->limit_rank && !$couponGroup->limitRanks->contains($member->rank_id)) {
-            return false;
-        }
-
         // 可以添加更多的限制條件檢查
-
         return true;
     }
 
-    public function issueCouponGroupToMembers($couponGroupId, $memberIds)
+    public function issueCouponGroupToMembers(String $couponGroupId, Collection $memberIds, Collection $rankId)
     {
         $issuedCoupons = [];
 
+        if (CollectionUtil::isNotEmpty($rankId)) {
+            $ranks = $this->rankRepository->findWithoutFail($rankId);
+            foreach ($ranks as $rank) {
+                $rankMembers = $rank->members;
+                $memberIds = $memberIds->merge($rankMembers->pluck('id'));
+            }
+        }
+
         $couponGroup = $this->couponGroupRepository->findWithoutFail($couponGroupId);
 
-        foreach ($memberIds as $memberId) {
+        foreach ($memberIds->unique() as $memberId) {
             $coupon = $this->issueCouponToMember($couponGroup, $memberId);
             if ($coupon) {
                 $issuedCoupons[] = $coupon;
@@ -286,14 +289,6 @@ class CouponService
             $limitBranches = $this->branchRepository->findInBranchIds($branches);
             $isLimitBranch = collect($limitBranches->pluck('id'))->isNotEmpty();
             $promotion->limitBranches()->sync($limitBranches->pluck('id'));
-        }
-
-        // limit ranks
-        $ranks = Arr::get($data, 'ranks', []);
-        if (CollectionUtil::isNotEmpty($ranks)) {
-            $limitRanks = $this->rankRepository->findInNames($ranks);
-            $isLimitRank = collect($limitRanks->pluck('id'))->isNotEmpty();
-            $promotion->limitRanks()->sync($limitRanks->pluck('id'));
         }
     }
 }

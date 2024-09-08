@@ -14,11 +14,9 @@ class CouponConstant {
     // const CONTENT_FREE_SPECIFIC_PRODUCT = 'FREE_SPECIFIC_PRODUCT';
 
     const SIMPLE_PROMOTION_RELATIONS = [
-        'limitRanks',
         'limitBranches'
     ];
 
     const QUERY_PROMOTION_RELATIONS = [
-        'limitRanks',
     ];
 }
