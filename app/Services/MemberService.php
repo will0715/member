@@ -114,15 +114,16 @@ class MemberService
     public function updateMember($data, $id)
     {
         $member = $this->findMember($id);
-        $data_with_out_rank = Arr::except($data, ['rank_id']);
-        $member = $this->memberRepository->updateMember($data_with_out_rank, $id);
+        $dataWithOutRank = Arr::except($data, ['rank_id']);
+        $skipIssueCoupon = Arr::get($data, 'skip_issue_coupon', false);
+        $member = $this->memberRepository->updateMember($dataWithOutRank, $id);
 
         $newRankId = Arr::get($data, 'rank_id');
-        $this->updateMemberRank($newRankId, $id);
+        $this->updateMemberRank($newRankId, $id, !$skipIssueCoupon);
         return $member;
     }
 
-    public function updateMemberRank($rankId, $id)
+    public function updateMemberRank($rankId, $id, $issueCoupon = true)
     {
         $member = $this->findMember($id);
         if (!$rankId) {
@@ -138,7 +139,7 @@ class MemberService
         ], $id);
 
         $customer = CustomerHelper::getCustomer();
-        event(new MemberRankChanged($customer, $member, $rankId));
+        event(new MemberRankChanged($customer, $member, $rankId, $issueCoupon));
 
         return $member;
     }

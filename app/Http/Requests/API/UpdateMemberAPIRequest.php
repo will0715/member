@@ -31,8 +31,9 @@ class UpdateMemberAPIRequest extends APIRequest
             'last_name' => 'required',
             'gender' => 'required|in:male,female,others,unknown',
             'email' => 'email',
+            'skip_issue_coupon' => 'boolean',
         ];
-        
+
         return $rules;
     }
 }

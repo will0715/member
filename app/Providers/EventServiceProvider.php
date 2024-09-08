@@ -29,6 +29,7 @@ class EventServiceProvider extends ServiceProvider
         'App\Listeners\MemberEventSubscriber',
         'App\Listeners\PrepaidCardEventSubscriber',
         'App\Listeners\NewCustomerEventSubscriber',
+        'App\Listeners\MemberRankChangedSubscriber',
     ];
 
     /**

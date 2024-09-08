@@ -18,15 +18,17 @@ class MemberRankChanged
     public $customer;
     public $member;
     public $newRankId;
+    public $issueCoupon = true;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($customer, $member, $newRankId)
+    public function __construct($customer, $member, $newRankId, $issueCoupon = true)
     {
         $this->customer = $customer;
         $this->member = $member;
         $this->newRankId = $newRankId;
+        $this->issueCoupon = $issueCoupon;
     }
 }

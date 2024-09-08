@@ -95,4 +95,9 @@ class RankUpgradeSetting extends Model
     {
         return $this->belongsTo(\App\Models\Rank::class);
     }
+
+    public function issueCouponGroup()
+    {
+        return $this->belongsTo(\App\Models\CouponGroup::class, 'issue_coupon_group_id');
+    }
 }

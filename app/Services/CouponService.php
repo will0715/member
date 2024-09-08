@@ -159,7 +159,7 @@ class CouponService
             return false;
         }
 
-        // 檢查會員是否符合優惠券組的限制條件（如等級限制）
+        // 檢查會員是否符合優惠券組的限制條件
         if (!$this->checkMemberEligibility($member, $couponGroup)) {
             return false;
         }
