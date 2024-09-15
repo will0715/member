@@ -18,7 +18,7 @@ class CreateCouponGroupsTable extends Migration
             $table->string('name');
             $table->string('prefix_code')->unique();
 
-            $table->boolean('limit_rank')->default(false);
+            $table->boolean('limit_branch')->default(false);
 
             // 計算時間方式，固定時間、領取後有效期
             $table->string('calculate_time_unit')->comment('FIXED, CLAIM');

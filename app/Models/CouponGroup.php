@@ -24,7 +24,7 @@ class CouponGroup extends Model
     public $fillable = [
         'name',
         'prefix_code',
-        'limit_rank',
+        'limit_branch',
         'calculate_time_unit',
         'fixed_start_time',
         'fixed_end_time',

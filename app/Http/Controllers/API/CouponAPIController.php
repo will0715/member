@@ -6,6 +6,7 @@ use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateCouponAPIRequest;
 use App\Http\Requests\API\UpdateCouponAPIRequest;
 use App\Http\Resources\Coupon;
+use App\Constants\CouponConstant;
 use App\Services\CouponService;
 use Illuminate\Http\Request;
 use Response;
@@ -29,8 +30,11 @@ class CouponAPIController extends AppBaseController
     public function index(Request $request)
     {
         $coupons = $this->couponService->listCoupons($request);
+        $coupons->load(CouponConstant::SIMPLE_COUPON_RELATIONS);
 
-        return $this->sendResponse(Coupon::collection($coupons), '優惠券列表獲取成功');
+        $count = $this->couponService->couponsCount($request);
+
+        return $this->sendResponseWithTotalCount(Coupon::collection($coupons), '優惠券列表獲取成功', $count);
     }
 
     /**
@@ -63,6 +67,7 @@ class CouponAPIController extends AppBaseController
         if (empty($coupon)) {
             return $this->sendError('優惠券不存在');
         }
+        $coupon->load(CouponConstant::SIMPLE_COUPON_RELATIONS);
 
         return $this->sendResponse(new Coupon($coupon), '優惠券詳情獲取成功');
     }

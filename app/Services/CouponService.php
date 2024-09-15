@@ -13,6 +13,7 @@ use App\Exceptions\CannotUpdateCouponGroupWithCouponsException;
 use App\Exceptions\CannotDeleteCouponGroupWithCouponsException;
 use App\Exceptions\CouponNotUseableException;
 use App\Exceptions\CouponCanNotDisableException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Models\Coupon;
 use App\Models\CouponGroup;
 use App\Utils\CollectionUtil;
@@ -45,9 +46,18 @@ class CouponService
     {
         $this->couponGroupRepository->pushCriteria(new RequestCriteria($request));
         $this->couponGroupRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $couponGroups = $this->couponGroupRepository->all();
+        $couponGroups = $this->couponGroupRepository->withCount('coupons')->all();
 
         return $couponGroups;
+    }
+
+    public function couponGroupsCount($request)
+    {
+        $couponGroupRepository = app(CouponGroupRepository::class);
+        $couponGroupRepository->pushCriteria(new RequestCriteria($request));
+        $counts = $couponGroupRepository->count();
+
+        return $counts;
     }
 
     public function findCouponGroup($id)
@@ -108,6 +118,15 @@ class CouponService
         $coupons = $this->couponRepository->all();
 
         return $coupons;
+    }
+
+    public function couponsCount($request)
+    {
+        $couponRepository = app(CouponRepository::class);
+        $couponRepository->pushCriteria(new RequestCriteria($request));
+        $counts = $couponRepository->count();
+
+        return $counts;
     }
 
     public function findCoupon($id)
@@ -198,15 +217,17 @@ class CouponService
         return true;
     }
 
-    public function issueCouponGroupToMembers(String $couponGroupId, Collection $memberIds, Collection $rankId, $quantity = 1)
+    public function issueCouponGroupToMembers(String $couponGroupId, Collection $memberIds, Collection $rankIds, $quantity = 1)
     {
         $issuedCoupons = [];
 
-        if (CollectionUtil::isNotEmpty($rankId)) {
-            $ranks = $this->rankRepository->findWithoutFail($rankId);
-            foreach ($ranks as $rank) {
-                $rankMembers = $rank->members;
-                $memberIds = $memberIds->merge($rankMembers->pluck('id'));
+        if (CollectionUtil::isNotEmpty($rankIds)) {
+            $ranks = $this->rankRepository->findWithoutFail($rankIds);
+            if (CollectionUtil::isNotEmpty($ranks)) {
+                foreach ($ranks as $rank) {
+                    $rankMembers = $rank->members;
+                    $memberIds = $memberIds->merge($rankMembers->pluck('id'));
+                }
             }
         }
 

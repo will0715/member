@@ -13,10 +13,14 @@ class CouponConstant {
     // const CONTENT_SPECIFIC_FIXED_PRICE = 'SPECIFIC_FIXED_PRICE';
     // const CONTENT_FREE_SPECIFIC_PRODUCT = 'FREE_SPECIFIC_PRODUCT';
 
-    const SIMPLE_PROMOTION_RELATIONS = [
+    const SIMPLE_COUPON_GROUP_RELATIONS = [
         'limitBranches'
     ];
 
-    const QUERY_PROMOTION_RELATIONS = [
+    const SIMPLE_COUPON_RELATIONS = [
+        'member'
+    ];
+
+    const QUERY_COUPON_RELATIONS = [
     ];
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\API\CreateCouponGroupAPIRequest;
 use App\Http\Requests\API\UpdateCouponGroupAPIRequest;
 use App\Http\Resources\CouponGroup;
 use App\Http\Resources\Coupon;
+use App\Constants\CouponConstant;
 use App\Services\CouponService;
 use Illuminate\Http\Request;
 use Response;
@@ -30,8 +31,11 @@ class CouponGroupAPIController extends AppBaseController
     public function index(Request $request)
     {
         $couponGroups = $this->couponService->listCouponGroups($request);
+        $couponGroups->load(CouponConstant::SIMPLE_COUPON_GROUP_RELATIONS);
 
-        return $this->sendResponse(CouponGroup::collection($couponGroups), '優惠券組列表獲取成功');
+        $count = $this->couponService->couponGroupsCount($request);
+
+        return $this->sendResponseWithTotalCount(CouponGroup::collection($couponGroups), '優惠券組列表獲取成功', $count);
     }
 
     /**
@@ -64,6 +68,7 @@ class CouponGroupAPIController extends AppBaseController
         if (empty($couponGroup)) {
             return $this->sendError('優惠券組不存在');
         }
+        $couponGroup->load(CouponConstant::SIMPLE_COUPON_GROUP_RELATIONS);
 
         return $this->sendResponse(new CouponGroup($couponGroup), '優惠券組詳情獲取成功');
     }
@@ -123,10 +128,10 @@ class CouponGroupAPIController extends AppBaseController
     public function issueCoupons($id, Request $request)
     {
         $memberIds = collect($request->input('member_ids', []));
-        $rankId = collect($request->input('rank_id', []));
+        $rankIds = collect($request->input('rank_ids', []));
         $quantity = $request->input('quantity', 1);
 
-        $issuedCoupons = $this->couponService->issueCouponGroupToMembers($id, $memberIds, $rankId, $quantity);
+        $issuedCoupons = $this->couponService->issueCouponGroupToMembers($id, $memberIds, $rankIds, $quantity);
 
         return $this->sendResponse(Coupon::collection($issuedCoupons), '優惠券發放成功');
     }

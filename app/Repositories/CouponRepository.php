@@ -11,7 +11,6 @@ class CouponRepository extends BaseRepository
     protected $fieldSearchable = [
         'code' => 'like',
         'status',
-        'member_id',
         'coupon_group_id',
     ];
 

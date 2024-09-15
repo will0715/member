@@ -28,6 +28,8 @@ class CouponGroup extends JsonResource
             'can_trigger_others' => $resource->can_trigger_others,
             'trigger_condition' => $resource->trigger_condition,
             'content' => $resource->content,
+            'created_at' => $resource->created_at,
+            'coupons_count' => $resource->coupons_count,
             'branches' => Branch::collection($resource->whenLoaded('limitBranches')),
         ];
     }

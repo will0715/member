@@ -10,7 +10,6 @@ class CouponGroupRepository extends BaseRepository
     protected $fieldSearchable = [
         'name' => 'like',
         'prefix_code' => 'like',
-        'calculate_time_unit',
     ];
 
     public function getFieldsSearchable()

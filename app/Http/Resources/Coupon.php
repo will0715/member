@@ -33,8 +33,9 @@ class Coupon extends JsonResource
             'trigger_condition' => $couponGroup->trigger_condition,
             'content' => $couponGroup->content,
             'limit_branch' => $couponGroup->limit_branch,
+            'created_at' => $resource->created_at,
             'member' => new Member($resource->whenLoaded('member')),
-            'limitBranches' => $couponGroup->limitBranches->pluck('code'),
+            'branches' => $couponGroup->limitBranches->pluck('code'),
         ];
     }
 }
