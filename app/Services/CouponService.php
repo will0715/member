@@ -14,13 +14,16 @@ use App\Exceptions\CannotDeleteCouponGroupWithCouponsException;
 use App\Exceptions\CouponNotUseableException;
 use App\Exceptions\CouponCanNotDisableException;
 use App\Exceptions\ResourceNotFoundException;
+use App\Constants\CouponConstant;
 use App\Models\Coupon;
 use App\Models\CouponGroup;
 use App\Utils\CollectionUtil;
+use App\Utils\StringUtil;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Arr;
+use Cache;
 
 class CouponService
 {
@@ -287,21 +290,65 @@ class CouponService
         return $this->couponRepository->disableCoupon($coupon->id);
     }
 
-    protected function generateUniqueCode($prefix)
+    protected function generateUniqueCode($prefix, $length = 8)
     {
         do {
-            $code = $this->generateCouponCode($prefix);
+            $code = $this->generateCouponCode($prefix, $length);
         } while ($this->couponRepository->codeExists($code));
 
         return $code;
     }
 
-    protected function generateCouponCode($prefix)
+    public function generateTemporaryCode($couponId)
+    {
+        $coupon = $this->couponRepository->findWithoutFail($couponId);
+
+        if (!$coupon || !$coupon->isUseable()) {
+            throw new CouponNotUseableException('Coupon is not useable');
+        }
+
+        do {
+            $temporaryCode = StringUtil::generateNumericCode(CouponConstant::TEMPORARY_CODE_LENGTH);
+            $expiredTime = Carbon::now()->addSeconds(CouponConstant::TEMPORARY_CODE_EXPIRED_TIME);
+            $success = Cache::add($this->couponTemporaryCodeKey($temporaryCode), $couponId, $expiredTime);
+        } while (!$success);
+
+        return [
+            'expired_at' => $expiredTime,
+            'temporary_code' => $temporaryCode,
+        ];
+    }
+
+    public function useByTemporaryCode($usageData)
+    {
+        $temporaryCode = Arr::get($usageData, 'temporary_code');
+        $coupon = $this->validateCouponTemporaryCode($temporaryCode);
+
+        $usageData['member_id'] = $coupon->member_id;
+        $coupon = $this->useCoupon($coupon->code, $usageData);
+
+        Cache::forget($this->couponTemporaryCodeKey($temporaryCode));
+
+        return $coupon;
+    }
+
+    public function validateCouponTemporaryCode($temporaryCode)
+    {
+        $couponId = Cache::get($this->couponTemporaryCodeKey($temporaryCode));
+
+        if (!$couponId) {
+            throw new ResourceNotFoundException('Temporary Code Not Found or Expired');
+        }
+
+        return $this->couponRepository->findWithoutFail($couponId);
+    }
+
+    protected function generateCouponCode($prefix, $length = 8)
     {
         // 32^8 = 1,099,511,627,776 possibilities
         $characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
         $code = '';
-        for ($i = 0; $i < 8; $i++) {
+        for ($i = 0; $i < $length; $i++) {
             $code .= $characters[rand(0, strlen($characters) - 1)];
         }
         return $prefix . $code;
@@ -316,6 +363,11 @@ class CouponService
             $isLimitBranch = collect($limitBranches->pluck('id'))->isNotEmpty();
             $promotion->limitBranches()->sync($limitBranches->pluck('id'));
         }
+    }
+
+    private function couponTemporaryCodeKey($temporaryCode)
+    {
+        return 'temporary_coupon_code:' . $temporaryCode;
     }
 }
 

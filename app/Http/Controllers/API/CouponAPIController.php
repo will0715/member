@@ -180,4 +180,23 @@ class CouponAPIController extends AppBaseController
 
         return $this->sendResponse(Coupon::collection($coupons), '會員所有優惠券獲取成功');
     }
+
+    public function generateTemporaryCode($id)
+    {
+        $code = $this->couponService->generateTemporaryCode($id);
+
+        return $this->sendResponse(['code' => $code], '優惠券 code 獲取成功');
+    }
+
+    public function useByTemporaryCode(Request $request)
+    {
+        $usageData = $request->all();
+
+        $result = $this->couponService->useByTemporaryCode($usageData);
+
+        if (!$result) {
+            return $this->sendError('優惠券無法使用');
+        }
+        return $this->sendSuccess(new Coupon($result), '優惠券使用成功');
+    }
 }

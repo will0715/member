@@ -214,11 +214,13 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::resource('couponGroups', 'CouponGroupAPIController');
                 Route::post('couponGroups/{id}/issue', 'CouponGroupAPIController@issueCoupons');
 
-                Route::resource('coupons', 'CouponAPIController');
+                Route::post('coupons/useByTemporaryCode', 'CouponAPIController@useByTemporaryCode');
+                Route::post('coupons/{id}/generateTemporaryCode', 'CouponAPIController@generateTemporaryCode');
                 Route::post('coupons/{code}/use', 'CouponAPIController@useCoupon');
                 Route::post('coupons/{code}/disable', 'CouponAPIController@disableCoupon');
                 Route::get('coupons/available/{memberId}', 'CouponAPIController@getMemberAvailableCoupons');
                 Route::get('coupons/all/{memberId}', 'CouponAPIController@getMemberAllCoupons');
+                Route::resource('coupons', 'CouponAPIController');
             });
         });
     });
