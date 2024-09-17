@@ -35,7 +35,7 @@ class CouponGroupAPIController extends AppBaseController
 
         $count = $this->couponService->couponGroupsCount($request);
 
-        return $this->sendResponseWithTotalCount(CouponGroup::collection($couponGroups), '優惠券組列表獲取成功', $count);
+        return $this->sendResponseWithTotalCount(CouponGroup::collection($couponGroups), 'coupon groups retrieved successfully', $count);
     }
 
     /**
@@ -51,7 +51,7 @@ class CouponGroupAPIController extends AppBaseController
 
         $couponGroup = $this->couponService->newCouponGroup($input);
 
-        return $this->sendResponse(new CouponGroup($couponGroup), '優惠券組創建成功');
+        return $this->sendResponse(new CouponGroup($couponGroup), 'coupon group created successfully');
     }
 
     /**
@@ -66,11 +66,11 @@ class CouponGroupAPIController extends AppBaseController
         $couponGroup = $this->couponService->findCouponGroup($id);
 
         if (empty($couponGroup)) {
-            return $this->sendError('優惠券組不存在');
+            return $this->sendError('coupon group not found');
         }
         $couponGroup->load(CouponConstant::SIMPLE_COUPON_GROUP_RELATIONS);
 
-        return $this->sendResponse(new CouponGroup($couponGroup), '優惠券組詳情獲取成功');
+        return $this->sendResponse(new CouponGroup($couponGroup), 'coupon group retrieved successfully');
     }
 
     /**
@@ -88,12 +88,12 @@ class CouponGroupAPIController extends AppBaseController
         $couponGroup = $this->couponService->findCouponGroup($id);
 
         if (empty($couponGroup)) {
-            return $this->sendError('優惠券組不存在');
+            return $this->sendError('coupon group not found');
         }
 
         $couponGroup = $this->couponService->updateCouponGroup($input, $id);
 
-        return $this->sendResponse(new CouponGroup($couponGroup), '優惠券組更新成功');
+        return $this->sendResponse(new CouponGroup($couponGroup), 'coupon group updated successfully');
     }
 
     /**
@@ -109,12 +109,12 @@ class CouponGroupAPIController extends AppBaseController
         $couponGroup = $this->couponService->findCouponGroup($id);
 
         if (empty($couponGroup)) {
-            return $this->sendError('優惠券組不存在');
+            return $this->sendError('coupon group not found');
         }
 
         $this->couponService->deleteCouponGroup($id);
 
-        return $this->sendSuccess('優惠券組刪除成功');
+        return $this->sendSuccess('coupon group deleted successfully');
     }
 
     /**
@@ -133,6 +133,6 @@ class CouponGroupAPIController extends AppBaseController
 
         $issuedCoupons = $this->couponService->issueCouponGroupToMembers($id, $memberIds, $rankIds, $quantity);
 
-        return $this->sendResponse(Coupon::collection($issuedCoupons), '優惠券發放成功');
+        return $this->sendResponse(Coupon::collection($issuedCoupons), 'coupon issued successfully');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Client;
 use App\Constants\MemberConstant;
 use App\Constants\RecordConstant;
 use App\Constants\TransactionConstant;
+use App\Constants\CouponConstant;
 use App\Http\Controllers\AppBaseController;
 use App\ServiceManagers\MemberRegisterManager;
 use App\ServiceManagers\MemberChopServiceManager;
@@ -13,11 +14,13 @@ use App\ServiceManagers\TransactionManager;
 use App\Http\Requests\API\Client\CreateMemberAPIRequest;
 use App\Http\Requests\API\Client\UpdateMemberAPIRequest;
 use App\Services\MemberService;
+use App\Services\CouponService;
 use App\Exceptions\ResourceNotFoundException;
 use App\Helpers\AuthMemberHelper;
 use App\Http\Resources\Member;
 use App\Http\Resources\MemberList;
 use App\Http\Resources\Chop;
+use App\Http\Resources\Coupon;
 use App\Http\Resources\ChopRecord;
 use App\Http\Resources\PrepaidcardRecord;
 use App\Utils\MemberAuthToken;
@@ -43,6 +46,7 @@ class MemberAPIController extends AppBaseController
         $this->memberChopServiceManager = app(MemberChopServiceManager::class);
         $this->memberPrepaidCardServiceManager = app(MemberPrepaidCardServiceManager::class);
         $this->transactionManager = app(TransactionManager::class);
+        $this->couponService = app(CouponService::class);
     }
 
     public function login(Request $request)
@@ -199,6 +203,25 @@ class MemberAPIController extends AppBaseController
         $records->load(RecordConstant::BRANCH_RELATIONS);
 
         return $this->sendResponse(PrepaidcardRecord::collection($records), 'Member retrieved successfully');
+    }
+
+    public function getCoupons()
+    {
+        $authMember = $this->getAuthMember();
+
+        $coupons = $this->couponService->getAvailableCouponsForMember($authMember->id);
+        $coupons->load(CouponConstant::SIMPLE_COUPON_RELATIONS);
+
+        return $this->sendResponse(Coupon::collection($coupons), 'Member retrieved successfully');
+    }
+
+    public function generateCouponTemporaryCode($id)
+    {
+        $authMember = $this->getAuthMember();
+
+        $code = $this->couponService->generateTemporaryCode($id);
+
+        return $this->sendResponse(['code' => $code], 'coupon code generated successfully');
     }
 
     private function getAuthMember()

@@ -34,7 +34,7 @@ class CouponAPIController extends AppBaseController
 
         $count = $this->couponService->couponsCount($request);
 
-        return $this->sendResponseWithTotalCount(Coupon::collection($coupons), '優惠券列表獲取成功', $count);
+        return $this->sendResponseWithTotalCount(Coupon::collection($coupons), 'coupons retrieved successfully', $count);
     }
 
     /**
@@ -50,7 +50,7 @@ class CouponAPIController extends AppBaseController
 
         $coupon = $this->couponService->newCoupon($input);
 
-        return $this->sendResponse(new Coupon($coupon), '優惠券創建成功');
+        return $this->sendResponse(new Coupon($coupon), 'coupon created successfully');
     }
 
     /**
@@ -65,11 +65,11 @@ class CouponAPIController extends AppBaseController
         $coupon = $this->couponService->findCoupon($id);
 
         if (empty($coupon)) {
-            return $this->sendError('優惠券不存在');
+            return $this->sendError('coupon not found');
         }
         $coupon->load(CouponConstant::SIMPLE_COUPON_RELATIONS);
 
-        return $this->sendResponse(new Coupon($coupon), '優惠券詳情獲取成功');
+        return $this->sendResponse(new Coupon($coupon), 'coupon retrieved successfully');
     }
 
     /**
@@ -87,12 +87,12 @@ class CouponAPIController extends AppBaseController
         $coupon = $this->couponService->findCoupon($id);
 
         if (empty($coupon)) {
-            return $this->sendError('優惠券不存在');
+            return $this->sendError('coupon not found');
         }
 
         $coupon = $this->couponService->updateCoupon($input, $id);
 
-        return $this->sendResponse(new Coupon($coupon), '優惠券更新成功');
+        return $this->sendResponse(new Coupon($coupon), 'coupon updated successfully');
     }
 
     /**
@@ -108,12 +108,12 @@ class CouponAPIController extends AppBaseController
         $coupon = $this->couponService->findCoupon($id);
 
         if (empty($coupon)) {
-            return $this->sendError('優惠券不存在');
+            return $this->sendError('coupon not found');
         }
 
         $this->couponService->deleteCoupon($id);
 
-        return $this->sendSuccess('優惠券刪除成功');
+        return $this->sendSuccess('coupon deleted successfully');
     }
 
     /**
@@ -131,9 +131,9 @@ class CouponAPIController extends AppBaseController
         $result = $this->couponService->useCoupon($id, $usageData);
 
         if (!$result) {
-            return $this->sendError('優惠券無法使用');
+            return $this->sendError('coupon cannot be used');
         }
-        return $this->sendSuccess(new Coupon($result), '優惠券使用成功');
+        return $this->sendSuccess(new Coupon($result), 'coupon used successfully');
     }
 
     /**
@@ -150,7 +150,7 @@ class CouponAPIController extends AppBaseController
 
         $result = $this->couponService->disableCoupon($id, $usageData);
 
-        return $this->sendSuccess(new Coupon($result), '優惠券無效成功');
+        return $this->sendSuccess(new Coupon($result), 'disable coupon successfully');
     }
 
     /**
@@ -164,7 +164,7 @@ class CouponAPIController extends AppBaseController
     {
         $coupons = $this->couponService->getAvailableCouponsForMember($memberId);
 
-        return $this->sendResponse(Coupon::collection($coupons), '會員可用優惠券獲取成功');
+        return $this->sendResponse(Coupon::collection($coupons), 'coupon list retrieved successfully');
     }
 
     /**
@@ -178,14 +178,14 @@ class CouponAPIController extends AppBaseController
     {
         $coupons = $this->couponService->getAllCouponsForMember($memberId);
 
-        return $this->sendResponse(Coupon::collection($coupons), '會員所有優惠券獲取成功');
+        return $this->sendResponse(Coupon::collection($coupons), 'coupon list retrieved successfully');
     }
 
     public function generateTemporaryCode($id)
     {
         $code = $this->couponService->generateTemporaryCode($id);
 
-        return $this->sendResponse(['code' => $code], '優惠券 code 獲取成功');
+        return $this->sendResponse(['code' => $code], 'coupon temporary code generated successfully');
     }
 
     public function useByTemporaryCode(Request $request)
@@ -195,8 +195,8 @@ class CouponAPIController extends AppBaseController
         $result = $this->couponService->useByTemporaryCode($usageData);
 
         if (!$result) {
-            return $this->sendError('優惠券無法使用');
+            return $this->sendError('coupon cannot be used');
         }
-        return $this->sendSuccess(new Coupon($result), '優惠券使用成功');
+        return $this->sendSuccess(new Coupon($result), 'coupon used successfully');
     }
 }

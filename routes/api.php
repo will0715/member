@@ -32,6 +32,8 @@ Route::namespace('Client')->prefix('client')->group(function () {
             Route::get('/chopsRecords', 'MemberAPIController@getChopsRecords');
             Route::get('/orderRecords', 'MemberAPIController@getOrderRecords');
             Route::get('/prepaidcard', 'MemberAPIController@getPrepaidcardRecords');
+            Route::get('/coupons', 'MemberAPIController@getCoupons');
+            Route::get('/coupons/{id}/generateTemporaryCode', 'MemberAPIController@generateCouponTemporaryCode');
             Route::patch('/information', 'MemberAPIController@update');
         });
     });

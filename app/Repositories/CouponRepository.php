@@ -46,6 +46,7 @@ class CouponRepository extends BaseRepository
                 $query->whereNull('effective_start_at')
                     ->orWhere('effective_start_at', '<=', Carbon::now());
             })
+            ->orderBy('claimed_at', 'desc')
             ->get();
     }
 
